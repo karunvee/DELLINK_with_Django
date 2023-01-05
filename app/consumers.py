@@ -15,6 +15,7 @@ class AppConsumer(AsyncWebsocketConsumer):
         text_message =  event["text"]
         await self.send(text_message)
 
+
 # class AppConsumer(JsonWebsocketConsumer):
 #     def connect(self):
 #         async_to_sync(self.channel_layer.group_add)("app", self.channel_name)

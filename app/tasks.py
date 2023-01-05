@@ -11,7 +11,6 @@ channel_layer = get_channel_layer()
 
 app = Celery('DELLINK')
 
-
 def publish_message_to_group(message: Dict[str, Any], group: str) -> None:
     with app.producer_pool.acquire(block=True) as producer:
         producer.publish(

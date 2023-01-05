@@ -82,11 +82,11 @@ DATABASES = {
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
-CHANNEL_LAYERS={
-    "default": {
-        "BACKEND": "channels.layers.InMemoryChannelLayer"
-     }
-}
+# CHANNEL_LAYERS={
+#     "default": {
+#         "BACKEND": "channels.layers.InMemoryChannelLayer"
+#      }
+# }
 CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_rabbitmq.core.RabbitmqChannelLayer",

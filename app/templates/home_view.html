@@ -1,25 +1,61 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <link rel="stylesheet" href="{% static 'css/home_view.css' %}">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
 </head>
 <body>
-    <h1>Message here!</h1>
-    <h3 id="onMsg"></h3>
-
-
-
+    {% include "main_templates/menubar.html" %}
+    <section class="header">
+        <div class="wrapper">
+            {% for i in '12345'|make_list %}
+                <div class="card" >
+                    <div class="content-plant">
+                        <h3>DCBU {{ forloop.counter }}</h3>
+                        <div class="detail">
+                            <p>Lorem ipsum dolor sit amet.</p>
+                        </div>
+                        <div class="detail-ip">
+                            <span>IP : 10.195.220.30:5000</span>
+                        </div>
+                        <!-- <h3 id="onMsg"></h3> -->
+                    </div>
+                    <div class="lines">
+                        {% for item in '012345678901'|make_list %}
+                        <div class="line-item" onclick="location.href='{% url 'line_view' 1 1 %}';">
+                            <div class="item-header">
+                                <span>Line {{ forloop.counter }}</span>
+                                <h4>Amazon</h4>
+                            </div>
+                            <div class="item-status">
+                                <p>Machine total : 9</p>
+                                <div class="monitor">
+                                    <label class="online">Online 6</label>
+                                    <label class="status">Normal</label>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endfor %}
+            
+            
+        </div>
+    </section>
+    
     <script>
         // var socket = new WebSocket('ws://localhost:8000/ws/app/');
-        var socket = new WebSocket('ws://10.234.232.101:8000/ws/app/');
-        socket.onmessage = function(event){
-            var msg = event.data;
+        // // var socket = new WebSocket('ws://10.234.232.101:8000/ws/app/');
+        // socket.onmessage = function(event){
+        //     var msg = event.data;
 
-            document.querySelector('#onMsg').innerText = msg;
-        }
+        //     document.querySelector('#onMsg').innerText = msg;
+        // }
     </script>
 </body>
 </html>

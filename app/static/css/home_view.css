@@ -1,0 +1,126 @@
+*{
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+    
+}
+body{
+    overflow-y: hidden;
+}
+.container{
+    position: relative;
+}
+.wrapper{
+    color: var(--text-color);
+    padding-left: 50px;
+    padding-right: 20px;
+    position: relative;
+    display: block;
+    align-items: center;
+    /* justify-content: center; */
+    height: 100%;
+    overflow-x: auto;
+    overscroll-behavior-inline: contain;
+}
+
+.wrapper .card{
+    transform: scale(0.95);
+    margin: 30px auto 30px auto;
+    display: flex;
+    justify-content: flex-start;
+    min-width: 920px;
+    padding: 10px;
+    height: auto;
+    width: 100%;
+    background-color: var(--sidebar-color);
+    border-radius: 20px;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+    transition: 1s ease;
+}
+.card:hover{
+    -webkit-transform: scale(1);
+    -ms-transform: scale(1);
+    transform: scale(1);
+    transition: 1s ease;
+    box-shadow: 0 10px 15px 0 rgba(4, 152, 251, 0.2), 0 6px 20px 0 rgba(8, 55, 109, 0.19);
+}
+.content-plant{
+    align-items: flex-end;
+    display: block;
+    min-width: 220px;
+    max-width: 220px;
+    height: auto;
+    margin-top: 0;
+    margin-right: 15px;
+}
+.content-plant .detail-ip{
+    position: absolute;
+    width: auto;
+    height: 30px;
+    bottom: 0;
+    margin: auto 8px;
+    font-size: 12px;
+}
+.content-plant h3{
+    text-align: center;
+    margin: 0;
+    padding: 10px 0;
+    font-size: 26px;
+    color: #ffffff;
+    background-color: var(--header-text);
+    border-radius: 15px;
+}
+.detail{
+    margin: auto 8px;
+}
+.lines{
+    align-items: center;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, auto));
+    grid-gap: 8px;
+    max-width: 82%;
+}
+.line-item *{
+    margin: 0;
+}
+.line-item{
+    font-size: 14px;
+    width: auto;
+    min-width: 330px;
+    padding: 7px 17px;
+    display: flex;
+    justify-content:space-between;
+    border-radius: 15px;
+    background-color: var(--body-color);
+}
+.line-item:hover{
+    cursor: pointer;
+    padding: 5px 15px;
+    border: 2px solid #41a022;
+}
+.line-item h4{
+    font-size: 18px;
+}
+.item-header{
+    margin-right: 12px;
+}
+
+.monitor{
+    display: flex;
+    gap: 10px;
+}
+.monitor label{
+    margin-top: 5px;
+    padding: 0 10px;
+    border-radius: 15px;
+}
+.monitor .online{
+    background-color: var(--sidebar-color);
+}
+.monitor .status{
+    color: #ffffff;
+    background-color: #41a022;
+}
+.monitor .status.error{
+    color: #ffffff;
+    background-color: #e33333;
+}

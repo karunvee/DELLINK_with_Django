@@ -11,3 +11,9 @@ def home_view(request):
     }
     # Return a response to the client
     return render(request, 'home_view.html', context)
+
+def line_view(request, pt, ln):
+    context = {
+
+    }
+    return render(request, 'line_view.html', context)
