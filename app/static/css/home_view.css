@@ -53,6 +53,7 @@ body{
     margin-right: 15px;
 }
 .content-plant .detail-ip{
+    cursor: pointer;
     position: absolute;
     width: auto;
     height: 30px;
@@ -60,6 +61,24 @@ body{
     margin: auto 8px;
     font-size: 12px;
 }
+.content-plant .detail-ip .tooltip{
+    visibility: hidden;
+    width: 120px;
+    background-color: black;
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px 0;
+  /* Position the tooltip */
+    position: absolute;
+    z-index: 1;
+    top: 100%;
+    left: 50%;
+    margin-left: -60px;
+}
+.detail-ip:hover .tooltip {
+    visibility: visible;
+  }
 .content-plant h3{
     text-align: center;
     margin: 0;

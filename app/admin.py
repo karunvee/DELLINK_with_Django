@@ -5,5 +5,5 @@ from .models import *
 # Register your models here.
 
 class LineInfoAdmin(admin.ModelAdmin):
-    list_display = ('name', 'id', 'ip', 'port', 'detail')
+    list_display = ('name', 'detail', 'id', 'ip1', 'port1', 'ip2', 'port2', 'ip3', 'port3', 'ip4', 'port4')
 admin.site.register(PlantInfo, LineInfoAdmin)

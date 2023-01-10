@@ -17,3 +17,6 @@ CN08
 CN05
 10.195.220.21
 5000
+
+CNBU : Control networking business unit
+DCBU : Direct current business unit.

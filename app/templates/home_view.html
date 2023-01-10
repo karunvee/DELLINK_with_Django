@@ -12,15 +12,15 @@
     {% include "main_templates/menubar.html" %}
     <section class="header">
         <div class="wrapper">
-            {% for i in '12345'|make_list %}
+            {% for val in plant_members %}
                 <div class="card" >
                     <div class="content-plant">
-                        <h3>DCBU {{ forloop.counter }}</h3>
+                        <h3>{{ val.name }}</h3>
                         <div class="detail">
-                            <p>Lorem ipsum dolor sit amet.</p>
+                            <p>{{val.detail}}</p>
                         </div>
-                        <div class="detail-ip">
-                            <span>IP : 10.195.220.30:5000</span>
+                        <div class="detail-ip">IP info >
+                            <span class="tooltip">{{val.ip1}} {{val.ip2}} {{val.ip3}} {{val.ip4}}</span>
                         </div>
                         <!-- <h3 id="onMsg"></h3> -->
                     </div>
