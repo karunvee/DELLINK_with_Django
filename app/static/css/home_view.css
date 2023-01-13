@@ -132,6 +132,9 @@ body{
     padding: 0 10px;
     border-radius: 15px;
 }
+.monitor label:hover{
+    cursor: pointer;
+}
 .monitor .online{
     background-color: var(--sidebar-color);
 }

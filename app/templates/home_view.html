@@ -25,20 +25,30 @@
                         <!-- <h3 id="onMsg"></h3> -->
                     </div>
                     <div class="lines">
-                        {% for item in '012345678901'|make_list %}
-                        <div class="line-item" onclick="location.href='{% url 'line_view' 1 1 %}';">
+                        {% for key, value in dictPlant.items %}
+                            {% if key == val.name %}
+                                {% for k, v in value.items %}
+                        <div class="line-item" onclick="location.href='{% url 'line_view' val.name k %}';">
                             <div class="item-header">
-                                <span>Line {{ forloop.counter }}</span>
-                                <h4>Amazon</h4>
+                                <span>Line</span>
+                                <h4>{{k}}</h4>
                             </div>
                             <div class="item-status">
-                                <p>Machine total : 9</p>
+                                <p>Machine totals : 
+                                    {% for index in v %}
+                                        {% if forloop.last %}
+                                            {{ forloop.counter }}
+                                        {% endif %}
+                                    {% endfor %}
+                                </p>
                                 <div class="monitor">
                                     <label class="online">Online 6</label>
                                     <label class="status">Normal</label>
                                 </div>
                             </div>
                         </div>
+                                {% endfor %}
+                            {% endif %}
                         {% endfor %}
                     </div>
                 </div>
