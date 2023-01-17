@@ -1,13 +1,80 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'css/line_view.css' %}">
     <title>Document</title>
 </head>
 <body>
     {% include "main_templates/menubar.html" %}
-    <h1>Line view</h1>
+    <section class="header">
+        <div class="line-container">
+            <h1>Line Overview</h1>
+            <div class="container">
+                <div class="machine-field">
+                    {% for index in 123456789101112|make_list %}
+                        <div class="machine">
+                            <img class="machine-img" src="{% static "img/autoInsert-removebg-preview.png" %}" alt=""/>
+                            <div class="light-status">
+                                <div class="green-light on"></div>
+                                <div class="yellow-light on"></div>
+                                <div class="red-light on"></div>
+                            </div>
+                            <span>{{index}} machine Lorem ipsum dolor sit.</span>
+                        </div>
+                        {% endfor %}
+                        <div class="machine">
+                            <img class="machine-img" src="{% static "img/postwave-removebg-preview.png" %}" alt=""/>
+                            <div class="light-status">
+                                <div class="green-light on"></div>
+                                <div class="yellow-light on"></div>
+                                <div class="red-light on"></div>
+                            </div>
+                            <span>{{index}} machine Lorem ipsum dolor sit amet consectetur.</span>
+                        </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="list-machines">
+            <table class="table-machines" id="table-machines">
+                <tr>
+                    <th>DeviceId</th>
+                    <th>Name</th>
+                    <th>Device name</th>
+                    <th>Status</th>
+                    <th>Picture path</th>
+                    <th class="colunm-assignment">Assignment</th>
+                </tr>
+                {% for index in 123456789101112|make_list %}
+                <tr>
+                    <td>DeviceId</td>
+                    <td>Name</td>
+                    <td>Device name</td>
+                    <td>Status</td>
+                    <td>Picture path</td>
+                    <td class="colunm-assignment">
+                        <button>Assign</button>
+                        <button>Delete</button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+        
+    </section>
+        
+    <script>
+        // var socket = new WebSocket('ws://localhost:8000/ws/app/');
+
+        // socket.onmessage = function(e){
+        //     raw_data = JSON.parse(e.data);
+
+        // }
+
+    </script>
 </body>
 </html>

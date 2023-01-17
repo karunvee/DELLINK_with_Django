@@ -6,6 +6,7 @@ from celery import shared_task
 from celery import Celery
 from typing import Any, Dict
 import msgpack
+import json
 
 from .models import *
 
@@ -34,30 +35,88 @@ def publish_message_to_group(message: Dict[str, Any], group: str) -> None:
 def get_api():
     plant_members = PlantInfo.objects.all()
 
-    dictMachineID = {}
+    data = []
+    urlLine = []
+    machine_list = {}
+
     dictPlant = {}
     dictLine = {}
-    url = []
+    dictMachine = {}
+    dictIndicator = {}
 
     for plant in plant_members:
-
+        urlLine = []
         if plant.ip1 != "":
-            url.append(urlDIA(plant.ip1, plant.port1, 'devices')) 
+            urlLine.append(urlDIA(plant.ip1, plant.port1, 'devices')) 
         if plant.ip2 != "":
-            url.append(urlDIA(plant.ip2, plant.port2, 'devices'))   
+            urlLine.append(urlDIA(plant.ip2, plant.port2, 'devices'))   
         if plant.ip3 != "":
-            url.append(urlDIA(plant.ip3, plant.port3, 'devices'))  
+            urlLine.append(urlDIA(plant.ip3, plant.port3, 'devices'))  
         if plant.ip3 != "":
-            url.append(urlDIA(plant.ip4, plant.port4, 'devices'))   
+            urlLine.append(urlDIA(plant.ip4, plant.port4, 'devices')) 	 
 
-        for urlIndex in url:
-            couple_lines_resp = requests.get(urlIndex).json()
+        dictPlant = {}
+        dictPlant["plant_name"] = plant.name
+        dictPlant["line"] = []
+        machine_list = {}
+
+        for url in urlLine:
+            line_members = requests.get(url).json()
+            for line in line_members:
+                deviceNo = line['deviceId']
+                status = line['status']
+                deviceName = line['name']
+
+                if line['comment'].find('@') != -1:
+                    line_word = line['comment'].split("@")[0]
+                    machine_word = line['comment'].split("@")[1]
+                else:
+                    line_word = "Unknown"
+                    machine_word = line['comment']
 
 
+                if line_word in machine_list:
+                    machine_list[line_word].append([machine_word, deviceNo, status, deviceName, url])
+                else:
+                    machine_list[line_word] = [[machine_word, deviceNo, status, deviceName, url]]
 
+        for key in machine_list.keys() :
+            dictLine = {}
+            dictLine["line_name"] = key
+            dictLine["machine"] = []
+
+            for mIndex in machine_list[key]:
+                dictMachine = {}
+                dictMachine["machine_name"] = mIndex[0]
+                dictMachine["deviceId"] = mIndex[1]
+                dictMachine["status"] = mIndex[2]
+                dictMachine["device_name"] = mIndex[3]
+                dictMachine["indicator"] = []
+
+                indicator_members = requests.get(mIndex[4] + "/" + str(mIndex[1]) + "/tags").json()
+
+                for indicator in indicator_members:
+                    dictIndicator = {}
+                    dictIndicator["indicator_name"] = indicator['name']
+                    dictIndicator["tid"] = indicator['tid']
+                    dictIndicator["register"] = indicator['register']
+                    dictIndicator["gp"] = indicator['gp']
+                    dictIndicator["value"] = str(indicator['value'])
+
+                    dictMachine["indicator"].append(dictIndicator)
+                
+                dictLine["machine"].append(dictMachine)
+
+                
+            dictPlant["line"].append(dictLine)
+
+        data.append(dictPlant)
+
+    data_json = json.dumps(data)
+    print("API fetching worker is listening..")
+    publish_message_to_group({ "type": "chat_message", "text": data_json }, "app")
 
     # publish_message_to_group({ "type": "chat_message", "text": response }, "app")
-
     # response = requests.get(url).json()
     # msg = response['comment']
 
@@ -66,6 +125,7 @@ def get_api():
     # print('<==================> message :' + msg)
 
 
+#----------------------------------------
 # import json
 # from collections import defaultdict
 # import requests

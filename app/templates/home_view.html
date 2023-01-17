@@ -9,6 +9,7 @@
     <title>Document</title>
 </head>
 <body>
+    {% include "main_templates/loading_spinner.html" %}
     {% include "main_templates/menubar.html" %}
     <section class="header">
         <div class="wrapper">
@@ -24,48 +25,73 @@
                         </div>
                         <!-- <h3 id="onMsg"></h3> -->
                     </div>
-                    <div class="lines">
-                        {% for key, value in dictPlant.items %}
-                            {% if key == val.name %}
-                                {% for k, v in value.items %}
-                        <div class="line-item" onclick="location.href='{% url 'line_view' val.name k %}';">
-                            <div class="item-header">
-                                <span>Line</span>
-                                <h4>{{k}}</h4>
-                            </div>
-                            <div class="item-status">
-                                <p>Machine totals : 
-                                    {% for index in v %}
-                                        {% if forloop.last %}
-                                            {{ forloop.counter }}
-                                        {% endif %}
-                                    {% endfor %}
-                                </p>
-                                <div class="monitor">
-                                    <label class="online">Online 6</label>
-                                    <label class="status">Normal</label>
-                                </div>
-                            </div>
-                        </div>
-                                {% endfor %}
-                            {% endif %}
-                        {% endfor %}
-                    </div>
+                    <div class="lines" id="lines{{ val.name }}">
+                        
+                     </div>
                 </div>
             {% endfor %}
-            
             
         </div>
     </section>
     
     <script>
-        // var socket = new WebSocket('ws://localhost:8000/ws/app/');
-        // // var socket = new WebSocket('ws://10.234.232.101:8000/ws/app/');
-        // socket.onmessage = function(event){
-        //     var msg = event.data;
+        var socket = new WebSocket('ws://localhost:8000/ws/app/');
+        // var socket = new WebSocket('ws://10.234.232.101:8000/ws/app/');
+        socket.onmessage = function(e){
+            raw_data = JSON.parse(e.data);
+            
+            for(let i =0; i < raw_data.length; i++){
+                content = ``;
+                for(let j =0; j < raw_data[i]['line'].length; j++ ){
 
-        //     document.querySelector('#onMsg').innerText = msg;
-        // }
+                    onlineNum = 0;
+                    errorNum =0;
+                    errorContext = "";
+                    errorClass = "";
+                    for(let k =0; k < raw_data[i]['line'][j]['machine'].length; k++){
+                        if(raw_data[i]['line'][j]['machine'][k]['status'] == 1){
+                            onlineNum = onlineNum + 1;
+                        }
+                        for(let l=0 ; l < raw_data[i]['line'][j]['machine'][k]['indicator'].length; l++){
+                            if(raw_data[i]['line'][j]['machine'][k]['indicator'][l]['indicator_name'] == "statusCode"){
+                                if(raw_data[i]['line'][j]['machine'][k]['indicator'][l]['value'] != "0"){
+                                    errorNum = errorNum + 1;
+                                    errorContext = "Error " + String(errorNum) ;
+                                    errorClass = "error";
+                                }
+                                else{
+                                    errorContext = "Normal";
+                                    errorClass = "";
+                                }
+                            }
+                        }
+                    }
+                    content += `
+                        <div class="line-item" onclick="location.href='line_view/pt${raw_data[i]['plant_name']}ln${raw_data[i]['line'][j]['line_name']}/';">
+                            <div class="item-header">
+                                <span>Line</span>
+                                <h4>${raw_data[i]['line'][j]['line_name']}</h4>
+                            </div>
+                            <div class="item-status">
+                                <p>Machine totals : ${raw_data[i]['line'][j]['machine'].length}
+                                </p>
+                                <div class="monitor">
+                                    <label class="online">Online ${onlineNum}</label>
+                                    <label class="status ${errorClass}">${errorContext}</label>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+                var plantName = raw_data[i]['plant_name'];
+                document.querySelector('#lines'+plantName+'').innerHTML = content;
+            }
+            
+            
+        }
+        socket.onerror = function(e){
+            console.log(`error : ${e}`);
+        }
     </script>
 </body>
 </html>

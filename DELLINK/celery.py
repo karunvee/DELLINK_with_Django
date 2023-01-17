@@ -16,7 +16,7 @@ app.config_from_object('django.conf:settings', namespace='CELERY')
 app.conf.beat_schedule ={
     'get_api_3s': {
         'task' : 'app.tasks.get_api',
-        'schedule' : 5.0,
+        'schedule' : 3.0,
         'options': {
             'expires': 15.0,
         },

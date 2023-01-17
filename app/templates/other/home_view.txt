@@ -1,0 +1,80 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <link rel="stylesheet" href="{% static 'css/home_view.css' %}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    {% include "main_templates/menubar.html" %}
+    <section class="header">
+        <div class="wrapper">
+            {% for val in plant_members %}
+                <div class="card" >
+                    <div class="content-plant">
+                        <h3>{{ val.name }}</h3>
+                        <div class="detail">
+                            <p>{{val.detail}}</p>
+                        </div>
+                        <div class="detail-ip">IP info >
+                            <span class="tooltip">{{val.ip1}} {{val.ip2}} {{val.ip3}} {{val.ip4}}</span>
+                        </div>
+                        <!-- <h3 id="onMsg"></h3> -->
+                    </div>
+                    <div class="lines">
+                        {% for key, value in dictPlant.items %}
+                            {% if key == val.name %}
+                                {% for k, v in value.items %}
+                        <div class="line-item" onclick="location.href='{% url 'line_view' val.name k %}';">
+                            <div class="item-header">
+                                <span>Line</span>
+                                <h4>{{k}}</h4>
+                            </div>
+                            <div class="item-status">
+                                <p>Machine totals : 
+                                    {% for index in v %}
+                                        {% if forloop.last %}
+                                            {{ forloop.counter }}
+                                        {% endif %}
+                                    {% endfor %}
+                                </p>
+                                <div class="monitor">
+                                    <label class="online">Online 6</label>
+                                    <label class="status">Normal</label>
+                                </div>
+                            </div>
+                        </div>
+                                {% endfor %}
+                            {% endif %}
+                        {% endfor %}
+                     </div>
+                </div>
+            {% endfor %}
+            <div id="onMsg">
+
+            </div>
+            
+        </div>
+    </section>
+    
+    <script>
+        var socket = new WebSocket('ws://localhost:8000/ws/app/');
+        // var socket = new WebSocket('ws://10.234.232.101:8000/ws/app/');
+        socket.onmessage = function(e){
+            raw_data = JSON.parse(e.data)
+            document.querySelector('#onMsg').innerHTML = ``;
+            for(let i =0; i < raw_data.length; i++){
+                for(let j =0; j < raw_data[i]['line'].length; j++ )
+                document.querySelector('#onMsg').innerHTML += `<p>${raw_data[i]['line'][j]['line_name']}</p>`;
+            }
+            
+        }
+        socket.onerror = function(e){
+            console.log(`error : ${e}`);
+        }
+    </script>
+</body>
+</html>

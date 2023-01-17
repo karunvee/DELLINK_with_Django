@@ -1,0 +1,32 @@
+.bg-spinner{
+    top: 0;
+    z-index: 100;
+    height: 100%;
+    width: 100%;
+    position: fixed;
+    background-color: rgb(51, 48, 48);
+    opacity: 0.5;
+}
+.position-spinner{
+    display: flex;
+    height: 100%;
+    margin-left: 270px;
+    justify-content: center;
+    align-items: center;
+}
+.spinner{
+    height: 60px;
+    width: 60px;
+    border-radius: 50%;
+    border: 8px solid rgb(2, 86, 254);
+    border-top: 8px solid rgb(69, 69, 69);
+    animation: loading 0.5s infinite linear;
+}
+@keyframes loading{
+    to{
+        transform: rotate(360deg);
+    }
+}
+.invisable{
+    display: none;
+}

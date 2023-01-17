@@ -20,6 +20,7 @@
     --table-color: #f2f2f2;
     --linebtn-color: rgb(53, 178, 245);
     --header-text: #005992;
+    --highlight-text: #ffffcb;
     /* ====== Transition ====== */
     --tran-03: all 0.2s ease;
     --tran-03: all 0.3s ease;
@@ -50,6 +51,7 @@ body.dark{
     --table-color: #3b3b3b;
     --linebtn-color: rgb(255, 210, 86);
     --header-text: #1c6a9b;
+    --highlight-text: rgb(26, 125, 171);
 }
 
 /* ===== Sidebar ===== */
