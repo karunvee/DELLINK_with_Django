@@ -6,18 +6,19 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{% static 'css/line_view.css' %}">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <title>Document</title>
 </head>
 <body>
     {% include "main_templates/menubar.html" %}
     <section class="header">
+        <h1>Line : {{line_name}}</h1>
         <div class="line-container">
-            <h1>Line Overview</h1>
             <div class="container">
                 <div class="machine-field">
                     {% for index in 123456789101112|make_list %}
                         <div class="machine">
-                            <img class="machine-img" src="{% static "img/autoInsert-removebg-preview.png" %}" alt=""/>
+                            <img class="machine-img" src="{% static "img/default.png" %}" alt=""/>
                             <div class="light-status">
                                 <div class="green-light on"></div>
                                 <div class="yellow-light on"></div>
@@ -38,35 +39,41 @@
                 </div>
             </div>
         </div>
-
-        <div class="list-machines">
-            <table class="table-machines" id="table-machines">
-                <tr>
-                    <th>DeviceId</th>
-                    <th>Name</th>
-                    <th>Device name</th>
-                    <th>Status</th>
-                    <th>Picture path</th>
-                    <th class="colunm-assignment">Assignment</th>
-                </tr>
-                {% for index in 123456789101112|make_list %}
-                <tr>
-                    <td>DeviceId</td>
-                    <td>Name</td>
-                    <td>Device name</td>
-                    <td>Status</td>
-                    <td>Picture path</td>
-                    <td class="colunm-assignment">
-                        <button>Assign</button>
-                        <button>Delete</button>
-                    </td>
-                </tr>
-                {% endfor %}
-            </table>
-        </div>
-        
+        <h1>Machine number setting</h1>
+            <div class="list-machines">
+                    <table class="table-machines" id="table-machines">
+                        <tbody>
+                            <tr>
+                                <th class="column-drag"></th>
+                                <th>DeviceId </th>
+                                <th>Name</th>
+                                <th>Device name</th>
+                                <th>Status</th>
+                                <th>Picture path</th>
+                            </tr>
+                            {% for index in 1234|make_list %}
+                            <tr draggable="true" ondragstart="start()" ondragover="dragover()">
+                                <td class="column-drag"><i class='bx bx-menu'></i></td>
+                                <td>{{index}}</td>
+                                <td>name{{index}}</td>
+                                <td>device{{index}}</td>
+                                <td>status{{index}}</td>
+                                <td>picture{{index}}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+    
+            </div>
+            
+            <div class="panel-func">
+                <button class="btn-set-lineup" id="btn-load"><i class='bx bx-refresh'></i>&ensp;Load data from DIA</button>
+                <button class="btn-set-lineup" id="btn-upload"><i class='bx bx-save' ></i>&ensp;Save</button>
+            </div>
     </section>
-        
+    
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
     <script>
         // var socket = new WebSocket('ws://localhost:8000/ws/app/');
 
@@ -74,7 +81,57 @@
         //     raw_data = JSON.parse(e.data);
 
         // }
+        var dataTable = {};
+        var table = document.getElementById("table-machines");
 
+        $(document).ready(function() {
+        $("#btn-upload").on('click',function() {
+            
+            for(let i=1; i < table.rows.length; i++){
+
+                var lineUpNo = table.rows[i].rowIndex;
+                dataTable[String(lineUpNo)] = [];
+
+                for(let j=1; j < table.rows[i].cells.length; j++){
+                    var data = table.rows[i].cells[j].innerHTML;
+                    
+                    dataTable[String(lineUpNo)].push(data);
+                }
+            }
+
+            $.ajax({
+                type: "POST",
+                url: "{% url 'set_line' plant_name line_name %}",
+                data: JSON.stringify(dataTable),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (response) {
+                    alert("Saved!");
+                },
+                error : function(xhr, errmsg, err) {
+                        alert("Could not be saved!");
+                    }
+            });
+
+            });
+        });
+
+
+        var row;
+        function start(){  
+        row = event.target; 
+        }
+        function dragover(){
+        var e = event;
+        e.preventDefault(); 
+        
+        let children= Array.from(e.target.parentNode.parentNode.children);
+        
+        if(children.indexOf(e.target.parentNode)>children.indexOf(row))
+            e.target.parentNode.after(row);
+        else
+            e.target.parentNode.before(row);
+        }
     </script>
 </body>
 </html>

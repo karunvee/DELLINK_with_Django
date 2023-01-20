@@ -6,8 +6,9 @@
     display: block;
     align-items: center;
 }
-.line-container h1{
-    margin: 25px auto 5px 20px;
+.header h1{
+    margin: 25px auto 5px 60px;
+    color: var(--text-color);
 }
 .machine-field{
   background-color: var(--sidebar-color);
@@ -110,8 +111,9 @@
 
 .list-machines {
   border-radius: 20px;
-  margin: 20px 20px 20px 50px;
+  margin: 0 20px 20px 50px;
   border: 2px solid #fff;
+  padding-bottom: 10px;
 }
 .table-machines {
   width: 100%;
@@ -121,10 +123,7 @@
 .table-machines td, .table-machines th {
   padding: 8px;
 }
-.table-machines tr:last-child{
-  border-bottom-left-radius: 15px;
-  border-bottom-right-radius: 15px;
-}
+
 .table-machines tr:nth-child(even){background-color: var(--table-color);}
 
 .table-machines tr:hover {background-color: var(--highlight-text);}
@@ -143,6 +142,35 @@
   background-color: #0086DB;
   color: #fff;
 }
-.list-machines .colunm-assignment{
-  width: 200px;
+.list-machines .column-drag{
+  width: 60px;
+}
+.table-machines input{
+  cursor: default;
+  border: 0;
+  background-color: transparent;
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.column-drag:hover{
+  cursor: grab;
+}
+.panel-func{
+  position: absolute;
+  right: 0;
+}
+.btn-set-lineup{
+  margin: 0 20px 20px 0;
+  padding: 5px 10px;
+  border: 2px solid transparent;
+  border-radius: 10px;
+  color: #fff;
+  background-color: #0086DB;
+  font-size: 16px;
+}
+.btn-set-lineup:hover{
+  cursor: pointer;
+  opacity: 0.8;
+  border: 2px solid #004d80;
 }
