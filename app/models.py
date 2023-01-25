@@ -2,6 +2,9 @@ from django.db import models
 from django.contrib.postgres.fields import ArrayField
 from django.conf import settings
 
+def default_image_path():
+    return f'{settings.STATIC_URL}/img/default.png'
+    
 # Create your models here.
 class PlantInfo(models.Model):
     name = models.CharField(max_length = 255)
@@ -20,18 +23,16 @@ class PlantInfo(models.Model):
     def __str__(self):
         return self.name
 
-
-def default_image_path():
-    return f'{settings.STATIC_URL}/img/default.png'
-
 class LineRow(models.Model):
     plant_name = models.CharField(max_length = 255)
     line_name = models.CharField(max_length = 255)
     deviceId = models.CharField(max_length = 255)
     name = models.CharField(max_length = 255)
     deviceName = models.CharField(max_length = 255)
+    number = models.IntegerField(unique=True)
+    status = models.CharField(max_length = 255)
+    ip_camera = models.CharField(max_length = 255, blank=True)
     picturePath = models.ImageField(upload_to='images/', default=default_image_path)
-    number = models.CharField(max_length = 255, unique=True)
 
     def __str__(self):
         return self.name
