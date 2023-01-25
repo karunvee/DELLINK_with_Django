@@ -1,7 +1,7 @@
 from django import forms
 from .models import LineRow
 
-class MyModelForm(forms.ModelForm):
+class LineRowForm(forms.ModelForm):
     class Meta:
         model = LineRow
-        fields = ('image',)
+        fields = '__all__'

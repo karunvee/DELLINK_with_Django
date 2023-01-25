@@ -16,58 +16,46 @@
         <div class="line-container">
             <div class="container">
                 <div class="machine-field">
-                    {% for index in 123456789101112|make_list %}
-                        <div class="machine">
-                            <img class="machine-img" src="{% static "img/default.png" %}" alt=""/>
-                            <div class="light-status">
-                                <div class="green-light on"></div>
+                    {% for val in line_row %}
+                        <div class="machine" onclick="location.href='{% url 'machine_view' plant_name line_name val.name %}';">
+                            <img class="machine-img" src="{{val.picturePath.url}}" alt=""/>
+                            <div class="light-status" id="light-status{{val.deviceId}}">
+                                <!-- <div class="green-light on"></div>
                                 <div class="yellow-light on"></div>
-                                <div class="red-light on"></div>
+                                <div class="red-light on"></div> -->
                             </div>
-                            <span>{{index}} machine Lorem ipsum dolor sit.</span>
+                            <span>{{val.number}}.{{val.name}}</span>
                         </div>
                         {% endfor %}
-                        <div class="machine">
-                            <img class="machine-img" src="{% static "img/postwave-removebg-preview.png" %}" alt=""/>
-                            <div class="light-status">
-                                <div class="green-light on"></div>
-                                <div class="yellow-light on"></div>
-                                <div class="red-light on"></div>
-                            </div>
-                            <span>{{index}} machine Lorem ipsum dolor sit amet consectetur.</span>
-                        </div>
                 </div>
             </div>
         </div>
-        <h1>Machine number setting</h1>
+        <h1>Machine numbers sorting</h1>
             <div class="list-machines">
                     <table class="table-machines" id="table-machines">
-                        <tbody>
                             <tr>
                                 <th class="column-drag"></th>
+                                <th>No.</th>
                                 <th>DeviceId </th>
                                 <th>Name</th>
                                 <th>Device name</th>
                                 <th>Status</th>
-                                <th>Picture path</th>
                             </tr>
-                            {% for index in 1234|make_list %}
+                            {% for val in line_row %}
                             <tr draggable="true" ondragstart="start()" ondragover="dragover()">
                                 <td class="column-drag"><i class='bx bx-menu'></i></td>
-                                <td>{{index}}</td>
-                                <td>name{{index}}</td>
-                                <td>device{{index}}</td>
-                                <td>status{{index}}</td>
-                                <td>picture{{index}}</td>
+                                <td>{{val.number}}</td>
+                                <td>{{val.deviceId}}</td>
+                                <td>{{val.name}}</td>
+                                <td>{{val.deviceName}}</td>
+                                <td>{{val.status}}</td>
                             </tr>
                             {% endfor %}
-                        </tbody>
                     </table>
-    
             </div>
             
             <div class="panel-func">
-                <button class="btn-set-lineup" id="btn-load"><i class='bx bx-refresh'></i>&ensp;Load data from DIA</button>
+                <button class="btn-set-lineup" onclick="showMachine()"><i class='bx bx-refresh'></i>&ensp;Load data from DIA</button>
                 <button class="btn-set-lineup" id="btn-upload"><i class='bx bx-save' ></i>&ensp;Save</button>
             </div>
     </section>
@@ -75,12 +63,14 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
     <script>
-        // var socket = new WebSocket('ws://localhost:8000/ws/app/');
+        var socket = new WebSocket('ws://localhost:8000/ws/app/');
 
-        // socket.onmessage = function(e){
-        //     raw_data = JSON.parse(e.data);
+        socket.onmessage = function(e){
+            raw_data = JSON.parse(e.data);
+            ShowMachineStatus(raw_data);
+        }
 
-        // }
+
         var dataTable = {};
         var table = document.getElementById("table-machines");
 
@@ -92,7 +82,7 @@
                 var lineUpNo = table.rows[i].rowIndex;
                 dataTable[String(lineUpNo)] = [];
 
-                for(let j=1; j < table.rows[i].cells.length; j++){
+                for(let j=2; j < table.rows[i].cells.length; j++){
                     var data = table.rows[i].cells[j].innerHTML;
                     
                     dataTable[String(lineUpNo)].push(data);
@@ -131,6 +121,79 @@
             e.target.parentNode.after(row);
         else
             e.target.parentNode.before(row);
+        }
+
+        function ShowMachineStatus(raw_data){
+            for(let i =0; i < raw_data.length; i++){
+                if(raw_data[i]['plant_name'] == "{{plant_name}}" ){
+                    for(let j=0; j < raw_data[i]['line'].length; j++){
+
+                        if(raw_data[i]['line'][j]['line_name'] == "{{line_name}}"){
+                            for(let k=0; k < raw_data[i]['line'][j]['machine'].length; k++){
+                                for(let l=0 ; l < raw_data[i]['line'][j]['machine'][k]['indicator'].length; l++){
+                                    if(raw_data[i]['line'][j]['machine'][k]['indicator'][l]['indicator_name'] == "statusCode"){
+
+                                        var light_status = document.querySelector('#light-status'+ String(raw_data[i]['line'][j]['machine'][k]['deviceId']));
+                                        switch(raw_data[i]['line'][j]['machine'][k]['indicator'][l]['value']) {
+                                            case "0":
+                                                // green
+                                                light_status.innerHTML = `<div class="green-light on"></div>`;
+                                                break;
+                                            case "1":
+                                                // red
+                                                light_status.innerHTML = `<div class="red-light on"></div>`;
+                                                break;
+                                            default:
+                                                // yellow
+                                                light_status.innerHTML = `<div class="yellow-light on"></div>`;
+                                                
+                                            }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                }
+        }
+
+        function showMachine(){
+            var table = document.querySelector('#table-machines');
+            table.innerHTML = "";
+            table.innerHTML += `
+                     <tbody>
+                            <tr>
+                                <th class="column-drag">{{plant_name}}/{{line_name}}</th>
+                                <th>No.</th>
+                                <th>DeviceId</th>
+                                <th>Name</th>
+                                <th>Device name</th>
+                                <th>Status</th>
+                            </tr>
+            `;
+            for(let i =0; i < raw_data.length; i++){
+
+                if(raw_data[i]['plant_name'] == "{{plant_name}}" ){
+                    for(let j=0; j < raw_data[i]['line'].length; j++){
+
+                        if(raw_data[i]['line'][j]['line_name'] == "{{line_name}}"){
+                            for(let k=0; k < raw_data[i]['line'][j]['machine'].length; k++){
+
+                                table.innerHTML +=`
+                                <tr draggable="true" ondragstart="start()" ondragover="dragover()">
+                                    <td class="column-drag"><i class='bx bx-menu'></i></td>
+                                    <td>${k}</td>
+                                    <td>${raw_data[i]['line'][j]['machine'][k]['deviceId']}</td>
+                                    <td>${raw_data[i]['line'][j]['machine'][k]['machine_name']}</td>
+                                    <td>${raw_data[i]['line'][j]['machine'][k]['device_name']}</td>
+                                    <td>${raw_data[i]['line'][j]['machine'][k]['status']}</td>
+                                </tr>
+                                `;
+                            }
+                        }
+                    }
+                }
+            }
         }
     </script>
 </body>

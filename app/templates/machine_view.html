@@ -1,0 +1,117 @@
+{% load static %}Online
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'css/machine_view.css' %}">
+    <link rel="stylesheet" href="{% static 'css/main-css/display.css' %}">
+    <title>Document</title>
+</head>
+<body>
+    {% include "main_templates/menubar.html" %}
+    <section class="header">
+        <div class="content-item-view">
+            <div class="head-container">
+                <div class="img">
+                    <img class="machine-img" src="{% static 'img/default.png' %}" alt=""/>
+                </div>
+                <div class="container-content">
+                    <div class="header-info">
+                        <h3 id="machineName" class="machineName">{{machineInfo.name}}</h3>
+                        <div class="header-status">
+                            <div id="status" class="status">
+                                <div class="display Online"><label> Online </label></div>
+                            </div>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="header-information">
+                            <div class="box-info">
+                                <span >Device :</span>
+                                <span id="machineRname">{{machineInfo.deviceName}}</span>
+                            </div>
+                            <div class="box-info">
+                                <span class="sp-info">Machine ID : </span>
+                                <span id="machineID">{{machineInfo.deviceId}}</span>
+                            </div>
+                            <div class="box-info">
+                                <span class="sp-info">IP : </span> 
+                                <span id="machineIP">{{machineInfo.ip_camera}}</span>
+                            </div>
+                            <div class="box-info">
+                                <span>Type : </span>  
+                                <span id="type"></span>
+                            </div>
+                            <div class="box-info">
+                                <span class="sp-info">Model : </span> 
+                                <span id="model"></span>
+                            </div>
+                    </div>
+                </div>
+                <!-- Connection status -->
+            </div>
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <input type="submit" value="Upload">
+            </form>
+            <section class="body-content">
+                <div class="pnl box-camera">
+                    <h5 class="head-pnl">RTSP camera</h5>
+                    <img src="" width="100%" height="470px" 
+                    onerror="this.onerror=null; this.src='{% static 'img/camera-not-found.jpg' %}'" loading="lazy">
+                    <div class="camera-info">
+                        <div>
+                            {% if data_camera == "Exist" %}
+                            <span>IP camera : {{camera_ip}}.</span>
+                            {% else %}
+                            <span>This machine have not been assigned an IP.</span>
+                            <button>Assign</button>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                <div class="pnl box-command-monitor">
+                    <h5 class="head-pnl">Monitor & Controller</h5>
+                    <div class="cmd-container">
+                        <!-- Button generator -->
+                        <div class="cmd-btn">
+                            
+                        </div>
+                        <hr>
+                        <!-- Text generator -->
+                        <div class="cmd-text">
+                            <!-- Indicator generator -->
+
+                        </div>
+                    </div>
+                    
+                </div>        
+            </section>
+
+            <section class="body-tags">
+                <div class="pnl box-machineView">
+                    <div class="header-tags">
+                        <h5 class="head-pnl">Tag members</h5>
+                        <button class="btn-add" id="addTag" onclick="">Add Tag</button>
+                    </div>
+                    <div class="table-container">
+                        <table class="table-tag" id="machineView">
+                            <tr>
+                                <th>No.</th>
+                                <th>Name</th>
+                                <th>Data type</th>
+                                <th>Tag ID</th>
+                                <th>Register</th>
+                                <th>Value</th>
+                                <th class="td-indicator">Indicator</th>
+                            </tr>
+                    </div>
+                </div> 
+            </section>
+        </div>
+    </section>
+</body>
+</html>

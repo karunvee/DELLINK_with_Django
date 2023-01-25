@@ -1,0 +1,568 @@
+.head-container {
+    padding: 15px;
+    margin-top: -12px;
+    margin-bottom: 30px;
+    border-bottom-left-radius: 10px;
+    border-bottom-right-radius: 15px;
+}
+.head-container {
+  display: flex;
+}
+.container-content{
+  width: 100%;
+}
+.img {
+  display: block;
+  padding-left: 10px;
+  padding-right: 20px;
+}
+.img img{
+  max-width: 100px;
+  max-height: 100px;
+}
+.header-status {
+    text-align: center;
+    width: 180px;
+    color: white;
+
+}
+.header-info h3{
+    margin-left: 10px;
+    padding-bottom: 10px;
+}
+.header-info *{
+    margin: 0;
+    padding: 0;
+}
+.box-info{
+    display: inline-flex;
+    border-radius: 15px;
+    padding: 5px 15px;
+}
+.header-info{
+    display: flex;
+    justify-content: space-between;
+}
+.header-information {
+    margin: 0;
+}
+.header-information span{
+    font-size: 18px;
+}
+.header-status i{
+    width: 30px;
+}
+.head-pnl {
+    margin: auto;
+    width: 100%;
+}
+.header-tags {
+    display: flex;
+}
+.btn-add {
+    right: 60px;
+    position: absolute;
+    z-index: 0;
+    margin: 8px 10px;
+    width: 120px;
+    height: 35px;
+    background-color: rgb(32, 133, 199);
+    color: white;
+    text-align: center;
+    border: 0;
+    border-radius: 25px;
+}
+.btn-add:hover{
+    background-color: rgb(118, 185, 229);
+    box-shadow: 0 4px 15px 0 rgba(65, 132, 234, 0.75);
+    cursor: pointer;
+}
+.body-content {
+    display: flex;
+    justify-content: space-between;
+}
+.pnl {
+    border-radius: 10px;
+}
+.pnl.box-camera{
+    width: 58%;
+    height: auto;
+    min-height: 570px;
+}
+.pnl.box-command-monitor{
+    width: 40%;
+    height: auto;
+}
+.head-container hr{
+    border: 1px solid #f1f1f1;
+    margin: 0;
+}
+.cmd-container hr {
+    border: 1px solid #f1f1f1;
+    margin: 15px 0 15px 0;
+  }
+.cmd-container{
+    display: flex;
+    justify-content: space-between;
+    height: 90%;
+}
+.cmd-btn , .cmd-text{
+    margin: 20px;
+    width: 50%;
+    height: auto;
+}
+.cmd-btn .btn-TagValue{
+    margin: 0 0 20px 0;
+    width: 100%;
+    height: 40px;
+    display: block;
+    background-color: var(--btn-color);
+    border: 0;
+    border-radius: 10px;
+    color: white;
+    font-size: 16px;
+}
+.cmd-btn .ON{
+    animation: glowing 1300ms infinite;
+}
+.cmd-btn .OFF{
+    filter: contrast(0.5);
+}
+@keyframes glowing {
+    0% {
+    filter: contrast(1);
+    box-shadow: 0 0 5px var(--btn-color);
+    }
+    50% {
+    filter: contrast(1.5);
+      box-shadow: 0 0 15px var(--btn-color);
+    }
+    100% {
+    filter: contrast(1);
+    box-shadow: 0 0 5px var(--btn-color);
+    }
+  }
+
+.cmd-btn .btn-TagValue.ON:hover, .cmd-btn .btn-TagValue.OFF:hover{
+    opacity: 0.9;
+    font-weight: 20px;
+    font-size: 17px;
+    cursor: pointer;
+    box-shadow: 0 2px 8px 0 rgba(124, 124, 124, 0.75);
+}
+.cmd-text{
+    font-size: 16px;
+}
+.cmd-text input[type=text]{
+    margin: 0;
+    width: 22%;
+    border: 0;
+    font-size: 16px;
+    background-color: transparent;
+    cursor: text;
+ }
+ .cmd-text input[type=text], select {
+    width: 70%;
+    padding: 5px;
+    display: inline-block;
+    border: none;
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+.cmd-text-send{
+    margin: 0 0 15px 0;
+    display: flex;
+    justify-content: space-between;
+    gap: 5px;
+}   
+.cmd-text-send button{
+    width: 30%;
+    padding: 5px;
+    display: block;
+    background-color: #3282B8;
+    border: 0;
+    border-radius: 10px;
+    color: white;
+    font-size: 14px;
+}
+.cmd-text-send button:hover{
+    cursor: pointer;
+    background-color: #005992;
+    /* box-shadow: 0 2px 8px 0 rgba(0, 77, 171, 0.75); */
+}
+   /* Add a background color when the inputs get focus */
+.cmd-text input[type=text]:focus, select:focus {
+    background-color: #ddd;
+    outline: none;
+}
+
+.pnl.box-machineView{
+    margin: 20px 0;
+    height: auto;
+}
+h5{
+    margin: 0;
+    padding: 8px 0;
+    text-align: center;
+    font-size: 24px;
+    font-weight: 30;
+    color: white;
+    background-color: #005992;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+}
+.text-members{
+    margin: 0;
+    padding: 15px;
+}
+
+.table-container{
+    height: 530px;
+    overflow: auto;
+}
+/* tr:nth-child(even){background-color: #f2f2f2} */
+.table-tag th {
+    text-align: left;
+    padding-left: 10px;
+    font-weight: 16;
+    background-color: #3282B8;
+    color: white;
+  }
+.table-tag{
+    border-collapse: collapse;
+    width: 100%;
+    border-color: rgb(0, 0, 0);
+    font-size: 18px;
+}
+.table-tag td{
+    text-align: left;
+    padding: 2px 10px;
+    font-weight: 10;
+}
+
+.tag-value{
+    width: 120px;
+    font-weight: 10;
+    font-size: 18px;
+    border: 0;
+    background-color: transparent;
+}
+.tag-add-value{
+    width: 80px;
+}
+/* width */
+::-webkit-scrollbar {
+    width: 10px;
+  }
+  
+  /* Track */
+  ::-webkit-scrollbar-track {
+    background: #f1f1f1; 
+  }
+   
+  /* Handle */
+  ::-webkit-scrollbar-thumb {
+    background: #888; 
+  }
+  
+  /* Handle on hover */
+  ::-webkit-scrollbar-thumb:hover {
+    background: #555; 
+  }
+  .ip-camera{
+    width: 100%;
+    height: 500px;
+  }
+  .th-indicator {
+    width: 340px;
+}
+  .td-indicator {
+    display: flex;
+    width: auto;
+}
+  .pnl-write-data{
+    margin-left: 30px;
+  }
+.table-container button{
+    margin: auto;
+    padding: 2px 8px;
+    background-color: rgb(0, 102, 170);
+    border: 0;
+    border-radius: 10px;
+    color: white;
+    opacity: 0.8;
+}
+.table-container .btn-assigned:hover ,.table-container .btn-deleted:hover ,.table-container .btn-tag-write:hover{ 
+    opacity: 1;
+    /* box-shadow: 0 4px 8px 0 rgba(65, 132, 234, 0.75); */
+    cursor: pointer;
+}
+.tag-add-value{
+    text-align: center;
+}
+input:focus{
+    outline: 2px ridge rgba(0, 103, 193, 0.6);
+}
+.container-status{
+    margin-bottom:  8px;
+    display: flex;
+    justify-content: space-between;
+}
+.text-status{
+    display: flex;
+    margin: auto;
+    align-items: center;
+    text-align: center;
+}
+.cmd-container span{
+    display: flex;
+    margin: auto;
+    font-size: 18px;
+}
+.indicator-status{
+    margin: auto;
+    width: 30%;
+    height: 20px;
+    background-color: #ccc;
+    border-radius: 20px;
+}
+.indicator-status.green{
+    --status-color : green;
+    background-color: var(--status-color);
+    animation: indicator_animation 1300ms infinite;
+}
+.indicator-status.yellow{
+    --status-color : rgb(227, 199, 73);
+    background-color: var(--status-color);
+    animation: indicator_animation 1300ms infinite;
+}
+.indicator-status.red{
+    --status-color : red;
+    background-color: var(--status-color);
+    animation: indicator_animation 1300ms infinite;
+}
+@keyframes indicator_animation {
+    0% {
+    filter: contrast(1);
+    box-shadow: 0 0 5px var(--status-color);
+    }
+    50% {
+    filter: contrast(1.5);
+      box-shadow: 0 0 15px var(--status-color);
+    }
+    100% {
+    filter: contrast(1);
+    box-shadow: 0 0 5px var(--status-color);
+    }
+  }
+  .text-error-code{
+    display: flex;
+    margin-bottom: 15px;
+    background-color: #9f9f9f;
+    border-radius: 10px;
+    color: white;
+  }
+  .text-error-code input{
+    text-align: center;
+    border: 0;
+    background-color: transparent;
+    width: 60px;
+    font-size: 18px;
+    color: white;
+  }
+
+  .btn-control-page{
+    display: block;
+    position: fixed;
+    bottom: 1rem;
+    right: 0.5rem;
+  }
+  .button-expand {
+    display: inline-flex;
+    background-color: #0086DB;
+    color: white;
+    text-decoration: none;
+    border-radius: 60px;
+    height: 40px;
+    align-items: center;
+    overflow:hidden;
+    width: auto;
+    max-width: 40px; /** I'm animating max-width because width needs to be auto, and auto can't be animated **/
+    -webkit-transition: max-width 0.5s;
+    transition: max-width 0.5s;
+  }
+  .button-expand:hover {
+    max-width: 300px;
+  }
+  
+  .button-expand-icon {
+    font-size: 16px;
+    margin-right: 15px;
+    padding: 0px 12px;
+    display: flex;
+    align-items: center;
+  }
+  
+  .button-expand-text {
+    white-space: nowrap;
+    padding-right: 15px;
+  }
+
+  .alert-message{
+    display: block;
+    position: fixed;
+    bottom: 4rem;
+    right: 0.5rem;
+  }
+  /* .alert-message-box{
+    right: 1rem;
+    border: 0;
+    border-radius: 10px;
+    font-size: 16px;
+    color: rgb(255, 255, 255);
+    height: auto;
+    width: 400px;
+    background-color: rgb(239, 62, 62);
+    z-index: 2;
+    display: flex;
+    position: fixed;
+    box-shadow: 0 4px 8px 0 rgba(161, 162, 163, 0.75);
+    /animation: fadeIn 2s; 
+  }
+  @keyframes fadeIn {
+    0% { opacity: 0; }
+    100% { opacity: 1; }
+  }
+  .alert-message-box .message-box{
+    margin: 15px;
+  } */
+
+  .notification {
+
+    display: inline-flex;
+    background-color: rgb(239, 62, 62);
+    color: white;
+    text-decoration: none;
+    border-radius: 60px;
+    height: 40px;
+    align-items: center;
+    overflow:hidden;
+    width: auto;
+    max-width: 40px;
+    -webkit-transition: max-width 0.5s;
+    transition: max-width 0.5s;
+    /* animation: blink 0.5s ;
+    animation-iteration-count: infinite; */
+    animation: expend 2s linear forwards;
+  }
+  @keyframes expend {
+    50% { max-width: 200px; }
+  }
+
+  /* .notification:hover {
+    max-width: 200px;
+    animation: none;
+  } */
+  .notification-icon {
+    font-size: 16px;
+    margin-right: 15px;
+    padding: 0px 12px;
+    display: flex;
+    align-items: center;
+    animation: shake 0.4s;
+    animation-iteration-count: infinite;
+  }
+  .notification .badge {
+    position: absolute;
+    top: -7px;
+    right: -7px;
+    padding: 2px 8px;
+    border-radius: 50%;
+    background: rgb(181, 126, 126);
+    font-size: 12px;
+    color: white;
+  }
+  @keyframes blink {
+    50%{
+      background-color: rgb(255, 0, 0);
+    }
+    100% {
+      background-color: rgb(255, 127, 127);
+    }
+  }
+  @keyframes shake {
+    10%, 20% {
+        transform:  rotate(8deg);
+    }
+    30%, 40%, 50% {
+        transform: rotate(-7deg);
+    }
+    60%, 70%, 80% {
+        transform: rotate(10deg);
+    }
+    90%, 100% {
+        transform: rotate(-8deg);
+    }
+  }
+  .cmd-text .alert-container .alert {
+    padding: 20px;
+    background-color: #FF0000;
+    border-radius: 10px;
+    color: white;
+    margin-bottom: 0.5rem;
+  }
+  
+  .closebtn {
+    margin-left: 15px;
+    color: white;
+    font-weight: bold;
+    float: right;
+    font-size: 22px;
+    line-height: 20px;
+    cursor: pointer;
+    transition: 0.3s;
+  }
+  
+  .closebtn:hover {
+    color: black;
+  }
+.cmd-indicator{
+  margin-bottom: 15px;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  background-color: #9f9f9f;
+  border-radius: 10px;
+}
+.cmd-indicator.ON{
+  background-color: #7aca62;
+}
+.cmd-indicator.OFF{
+  background-color: #9f9f9f;
+}
+.cmd-indicator span{
+  color: #ffff;
+text-align: center;
+}
+.camera-info{
+  top: 0;
+  margin-top: 0;
+}
+.camera-info div{
+  margin: auto;
+  text-align: center;
+}
+.camera-info span{
+  font-size: 16px;
+}
+.camera-info button{
+  margin: 0 10px;
+  border: 0;
+  border-radius: 5px;
+  color: white;
+  background-color: #3282B8;
+}
+.camera-info button:hover{
+  cursor: pointer;
+  background-color: #005992;
+}

@@ -123,7 +123,9 @@
 .table-machines td, .table-machines th {
   padding: 8px;
 }
-
+.table-machines tr{
+  background-color: var(--table-color);
+}
 .table-machines tr:nth-child(even){background-color: var(--table-color);}
 
 .table-machines tr:hover {background-color: var(--highlight-text);}
