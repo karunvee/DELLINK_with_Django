@@ -566,3 +566,68 @@ text-align: center;
   cursor: pointer;
   background-color: #005992;
 }
+.form-update{
+  font-size: 16px;
+}
+.form-update input{
+  padding: 10px 40px;
+  border: 0;
+  border-radius: 5px;
+  color: white;
+}
+.form-update input[type=submit]{
+  background-color: #3282B8;
+}
+.form-update input[type=button]{
+  background-color: #b83d32;
+}
+.form-update input[type=submit]:hover, .form-update input[type=button]:hover{
+  cursor: pointer;
+  opacity: 0.8;
+}
+
+.img:hover{
+  cursor: pointer;
+}
+.img .tooltip{
+  font-size: 10px;
+  visibility: hidden;
+  width: 100px;
+  background-color: black;
+  color: #fff;
+  text-align: center;
+  border-radius: 6px;
+  padding: 5px 0;
+/* Position the tooltip */
+  position: absolute;
+  z-index: 1;
+  top: 120px;
+  left: 6%;
+}
+.img:hover .tooltip{
+  visibility: visible;
+}
+
+.upload-form{
+  display: none; /* Hidden by default */
+  position: fixed; /* Stay in place */
+  z-index: 5; /* Sit on top */
+  left: 0;
+  top: 0;
+  width: 100%; /* Full width */
+  height: 100%; /* Full height */
+  overflow: auto; /* Enable scroll if needed */
+  padding-top: 50px;
+  color: rgb(60, 103, 133);
+  background-color: rgb(60, 103, 133, .8);
+  animation: background-fade 1s;
+}
+.upload-form-container {
+  padding: 20px;
+  background-color: #fefefe;
+  margin: 12% 25% 0 auto;
+  border: 1px solid #888;
+  width: 500px; /* Could be more or less, depending on screen size */
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+  border-radius: 25px;
+}

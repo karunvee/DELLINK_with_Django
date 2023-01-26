@@ -15,7 +15,8 @@
         <div class="content-item-view">
             <div class="head-container">
                 <div class="img">
-                    <img class="machine-img" src="{% static 'img/default.png' %}" alt=""/>
+                    <span class="tooltip">Click to upload</span>
+                    <img class="machine-img" src="{{ machineInfo.picturePath.url }}" alt="" onclick="showUploadForm()"/>
                 </div>
                 <div class="container-content">
                     <div class="header-info">
@@ -52,11 +53,7 @@
                 </div>
                 <!-- Connection status -->
             </div>
-            <form method="post" enctype="multipart/form-data">
-                {% csrf_token %}
-                {{ form.as_p }}
-                <input type="submit" value="Upload">
-            </form>
+            
             <section class="body-content">
                 <div class="pnl box-camera">
                     <h5 class="head-pnl">RTSP camera</h5>
@@ -113,5 +110,24 @@
             </section>
         </div>
     </section>
+    <div id="upload-form" class="upload-form">
+    </div>
+    <script>
+        function showUploadForm(){
+            document.getElementById('upload-form').style.display = "block";
+            document.querySelector('#upload-form').innerHTML = 
+            `<div class="upload-form-container">
+                <div class="form-update">
+                    <h2>Upload image file</h2>
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        {{ form.as_p}}
+                        <input type="submit" value="Upload" >
+                        <input type="button" value="Cancel" onclick="document.getElementById('upload-form').style.display='none'">
+                    </form>
+                </div>
+            </div>`;
+        }
+    </script>
 </body>
 </html>
