@@ -9,6 +9,8 @@ import json
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 from django.views.decorators import gzip
+import os
+from django.conf import settings
 
 # Create your views here.
 
@@ -31,21 +33,27 @@ def line_view(request, pt, ln):
     }
     return render(request, 'line_view.html', context)
 
+
 def machine_view(request, pt, ln, mc):
+    plantInfo = PlantInfo.objects.filter(name__exact = pt).get()
+
+    old_img = LineRow.objects.filter(plant_name__exact = pt, line_name__exact = ln, name__exact = mc).get()
     if request.method == 'POST':
-        form = LineRowForm(request.POST, request.FILES)
+        form = LineRowForm(request.POST or None, request.FILES or None, instance=old_img)
         if form.is_valid():
+            # deleting old uploaded image.
             form.save()
-            return redirect('success')
+            # return redirect('success')
+            return redirect('../../machine_view/pt{}ln{}mc{}/'.format(pt, ln, mc))
     else:
-        form = LineRowForm()
+        form = LineRowForm(instance=old_img)
 
     machineInfo = LineRow.objects.filter(plant_name__exact = pt, line_name__exact = ln, name__exact = mc)
     context = {
         'machineInfo' : machineInfo.get(),
         'form': form,
+        'plantInfo': plantInfo,
     }
-
     return render(request, 'machine_view.html', context)
 
 @csrf_exempt
@@ -64,6 +72,11 @@ def SetLine(request, pt, ln):
             low_row.save()
         return JsonResponse({'status': 'success'})
 
+def DeleteData(request, pt, ln):
+
+    LineRow.objects.filter(plant_name__exact = pt, line_name__exact = ln).delete()
+
+    return redirect('../../line_view/pt{}ln{}/'.format(pt, ln))
 
 
 
