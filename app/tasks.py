@@ -63,9 +63,13 @@ def get_api():
         for url in urlLine:
             line_members = requests.get(url).json()
             for line in line_members:
+                #get value of key from API 
                 deviceNo = line['deviceId']
                 status = line['status']
                 deviceName = line['name']
+                guid = line['guid']
+                type = line['type']
+                model = line['model']
 
                 if line['comment'].find('@') != -1:
                     line_word = line['comment'].split("@")[0]
@@ -76,9 +80,9 @@ def get_api():
 
 
                 if line_word in machine_list:
-                    machine_list[line_word].append([machine_word, deviceNo, status, deviceName, url])
+                    machine_list[line_word].append([url, machine_word, deviceNo, status, deviceName, guid, type, model])
                 else:
-                    machine_list[line_word] = [[machine_word, deviceNo, status, deviceName, url]]
+                    machine_list[line_word] = [[url, machine_word, deviceNo, status, deviceName, guid, type, model]]
 
         for key in machine_list.keys() :
             dictLine = {}
@@ -87,13 +91,17 @@ def get_api():
 
             for mIndex in machine_list[key]:
                 dictMachine = {}
-                dictMachine["machine_name"] = mIndex[0]
-                dictMachine["deviceId"] = mIndex[1]
-                dictMachine["status"] = mIndex[2]
-                dictMachine["device_name"] = mIndex[3]
+                dictMachine["machine_name"] = mIndex[1]
+                dictMachine["deviceId"] = mIndex[2]
+                dictMachine["status"] = mIndex[3]
+                dictMachine["device_name"] = mIndex[4]
+                dictMachine["guid"] = mIndex[5]
+                dictMachine["type"] = mIndex[6]
+                dictMachine["model"] = mIndex[7]
+                dictMachine["url"] = mIndex[0]
                 dictMachine["indicator"] = []
 
-                indicator_members = requests.get(mIndex[4] + "/" + str(mIndex[1]) + "/tags").json()
+                indicator_members = requests.get(mIndex[0] + "/" + str(mIndex[2]) + "/tags").json()
 
                 for indicator in indicator_members:
                     dictIndicator = {}

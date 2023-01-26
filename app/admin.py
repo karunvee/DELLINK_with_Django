@@ -9,5 +9,5 @@ class LineInfoAdmin(admin.ModelAdmin):
 admin.site.register(PlantInfo, LineInfoAdmin)
 
 class LineRowAdmin(admin.ModelAdmin):
-    list_display = ('plant_name','line_name', 'number', 'deviceId', 'name', 'deviceName', 'ip_camera', 'picturePath')
+    list_display = ('plant_name','line_name', 'number', 'deviceId', 'name', 'deviceName', 'ip_camera', 'picturePath', 'guid', 'type', 'model', 'url')
 admin.site.register(LineRow, LineRowAdmin)

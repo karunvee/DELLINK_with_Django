@@ -66,7 +66,19 @@ def SetLine(request, pt, ln):
         print(data_dictionary)
         LineRow.objects.filter(plant_name__exact = pt, line_name__exact = ln).delete()
         for i in range(1, len(data_dictionary) + 1, 1):
-            low_row = LineRow(number = str(i), plant_name = pt, line_name = ln, deviceId = data_dictionary[str(i)][0], name = data_dictionary[str(i)][1], deviceName = data_dictionary[str(i)][2], status = data_dictionary[str(i)][3])
+            low_row = LineRow(
+                number = str(i), 
+                plant_name = pt, 
+                line_name = ln, 
+                deviceId = data_dictionary[str(i)][0], 
+                name = data_dictionary[str(i)][1], 
+                deviceName = data_dictionary[str(i)][2], 
+                status = data_dictionary[str(i)][3],
+                type = data_dictionary[str(i)][4],
+                model = data_dictionary[str(i)][5],
+                guid = data_dictionary[str(i)][6],
+                url = data_dictionary[str(i)][7],
+                )
             print("number:{} plant:{} line:{} deviceId:{} name:{}".format(i, pt, ln, data_dictionary[str(i)][0], data_dictionary[str(i)][1]))
         
             low_row.save()

@@ -107,8 +107,6 @@
   cursor: pointer;
 }
 
-
-
 .list-machines {
   border-radius: 20px;
   margin: 0 20px 20px 50px;
@@ -119,8 +117,14 @@
   width: 100%;
   color: var(--text-color);
 }
-
+.table-machines .th-hide-detail{
+  width:  150px;
+}
+.table-machines td{
+  width: auto;
+}
 .table-machines td, .table-machines th {
+  overflow-wrap: normal;
   padding: 8px;
 }
 .table-machines tr{

@@ -33,7 +33,11 @@ class LineRow(models.Model):
     status = models.CharField(max_length = 255)
     ip_camera = models.CharField(max_length = 255, blank=True)
     picturePath = models.ImageField(upload_to='images/', default=default_image_path)
-    dia_ip = models.CharField(max_length = 255)
+
+    guid = models.CharField(max_length = 255)
+    type = models.CharField(max_length = 255)
+    model = models.CharField(max_length = 255)
+    url = models.CharField(max_length = 255)
 
     def __str__(self):
         return self.name

@@ -40,6 +40,10 @@
                                 <th>Name</th>
                                 <th>Device name</th>
                                 <th>Status</th>
+                                <th class="th-hide-detail">Type</th>
+                                <th class="th-hide-detail">Model</th>
+                                <th class="th-hide-detail">guid</th>
+                                <th class="th-hide-detail">URL</th>
                             </tr>
                             {% for val in line_row %}
                             <tr draggable="true" ondragstart="start()" ondragover="dragover()">
@@ -49,6 +53,10 @@
                                 <td>{{val.name}}</td>
                                 <td>{{val.deviceName}}</td>
                                 <td>{{val.status}}</td>
+                                <td>{{val.type}}</td>
+                                <td>{{val.model}}</td>
+                                <td>{{val.guid}}</td>
+                                <td>{{val.url}}</td>
                             </tr>
                             {% endfor %}
                     </table>
@@ -162,7 +170,6 @@
             var table = document.querySelector('#table-machines');
             table.innerHTML = "";
             table.innerHTML += `
-                     <tbody>
                             <tr>
                                 <th class="column-drag">{{plant_name}}/{{line_name}}</th>
                                 <th>No.</th>
@@ -170,6 +177,10 @@
                                 <th>Name</th>
                                 <th>Device name</th>
                                 <th>Status</th>
+                                <th class="hide-detail">Type</th>
+                                <th class="hide-detail">Model</th>
+                                <th class="hide-detail">guid</th>
+                                <th class="hide-detail">URL</th>
                             </tr>
             `;
             for(let i =0; i < raw_data.length; i++){
@@ -188,6 +199,10 @@
                                     <td>${raw_data[i]['line'][j]['machine'][k]['machine_name']}</td>
                                     <td>${raw_data[i]['line'][j]['machine'][k]['device_name']}</td>
                                     <td>${raw_data[i]['line'][j]['machine'][k]['status']}</td>
+                                    <td>${raw_data[i]['line'][j]['machine'][k]['type']}</td>
+                                    <td>${raw_data[i]['line'][j]['machine'][k]['model']}</td>
+                                    <td>${raw_data[i]['line'][j]['machine'][k]['guid']}</td>
+                                    <td>${raw_data[i]['line'][j]['machine'][k]['url']}</td>
                                 </tr>
                                 `;
                             }
