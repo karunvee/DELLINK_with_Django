@@ -67,7 +67,8 @@
                         }
                     }
                     content += `
-                        <div class="line-item" onclick="location.href='line_view/pt${raw_data[i]['plant_name']}ln${raw_data[i]['line'][j]['line_name']}/';">
+                    <a href="line_view/pt${raw_data[i]['plant_name']}ln${raw_data[i]['line'][j]['line_name']}/">
+                         <div class="line-item">
                             <div class="item-header">
                                 <span>Line</span>
                                 <h4>${raw_data[i]['line'][j]['line_name']}</h4>
@@ -81,6 +82,7 @@
                                 </div>
                             </div>
                         </div>
+                    </a>
                     `;
                 }
                 var plantName = raw_data[i]['plant_name'];
@@ -96,3 +98,5 @@
     </script>
 </body>
 </html>
+
+<!-- onclick="location.href='line_view/pt${raw_data[i]['plant_name']}ln${raw_data[i]['line'][j]['line_name']}/';" -->

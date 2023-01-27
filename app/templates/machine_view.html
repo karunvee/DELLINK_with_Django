@@ -23,7 +23,7 @@
                         <h3 id="machineName" class="machineName">{{machineInfo.name}}</h3>
                         <div class="header-status">
                             <div id="status" class="status">
-                                <div class="display Online"><label> Online </label></div>
+                                
                             </div>
                         </div>
                     </div>
@@ -43,11 +43,11 @@
                             </div>
                             <div class="box-info">
                                 <span>Type : </span>  
-                                <span id="type"></span>
+                                <span id="type">{{machineInfo.type}}</span>
                             </div>
                             <div class="box-info">
                                 <span class="sp-info">Model : </span> 
-                                <span id="model"></span>
+                                <span id="model">{{machineInfo.model}}</span>
                             </div>
                     </div>
                 </div>
@@ -92,10 +92,10 @@
                 <div class="pnl box-machineView">
                     <div class="header-tags">
                         <h5 class="head-pnl">Tag members</h5>
-                        <button class="btn-add" id="addTag" onclick="">Add Tag</button>
+                        <button class="btn-add" id="addTag" onclick="openDIAPage('{{dia_url}}')">DIA Link page</button>
                     </div>
                     <div class="table-container">
-                        <table class="table-tag" id="machineView">
+                        <table class="table-tag" id="table-tag">
                             <tr>
                                 <th>No.</th>
                                 <th>Name</th>
@@ -113,6 +113,74 @@
     <div id="upload-form" class="upload-form">
     </div>
     <script>
+        var socket = new WebSocket('ws://localhost:8000/ws/app/');
+
+        socket.onmessage = function(e){
+            raw_data = JSON.parse(e.data);
+            ShowMachineTags(raw_data);
+        }
+
+        function ShowMachineTags(data){
+            var table = document.querySelector('#table-tag');
+            table.innerHTML = "";
+            table.innerHTML += `
+                            <tr>
+                                <th>No.</th>
+                                <th>Name</th>
+                                <th>Data type</th>
+                                <th>Tag ID</th>
+                                <th>Register</th>
+                                <th>Value</th>
+                                <th class="th-indicator">Indicator</th>
+                            </tr>
+            `;
+            for(let i =0; i < raw_data.length; i++){
+                if(raw_data[i]['plant_name'] == "{{plantInfo.name}}" ){
+                    for(let j=0; j < raw_data[i]['line'].length; j++){
+
+                        if(raw_data[i]['line'][j]['line_name'] == "{{lineName}}"){
+                            for(let k=0; k < raw_data[i]['line'][j]['machine'].length; k++){
+
+                                if(raw_data[i]['line'][j]['machine'][k]['machine_name'] == "{{machineName}}"){
+
+                                    var status = document.querySelector('#status');
+                                    status.innerHTML = ``;
+                                    if(raw_data[i]['line'][j]['machine'][k]['status'] == 1){
+                                        status.innerHTML += `<div class="display small Online"><label>Online</label></div><span>on DIA Link</span>`;
+                                    }
+                                    else{
+                                        status.innerHTML += `<div class="display small Offline"><label>Offline</label></div><span>on DIA Link</span>`;
+                                    }
+
+                                    for(let l=0 ; l < raw_data[i]['line'][j]['machine'][k]['indicator'].length; l++){
+                                    table.innerHTML +=`
+                                        <tr draggable="true" ondragstart="start()" ondragover="dragover()">
+                                            <td>${l}</td>
+                                            <td>${raw_data[i]['line'][j]['machine'][k]['indicator'][l]['indicator_name']}</td>
+                                            <td>${raw_data[i]['line'][j]['machine'][k]['indicator'][l]['gp']}</td>
+                                            <td>${raw_data[i]['line'][j]['machine'][k]['indicator'][l]['tid']}</td>
+                                            <td>${raw_data[i]['line'][j]['machine'][k]['indicator'][l]['register']}</td>
+                                            <td>${raw_data[i]['line'][j]['machine'][k]['indicator'][l]['value']}</td>
+                                            <td class="td-indicator">
+                                                <button id="btn-assigned${raw_data[i]['line'][j]['machine'][k]['indicator'][l]['tid']}" class="btn-assigned" onclick="">Unassigned</button>
+                                                <button id="btn-p-assigned${raw_data[i]['line'][j]['machine'][k]['indicator'][l]['tid']}" class="btn-p-assigned" onclick="" style="display: none; background-color: #ccc; cursor: default;" disabled>Assigned</button>
+                                                <button id="btn-deleted${raw_data[i]['line'][j]['machine'][k]['indicator'][l]['tid']}" class="btn-deleted" onclick="" style="display: none; background-color: rgb(211, 51, 51); margin-left: 5px;"><i class='bx bx-trash' ></i></button>
+                                                <div class="pnl-write-data">
+                                                <button class="btn-tag-write" id='WriteData' onclick="">Write Data</button>
+                                                <input class="tag-add-value" id="TagValue${raw_data[i]['line'][j]['machine'][k]['indicator'][l]['tid']}"/>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    `;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         function showUploadForm(){
             document.getElementById('upload-form').style.display = "block";
             document.querySelector('#upload-form').innerHTML = 
@@ -127,6 +195,9 @@
                     </form>
                 </div>
             </div>`;
+        }
+        function openDIAPage(url){
+            window.open(url, "DIA Link web","width=1000,height=600");
         }
     </script>
 </body>

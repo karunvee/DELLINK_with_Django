@@ -6,7 +6,11 @@
     box-sizing: border-box;
     font-family: 'Poppins', sans-serif;
 }
-
+a:link,a:visited,a:hover,a:active { 
+    text-decoration: none; 
+    color: var(--text-color);
+  }
+  
 :root{
     /* ===== Colors ===== */
     --body-color: #E4E9F7;

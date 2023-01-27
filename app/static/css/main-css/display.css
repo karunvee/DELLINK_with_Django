@@ -67,10 +67,10 @@
        background-image: linear-gradient(to right, #eb3941, #f15e64, #e14e53, #e2373f);  box-shadow: 0 5px 15px rgba(242, 97, 103, .4);
   }
 .display.small.Online, .display.small.Offline{
-  margin-top: 5px;
-  height: 18px;
+  margin-top: 10px;
+  height: 25px;
   width: 100px;
-  font-size: 12px;
+  font-size: 16px;
 }
 .display.Online {
     background-image: linear-gradient(to right, #0ba360, #3cba92, #30dd8a, #2bb673);

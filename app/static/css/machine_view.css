@@ -22,7 +22,7 @@
 }
 .header-status {
     text-align: center;
-    width: 180px;
+    /* width: 180px; */
     color: white;
 
 }
@@ -49,8 +49,9 @@
 .header-information span{
     font-size: 18px;
 }
-.header-status i{
-    width: 30px;
+.header-status span{
+  font-size: 10px;
+    color: var(--text-color);
 }
 .head-pnl {
     margin: auto;
@@ -274,14 +275,14 @@ h5{
     height: 500px;
   }
   .th-indicator {
-    width: 340px;
+    width: 300px;
 }
   .td-indicator {
     display: flex;
     width: auto;
 }
   .pnl-write-data{
-    margin-left: 30px;
+    margin-left: 5px;
   }
 .table-container button{
     margin: auto;

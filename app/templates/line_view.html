@@ -17,16 +17,15 @@
             <div class="container">
                 <div class="machine-field">
                     {% for val in line_row %}
-                        <div class="machine" onclick="location.href='{% url 'machine_view' plant_name line_name val.name %}';">
+                    <a href="{% url 'machine_view' plant_name line_name val.name %}">
+                        <div class="machine">
                             <img class="machine-img" src="{{val.picturePath.url}}" alt=""/>
                             <div class="light-status" id="light-status{{val.deviceId}}">
-                                <!-- <div class="green-light on"></div>
-                                <div class="yellow-light on"></div>
-                                <div class="red-light on"></div> -->
                             </div>
                             <span>{{val.number}}.{{val.name}}</span>
                         </div>
-                        {% endfor %}
+                    </a>
+                    {% endfor %}
                 </div>
             </div>
         </div>
@@ -40,10 +39,10 @@
                                 <th>Name</th>
                                 <th>Device name</th>
                                 <th>Status</th>
-                                <th class="th-hide-detail">Type</th>
-                                <th class="th-hide-detail">Model</th>
-                                <th class="th-hide-detail">guid</th>
-                                <th class="th-hide-detail">URL</th>
+                                <th>Type</th>
+                                <th>Model</th>
+                                <th>guid</th>
+                                <th>URL</th>
                             </tr>
                             {% for val in line_row %}
                             <tr draggable="true" ondragstart="start()" ondragover="dragover()">
@@ -53,10 +52,10 @@
                                 <td>{{val.name}}</td>
                                 <td>{{val.deviceName}}</td>
                                 <td>{{val.status}}</td>
-                                <td>{{val.type}}</td>
-                                <td>{{val.model}}</td>
-                                <td>{{val.guid}}</td>
-                                <td>{{val.url}}</td>
+                                <td class="td-hide-detail">{{val.type}}</td>
+                                <td class="td-hide-detail">{{val.model}}</td>
+                                <td class="td-hide-detail">{{val.guid}}</td>
+                                <td class="td-hide-detail">{{val.url}}</td>
                             </tr>
                             {% endfor %}
                     </table>
@@ -140,21 +139,28 @@
                         if(raw_data[i]['line'][j]['line_name'] == "{{line_name}}"){
                             for(let k=0; k < raw_data[i]['line'][j]['machine'].length; k++){
                                 for(let l=0 ; l < raw_data[i]['line'][j]['machine'][k]['indicator'].length; l++){
-                                    if(raw_data[i]['line'][j]['machine'][k]['indicator'][l]['indicator_name'] == "statusCode"){
+                                    if(raw_data[i]['line'][j]['machine'][k]['indicator'][l]['indicator_name'] == "status"){
 
                                         var light_status = document.querySelector('#light-status'+ String(raw_data[i]['line'][j]['machine'][k]['deviceId']));
                                         switch(raw_data[i]['line'][j]['machine'][k]['indicator'][l]['value']) {
                                             case "0":
                                                 // green
-                                                light_status.innerHTML = `<div class="green-light on"></div>`;
+                                                light_status.innerHTML = `<div class="green-light on"></div>
+                                                                        <div class="yellow-light off"></div>
+                                                                        <div class="red-light off"></div>`;
                                                 break;
                                             case "1":
                                                 // red
-                                                light_status.innerHTML = `<div class="red-light on"></div>`;
+                                                light_status.innerHTML = `<div class="green-light off"></div>
+                                                                        <div class="yellow-light off"></div>
+                                                                        <div class="red-light on"></div>`;
                                                 break;
                                             default:
                                                 // yellow
-                                                light_status.innerHTML = `<div class="yellow-light on"></div>`;
+                                                light_status.innerHTML = `<div class="green-light off"></div>
+                                                                        <div class="yellow-light on"></div>
+                                                                        <div class="red-light off"></div>`;
+                                                break;
                                                 
                                             }
                                     }
@@ -177,10 +183,10 @@
                                 <th>Name</th>
                                 <th>Device name</th>
                                 <th>Status</th>
-                                <th class="hide-detail">Type</th>
-                                <th class="hide-detail">Model</th>
-                                <th class="hide-detail">guid</th>
-                                <th class="hide-detail">URL</th>
+                                <th>Type</th>
+                                <th>Model</th>
+                                <th>guid</th>
+                                <th>URL</th>
                             </tr>
             `;
             for(let i =0; i < raw_data.length; i++){
@@ -199,10 +205,10 @@
                                     <td>${raw_data[i]['line'][j]['machine'][k]['machine_name']}</td>
                                     <td>${raw_data[i]['line'][j]['machine'][k]['device_name']}</td>
                                     <td>${raw_data[i]['line'][j]['machine'][k]['status']}</td>
-                                    <td>${raw_data[i]['line'][j]['machine'][k]['type']}</td>
-                                    <td>${raw_data[i]['line'][j]['machine'][k]['model']}</td>
-                                    <td>${raw_data[i]['line'][j]['machine'][k]['guid']}</td>
-                                    <td>${raw_data[i]['line'][j]['machine'][k]['url']}</td>
+                                    <td class="td-hide-detail">${raw_data[i]['line'][j]['machine'][k]['type']}</td>
+                                    <td class="td-hide-detail">${raw_data[i]['line'][j]['machine'][k]['model']}</td>
+                                    <td class="td-hide-detail">${raw_data[i]['line'][j]['machine'][k]['guid']}</td>
+                                    <td class="td-hide-detail">${raw_data[i]['line'][j]['machine'][k]['url']}</td>
                                 </tr>
                                 `;
                             }

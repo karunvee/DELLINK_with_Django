@@ -48,11 +48,17 @@ def machine_view(request, pt, ln, mc):
     else:
         form = LineRowForm(instance=old_img)
 
-    machineInfo = LineRow.objects.filter(plant_name__exact = pt, line_name__exact = ln, name__exact = mc)
+    machineInfo = LineRow.objects.filter(plant_name__exact = pt, line_name__exact = ln, name__exact = mc).get()
+    url = machineInfo.url.split('api')
+    str_url = '{}devices/{}/{}/tags'.format(url[0], machineInfo.guid, machineInfo.deviceId)
+
     context = {
-        'machineInfo' : machineInfo.get(),
+        'machineInfo' : machineInfo,
         'form': form,
         'plantInfo': plantInfo,
+        'lineName' : ln,
+        'machineName': mc,
+        'dia_url' : str_url,
     }
     return render(request, 'machine_view.html', context)
 

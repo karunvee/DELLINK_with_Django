@@ -1,3 +1,4 @@
+
 .line-container{
     color: var(--text-color);
     padding-left: 50px;
@@ -24,6 +25,7 @@
   gap: 5px;
 }
 .machine {
+  text-decoration: none;
   padding: 5px;
   flex-basis: 0;
   flex-grow: 0;
@@ -73,13 +75,13 @@
     background-color: #ccc;
 }
 .light-status .green-light.on{
-    background-color: green;
+    background-color: rgb(10, 179, 10);
 }
 .light-status .yellow-light.on{
-    background-color: yellow;
+    background-color: rgb(252, 252, 11);
 }
 .light-status .red-light.on{
-    background-color: red;
+    background-color: rgb(252, 72, 72);
 }
 
 
@@ -114,17 +116,17 @@
   padding-bottom: 10px;
 }
 .table-machines {
+  table-layout: auto;
   width: 100%;
   color: var(--text-color);
 }
-.table-machines .th-hide-detail{
-  width:  150px;
+.td-hide-detail{
+  max-width:  50px;
 }
-.table-machines td{
-  width: auto;
-}
-.table-machines td, .table-machines th {
-  overflow-wrap: normal;
+.table-machines td, .table-machines th{
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   padding: 8px;
 }
 .table-machines tr{

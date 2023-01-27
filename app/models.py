@@ -29,7 +29,7 @@ class LineRow(models.Model):
     deviceId = models.CharField(max_length = 255)
     name = models.CharField(max_length = 255)
     deviceName = models.CharField(max_length = 255)
-    number = models.IntegerField(unique=True)
+    number = models.IntegerField()
     status = models.CharField(max_length = 255)
     ip_camera = models.CharField(max_length = 255, blank=True)
     picturePath = models.ImageField(upload_to='images/', default=default_image_path)
