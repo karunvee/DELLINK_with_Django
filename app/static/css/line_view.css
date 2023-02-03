@@ -88,8 +88,40 @@
 .light-status .red-light.on{
     background-color: rgb(252, 72, 72);
 }
-
-
+.error-container{
+  border-radius: 20px;
+  border: 2px solid #fff;
+  background-color: var(--sidebar-color);
+  margin: 15px 0;
+  padding: 0 10px;
+  display: flex;
+  align-items: center;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  overflow-y: hidden;
+  gap: 15px;
+  height: 65px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.error-container button{
+  width: fit-content;
+  padding: 3px 20px;
+  border: none;
+  border-radius: 10px;
+  background-color: #f01c1c;
+  color: #fff;
+}
+.error-container button:hover{
+  cursor: pointer;
+  opacity: 0.8;
+  transform: scale(1.05);
+}
+.machine-field::-webkit-scrollbar, .error-container::-webkit-scrollbar {
+  margin: auto 10px;
+  height: 15px;
+}
 /* width */
 ::-webkit-scrollbar {
   margin: auto 10px;

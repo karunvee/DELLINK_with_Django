@@ -33,9 +33,14 @@
                     {% endfor %}
                 </div>
             </div>
+            <div class="error-container">
+                <span><strong>Error shortcut <i class='bx bx-message-rounded-error'></i></strong></span>
+                {% for index in ""|make_list %}
+                    <button id="move1" type="button">5.Auto Test T2 #HIPOT+ Vibration</button>
+                {% endfor %}
+            </div>
         </div>
-        <button id="move1" type="button">Click1!</button>
-        <button id="move2" type="button">Click2</button>
+        
         <h1>Machine numbers sorting</h1>
             <div class="list-machines">
                     <table class="table-machines" id="table-machines">
@@ -99,7 +104,7 @@
                 $("#5").toggleClass("scaling");
                 setTimeout(function() {
                     $("#5").toggleClass("scaling");
-                }, 1000);
+                }, 1200);
                 });
             });
 
