@@ -9,10 +9,14 @@ import json
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 from django.views.decorators import gzip
-import os
 from django.conf import settings
+from django.dispatch import receiver
+from django.db.models.signals import pre_save
+import os
 
 # Create your views here.
+def remote_view(request):
+    return render(request, 'remote_view.html', {})
 
 def home_view(request):
     plant_members = PlantInfo.objects.all()
@@ -33,8 +37,10 @@ def line_view(request, pt, ln):
     }
     return render(request, 'line_view.html', context)
 
-
 def machine_view(request, pt, ln, mc):
+    lineRow = LineRow.objects.filter(plant_name__exact = pt, line_name__exact = ln, name__exact = mc).get()
+    notification_error = ErrorNotification.objects.filter(tag_member__line_name = ln, tag_member__machine_name = mc)
+    indicator_members = Indicator.objects.filter(plant_name__exact = pt, line_name__exact = ln, machine_name__exact = mc)
     plantInfo = PlantInfo.objects.filter(name__exact = pt).get()
 
     old_img = LineRow.objects.filter(plant_name__exact = pt, line_name__exact = ln, name__exact = mc).get()
@@ -51,16 +57,33 @@ def machine_view(request, pt, ln, mc):
     machineInfo = LineRow.objects.filter(plant_name__exact = pt, line_name__exact = ln, name__exact = mc).get()
     url = machineInfo.url.split('api')
     str_url = '{}devices/{}/{}/tags'.format(url[0], machineInfo.guid, machineInfo.deviceId)
-
+    ip_port = url[0]
     context = {
+        'ip_camera' : lineRow.ip_camera,
+        'indicator_members' : indicator_members,
         'machineInfo' : machineInfo,
         'form': form,
         'plantInfo': plantInfo,
         'lineName' : ln,
         'machineName': mc,
         'dia_url' : str_url,
+        'ip_port' : ip_port,
+        'notification_error' : notification_error,
     }
     return render(request, 'machine_view.html', context)
+
+
+@receiver(pre_save, sender=LineRow)
+def delete_old_file(sender, instance, **kwargs):
+    try:
+        old_file = sender.objects.get(pk=instance.pk).picturePath
+    except sender.DoesNotExist:
+        return
+    new_file = instance.picturePath
+    if not old_file == new_file:
+        # if os.path.isfile(old_file.path):
+        if old_file and hasattr(old_file, 'path') and os.path.isfile(old_file.path):
+            os.remove(old_file.path)
 
 @csrf_exempt
 def SetLine(request, pt, ln):
@@ -90,15 +113,38 @@ def SetLine(request, pt, ln):
             low_row.save()
         return JsonResponse({'status': 'success'})
 
+def DeleteIndicator(request, pt, ln, mc, tid):
+    indicator = Indicator.objects.get(plant_name__exact = pt, line_name__exact = ln, machine_name__exact = mc, tag_id__exact = tid)
+    indicator.delete()
+    return redirect('../../machine_view/pt{}ln{}mc{}/'.format(pt, ln, mc))
+
 def DeleteData(request, pt, ln):
 
     LineRow.objects.filter(plant_name__exact = pt, line_name__exact = ln).delete()
 
     return redirect('../../line_view/pt{}ln{}/'.format(pt, ln))
 
+def AssignIndicator(request, pt, ln, mc):
 
+    if request.method == 'POST':
+        tag_name = request.POST['tagName']
+        tag_id = request.POST['tagID']
+        register = request.POST['register']
+        data_type = request.POST['data_type']
+        if data_type == 'BIT':
+            display = request.POST['display_type_bit']
+        else:
+            display = request.POST['display_type_text']
+        color = request.POST['color']
+        indicator_members = Indicator(plant_name = pt, line_name = ln, machine_name = mc, tag_name = tag_name, tag_id = tag_id, register = register, data_type = data_type, display = display, color = color)
+        indicator_members.save()
+        return redirect('../../machine_view/pt{}ln{}mc{}/'.format(pt, ln, mc))
 
+def AssignCamera(request, pt, ln, mc):
 
+    if request.method == 'POST':
+        LineRow.objects.filter(plant_name__exact = pt, line_name__exact = ln, name__exact = mc).update(ip_camera = request.POST['ip_camera'])
+        return redirect('../../machine_view/pt{}ln{}mc{}/'.format(pt, ln, mc))
 
 
 

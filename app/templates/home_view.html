@@ -53,17 +53,19 @@
                             onlineNum = onlineNum + 1;
                         }
                         for(let l=0 ; l < raw_data[i]['line'][j]['machine'][k]['indicator'].length; l++){
-                            if(raw_data[i]['line'][j]['machine'][k]['indicator'][l]['indicator_name'] == "statusCode"){
-                                if(raw_data[i]['line'][j]['machine'][k]['indicator'][l]['value'] != "0"){
+                            if(raw_data[i]['line'][j]['machine'][k]['indicator'][l]['indicator_name'] == "status"){
+                                if(raw_data[i]['line'][j]['machine'][k]['indicator'][l]['value'] == "1"){
                                     errorNum = errorNum + 1;
-                                    errorContext = "Error " + String(errorNum) ;
-                                    errorClass = "error";
-                                }
-                                else{
-                                    errorContext = "Normal";
-                                    errorClass = "";
                                 }
                             }
+                        }
+                        if(errorNum != 0){
+                            errorContext = "Error " + String(errorNum) ;
+                            errorClass = "error";
+                        }
+                        else{
+                            errorContext = "Normal";
+                            errorClass = "";
                         }
                     }
                     content += `

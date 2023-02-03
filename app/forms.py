@@ -15,6 +15,10 @@ class LineRowForm(forms.ModelForm):
             'status' : '',
             'ip_camera' : '',
             'picturePath' : '',
+            'guid' : '',
+            'type' : '',
+            'model' : '',
+            'url' : '',
         }
         widgets = {
             'plant_name' : forms.TextInput(attrs={
@@ -46,6 +50,22 @@ class LineRowForm(forms.ModelForm):
                 'style' : 'display: none;'
                 }),
             'ip_camera' : forms.TextInput(attrs={
+                'class' : 'input-hidden',
+                'style' : 'display: none;'
+                }),
+            'guid' : forms.TextInput(attrs={
+                'class' : 'input-hidden',
+                'style' : 'display: none;'
+                }),
+            'type' : forms.TextInput(attrs={
+                'class' : 'input-hidden',
+                'style' : 'display: none;'
+                }),
+            'model' : forms.TextInput(attrs={
+                'class' : 'input-hidden',
+                'style' : 'display: none;'
+                }),
+            'url' : forms.TextInput(attrs={
                 'class' : 'input-hidden',
                 'style' : 'display: none;'
                 }),

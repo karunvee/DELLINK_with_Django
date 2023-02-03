@@ -15,20 +15,27 @@
         <h1>Line : {{line_name}}</h1>
         <div class="line-container">
             <div class="container">
-                <div class="machine-field">
+                <div class="machine-field" id="machine-field">
                     {% for val in line_row %}
-                    <a href="{% url 'machine_view' plant_name line_name val.name %}">
-                        <div class="machine">
-                            <img class="machine-img" src="{{val.picturePath.url}}" alt=""/>
-                            <div class="light-status" id="light-status{{val.deviceId}}">
+                        
+                        <a href="{% url 'machine_view' plant_name line_name val.name %}">
+                            <div class="machine" id="{{val.number}}">
+                                {% if val.picturePath == "" %}
+                                <img id="img{{val.number}}" class="machine-img" src="{% static "img/default.png" %}" alt=""/>
+                                {% else %}
+                                <img id="img{{val.number}}" class="machine-img" src="{{val.picturePath.url}}" alt=""/>
+                                {% endif %}
+                                <div class="light-status" id="light-status{{val.deviceId}}">
+                                </div>
+                                <span>{{val.number}}.{{val.name}}</span>
                             </div>
-                            <span>{{val.number}}.{{val.name}}</span>
-                        </div>
-                    </a>
+                        </a>
                     {% endfor %}
                 </div>
             </div>
         </div>
+        <button id="move1" type="button">Click1!</button>
+        <button id="move2" type="button">Click2</button>
         <h1>Machine numbers sorting</h1>
             <div class="list-machines">
                     <table class="table-machines" id="table-machines">
@@ -83,6 +90,20 @@
         var table = document.getElementById("table-machines");
 
         $(document).ready(function() {
+
+            // When Machine occurred some issue and then Click btn to show which machine
+            $("#move1").click(function() {
+            $("#machine-field").animate({
+                scrollLeft: $("#5").offset().left - $("#machine-field").offset().left + $("#machine-field").scrollLeft() - 50
+                }, 1000, function() {
+                $("#5").toggleClass("scaling");
+                setTimeout(function() {
+                    $("#5").toggleClass("scaling");
+                }, 1000);
+                });
+            });
+
+
         $("#btn-upload").on('click',function() {
             
             for(let i=1; i < table.rows.length; i++){
@@ -138,33 +159,42 @@
 
                         if(raw_data[i]['line'][j]['line_name'] == "{{line_name}}"){
                             for(let k=0; k < raw_data[i]['line'][j]['machine'].length; k++){
-                                for(let l=0 ; l < raw_data[i]['line'][j]['machine'][k]['indicator'].length; l++){
-                                    if(raw_data[i]['line'][j]['machine'][k]['indicator'][l]['indicator_name'] == "status"){
 
-                                        var light_status = document.querySelector('#light-status'+ String(raw_data[i]['line'][j]['machine'][k]['deviceId']));
-                                        switch(raw_data[i]['line'][j]['machine'][k]['indicator'][l]['value']) {
-                                            case "0":
-                                                // green
-                                                light_status.innerHTML = `<div class="green-light on"></div>
-                                                                        <div class="yellow-light off"></div>
-                                                                        <div class="red-light off"></div>`;
-                                                break;
-                                            case "1":
-                                                // red
-                                                light_status.innerHTML = `<div class="green-light off"></div>
-                                                                        <div class="yellow-light off"></div>
-                                                                        <div class="red-light on"></div>`;
-                                                break;
-                                            default:
-                                                // yellow
-                                                light_status.innerHTML = `<div class="green-light off"></div>
-                                                                        <div class="yellow-light on"></div>
-                                                                        <div class="red-light off"></div>`;
-                                                break;
-                                                
-                                            }
+                                var light_status = document.querySelector('#light-status'+ String(raw_data[i]['line'][j]['machine'][k]['deviceId']));
+                                if(raw_data[i]['line'][j]['machine'][k]['status'] == 1){
+
+                                    for(let l=0 ; l < raw_data[i]['line'][j]['machine'][k]['indicator'].length; l++){
+                                        if(raw_data[i]['line'][j]['machine'][k]['indicator'][l]['indicator_name'] == "status"){
+
+                                            
+                                            switch(raw_data[i]['line'][j]['machine'][k]['indicator'][l]['value']) {
+                                                case "0":
+                                                    // green
+                                                    light_status.innerHTML = `<div class="green-light on"></div>
+                                                                            <div class="yellow-light off"></div>
+                                                                            <div class="red-light off"></div>`;
+                                                    break;
+                                                case "1":
+                                                    // red
+                                                    light_status.innerHTML = `<div class="green-light off"></div>
+                                                                            <div class="yellow-light off"></div>
+                                                                            <div class="red-light on"></div>`;
+                                                    break;
+                                                default:
+                                                    // yellow
+                                                    light_status.innerHTML = `<div class="green-light off"></div>
+                                                                            <div class="yellow-light on"></div>
+                                                                            <div class="red-light off"></div>`;
+                                                    break;
+                                                    
+                                                }
+                                        }
                                     }
                                 }
+                                else{
+                                    light_status.innerHTML = `<span style="color: #1B262C;">Offline</span>`;
+                                }
+                                
                             }
                         }
                     }

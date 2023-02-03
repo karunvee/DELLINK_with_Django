@@ -21,7 +21,8 @@ a:link,a:visited,a:hover,a:active {
     --text-color: #707070;
     --item-color:#e4f4ff;
     --header-color: #ffffff;
-    --table-color: #ffff;
+    --table-color: rgb(226, 226, 226);
+    --table-color2: #ffff;
     --linebtn-color: rgb(53, 178, 245);
     --header-text: #005992;
     --highlight-text: #ffffcb;
@@ -53,6 +54,7 @@ body.dark{
     --item-color: #334652;
     --header-color: #ccc;
     --table-color: #3b3b3b;
+    --table-color2: #767676;
     --linebtn-color: rgb(255, 210, 86);
     --header-text: #1c6a9b;
     --highlight-text: rgb(26, 125, 171);

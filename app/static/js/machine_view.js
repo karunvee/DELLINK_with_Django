@@ -1,262 +1,4 @@
-{% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="{% static 'css/machine_view.css' %}">
-    <link rel="stylesheet" href="{% static 'css/main-css/display.css' %}">
-    <link rel="stylesheet" href="{% static 'css/main-css/form.css' %}">
-    <link rel="icon" type="image/x-icon" href="{% static 'img/favicon.ico' %}">
-    <title>Document</title>
-</head>
-<body>
-    {% include "main_templates/menubar.html" %}
-    <section class="header">
-        <div class="content-item-view">
-            <div class="head-container">
-                <div class="img">
-                    <span class="tooltip">Click to upload</span>
-                    {% if machineInfo.picturePath == "" %}
-                    <img class="machine-img" src="{% static "img/default.png" %}" alt="" onclick="document.getElementById('upload-form').style.display='block'"/>
-                    {% else %}
-                    <img class="machine-img" src="{{ machineInfo.picturePath.url }}" alt="" onclick="document.getElementById('upload-form').style.display='block'"/>
-                    {% endif %}
-                </div>
-                <div class="container-content">
-                    <div class="header-info">
-                        <h3 id="machineName" class="machineName">{{machineInfo.name}}</h3>
-                        <div class="header-status">
-                            <div id="status" class="status">
-                            </div>
-                        </div>
-                    </div>
-                    <hr>
-                    <div class="header-information">
-                            <div class="box-info">
-                                <span >Device :</span>
-                                <span id="machineRname">{{machineInfo.deviceName}}</span>
-                            </div>
-                            <div class="box-info">
-                                <span class="sp-info">Machine ID : </span>
-                                <span id="machineID">{{machineInfo.deviceId}}</span>
-                            </div>
-                            <div class="box-info">
-                                <span class="sp-info">IP : </span> 
-                                <span id="machineIP">{{machineInfo.ip_camera}}</span>
-                            </div>
-                            <div class="box-info">
-                                <span>Type : </span>  
-                                <span id="type">{{machineInfo.type}}</span>
-                            </div>
-                            <div class="box-info">
-                                <span class="sp-info">Model : </span> 
-                                <span id="model">{{machineInfo.model}}</span>
-                            </div>
-                    </div>
-                </div>
-                <!-- Connection status -->
-            </div>
-            
-            <section class="body-content">
-                <div class="pnl box-camera">
-                    <h5 class="head-pnl">RTSP camera</h5>
-                    <img src="" width="100%" height="470px" 
-                    onerror="this.onerror=null; this.src='{% static 'img/camera-not-found.jpg' %}'" loading="lazy">
-                    <div class="camera-info">
-                        <div>
-                            {% if ip_camera != "" %}
-                            <span>IP camera : {{ip_camera}}</span>
-                            <button onclick="document.getElementById('add-camera-form').style.display='block'">Edit</button>
-                            {% else %}
-                            <span>This machine have not been assigned an IP.</span>
-                            <button onclick="document.getElementById('add-camera-form').style.display='block'">Assign</button>
-                            {% endif %}
-                        </div>
-                    </div>
-                </div>
-                <div class="pnl box-command-monitor">
-                    <h5 class="head-pnl">Monitor & Controller</h5>
-                    <div class="cmd-container">
-                        <!-- Button generator -->
-                        <div class="cmd-btn">
-                            {% for indicator in indicator_members %}
-                                {% if indicator.data_type == "STATUS" %}
-                                    <input id="assTag{{indicator.tag_id}}"  type="hidden"/>
-                                    <div class="container-status">
-                                        <input id="indicator-status{{indicator.tag_id}}" type="hidden"/>
-                                        <div id="status-green" class="indicator-status"></div>
-                                        <div id="status-yellow" class="indicator-status"></div>
-                                        <div id="status-red" class="indicator-status"></div>
-                                    </div>
-                                    <div class="text-status">
-                                        <span id="text-indicator-status">Status</span>
-                                    </div>
-                                    <hr>
-                                {% elif indicator.data_type == "BIT" and indicator.display == "BUTTON" %}
-                                    <input id="assTag{{indicator.tag_id}}"  type="hidden"/>
-                                    <input id="bTagValue{{indicator.tag_id}}" hidden/>
-                                    <button id="btn-TagValue{{indicator.tag_id}}" class="btn-TagValue" style="--btn-color: {{indicator.color}};" onclick="WriteData('{{indicator.tag_id}}', 2)">{{indicator.tag_name}}</button>
-                                {% endif %}
-                            {% endfor %}
-                        </div>
-                        <hr>
-                        <!-- Text generator -->
-                        <div class="cmd-text">
-                            {% for e_msg in notification_error%}
-                                    <input id="errorMsg{{e_msg.error_code}}"  type="hidden" value="{{e_msg.error_message}}"/>
-                            {% endfor %}
-                            {% for indicator in indicator_members %}
-                                {% if indicator.data_type == "ERROR CODE" %}
-                                    <input id="assTag{{indicator.tag_id}}"  type="hidden"/>
-                                    <div class="text-error-code">
-                                        <span>Error code</span>
-                                        <input  id="errorCode{{indicator.tag_id}}"  value="" disabled/>
-                                    </div>
-                                    <div id="alert-container" class="alert-container">
-                                    </div>  
-                                {% elif indicator.data_type == "BIT" and indicator.display == "INDICATOR" %}
-                                    <input id="assTag{{indicator.tag_id}}"  type="hidden"/>
-                                    <div id="indicator{{indicator.tag_id}}" class="cmd-indicator OFF">
-                                        <span>{{indicator.tag_name}}</span>
-                                    </div>
-                                {% elif indicator.data_type == "STRING" %}
-                                    <input id="assTag{{indicator.tag_id}}"  type="hidden"/>
-                                    <label>{{indicator.tag_name}}</label>
-                                    <div class="cmd-text-send">
-                                        <input type="text" id="mTagValue{{indicator.tag_id}}"/>
-                                        <button onclick="WriteData('{{indicator.tag_id}}', 1)">Send</button>
-                                    </div>
-                                {% endif %}
-                            {% endfor %}
-                        </div>
-                    </div>
-                    
-                </div>        
-            </section>
-
-            <section class="body-tags">
-                <div class="pnl box-machineView">
-                    <div class="header-tags">
-                        <h5 class="head-pnl">Tag members</h5>
-                        <button class="btn-add" id="addTag" onclick="openDIAPage('{{dia_url}}')">DIA Link page</button>
-                    </div>
-                    <div class="table-container">
-                        <table class="table-tag" id="table-tag">
-                            <tr>
-                                <th>No.</th>
-                                <th>Name</th>
-                                <th>Data type</th>
-                                <th>Tag ID</th>
-                                <th>Register</th>
-                                <th>Value</th>
-                                <th class="td-indicator">Indicator</th>
-                            </tr>
-                    </div>
-                </div> 
-            </section>
-        </div>
-    </section>
-    <!-- Add RTSP IP Camera -->
-    <div id="add-camera-form" class="add-camera-form">
-        <form action="/assign_camera/pt{{plantInfo.name}}ln{{lineName}}mc{{machineName}}/" method="post">
-            {% csrf_token %}
-            <div class="add-camera-container">
-                <div class="add-camera-content">
-                    <h1>Add IP camera</h1>
-                    <label for="ip_camera">IP Address : </label><input type="text" id="ip_camera" name="ip_camera" placeholder="{{ip_camera}}"/>
-                    <hr>
-                    <input type="submit" value="Save" >
-                    <input type="button" value="Cancel" onclick="document.getElementById('add-camera-form').style.display='none'">
-                </div>
-            </div>
-        </form>
-    </div>
-    <!-- Delete Tag Confirmable windows -->
-    <div id="confirmForm" class="confirmForm">
-    </div>
-    <!-- upload image form -->
-    <div id="upload-form" class="upload-form">
-        <div class="upload-form-container">
-            <div class="form-update">
-                <h2>Upload image file</h2>
-                <form method="post" enctype="multipart/form-data">
-                    {% csrf_token %}
-                    {{ form.as_p}}
-                    <hr>
-                    <input type="submit" value="Upload" >
-                    <input type="button" value="Cancel" onclick="document.getElementById('upload-form').style.display='none'">
-                </form>
-            </div>
-        </div>
-    </div>
-    <!-- Assign INdicator form -->
-    <div id="assignForm" class="form">
-        <form action="/assign_indicator/pt{{plantInfo.name}}ln{{lineName}}mc{{machineName}}/" method="post">
-            <div class="form-container">
-                <div class="form-content">
-                    {% csrf_token %}
-                    <h2>Indicator assignment</h2>
-                    <strong>information</strong><br>
-                    <div class="form-info">
-                        <label>Tag name : </label><input type="text" id="tagName" name="tagName" />
-                        <label>Tag ID : </label><input type="text" id="tagID" name="tagID" />
-                        <label>Register : </label><input type="text" id="register" name="register" />
-                        <hr>
-                    </div>
-                    <strong>Data type</strong>
-                    <select id="data_type" name="data_type" onchange="getDataType()">
-                        <option value="">-</option>
-                        <option value="BIT">BIT</option>
-                        <option value="STRING">STRING</option>
-                        <option value="STATUS">STATUS</option>
-                        <option value="ERROR CODE">ERROR CODE</option>
-                    </select>
-                    <div id="datatype_bit" style="display: none;">
-                        <strong>Display type</strong>
-                        <select id="display_type" name="display_type_bit">
-                            <option value="BUTTON">BUTTON</option>
-                            <option value="INDICATOR">INDICATOR</option>
-                        </select>
-                        <strong>Color</strong>
-                            <div>
-                                <input type="radio" id="c1" name="color" value="#3282B8" checked/>
-                                <input type="color" id="btn_color1" name="color" value="#3282B8" disabled/>
-                                <label for="c1">Blue</label>
-                                <br>
-                                <input type="radio" id="c2" name="color" value="#50a920" />
-                                <input type="color" id="btn_color2" name="color" value="#50a920" disabled/>
-                                <label for="c2">Green</label>
-                                <br>
-                                <input type="radio" id="c3" name="color" value="#f9d922" />
-                                <input type="color" id="btn_color3" name="color" value="#f9d922" disabled/>
-                                <label for="c3">Yellow</label>
-                                <br>
-                                <input type="radio" id="c4" name="color" value="#e52d24" />
-                                <input type="color" id="btn_color4" name="color" value="#e52d24" disabled/>
-                                <label for="c4">Red</label>
-                              </div>
-                    </div>
-                    <div id="datatype_text" style="display: none;">
-                        <strong>Display type</strong>
-                        <select id="display_type" name="display_type_text">
-                            <option value="NUMBER">NUMBER</option>
-                            <option value="TEXT">TEXT</option>
-                        </select>
-                    </div>
-                    <hr>
-                    <div class="clearfix">
-                        <button id="btn-add" class="add" type="submit" style="display: none;">Add</button>
-                        <button class="cancel" type="button" onclick="document.getElementById('assignForm').style.display='none'">Cancel</button>
-                    </div>
-                </div>
-            </div>
-        </form>
-    </div>
-
-    <script>
-        var socket = new WebSocket('ws://localhost:8000/ws/app/');
+var socket = new WebSocket('ws://localhost:8000/ws/app/');
         first_loading = false;
         socket.onmessage = function(e){
             raw_data = JSON.parse(e.data);
@@ -356,7 +98,7 @@
                                         if(errorCode != null){
                                                 document.getElementById("errorCode"+String(tid)).value = val;
                                                 if(val != 0){
-                                                    // document.getElementById('alert-message').style.display = "block";
+                                                    document.getElementById('alert-message').style.display = "block";
                                                     var errorMsg = document.getElementById("errorMsg" + String(val));
                                                     if(errorMsg != null){
                                                         var eMsg = document.getElementById("errorMsg" + String(val)).value;
@@ -376,7 +118,7 @@
                                                     
                                                 }
                                                 else{
-                                                    // document.getElementById('alert-message').style.display = "none";
+                                                    document.getElementById('alert-message').style.display = "none";
                                                     document.querySelector('#alert-container').innerHTML = "";
                                                 }
                                         }
@@ -418,10 +160,10 @@
                                     var status = document.querySelector('#status');
                                     status.innerHTML = ``;
                                     if(raw_data[i]['line'][j]['machine'][k]['status'] == 1){
-                                        status.innerHTML += `<div class="display small Online"><label>Online</label></div>`;
+                                        status.innerHTML += `<div class="display small Online"><label>Online</label></div><span>on DIA Link</span>`;
                                     }
                                     else{
-                                        status.innerHTML += `<div class="display small Offline"><label>Offline</label></div>`;
+                                        status.innerHTML += `<div class="display small Offline"><label>Offline</label></div><span>on DIA Link</span>`;
                                     }
 
                                     for(let l=0 ; l < raw_data[i]['line'][j]['machine'][k]['indicator'].length; l++){
@@ -464,27 +206,23 @@
                 }
             }
         }
-        function deleteForm(tid, tag_name){
-            // Appearance Comfirm Form
-            document.getElementById('confirmForm').style.display = "block";
-            document.querySelector('#confirmForm').innerHTML = 
-            `<div class="confirmForm-container">
-                <div class="confirmForm-content">
-                    <h1>Question ?</h1>
-                    <p>Are you sure you want to delete this indicator id : <strong>${tid}</strong>, name : <strong>${tag_name}</strong> ?</p>
-                    <hr>
-                    <div class="clearfix">
-                        <button class="btn-delete yes" onclick="location.href='/delete_indicator/pt{{plantInfo.name}}ln{{lineName}}mc{{machineName}}tid${tid}/';">Yes, I'm sure</button>
-                        <button class="btn-delete no" type="button" onclick="document.getElementById('confirmForm').style.display='none'">No</button>
-                    </div>
+
+        function showUploadForm(){
+            document.getElementById('upload-form').style.display = "block";
+            document.querySelector('#upload-form').innerHTML = 
+            `<div class="upload-form-container">
+                <div class="form-update">
+                    <h2>Upload image file</h2>
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        {{ form.as_p}}
+                        <hr>
+                        <input type="submit" value="Upload" >
+                        <input type="button" value="Cancel" onclick="document.getElementById('upload-form').style.display='none'">
+                    </form>
                 </div>
             </div>`;
         }
-        function showAddCameraForm(){
-            document.getElementById('add-camera-form').style.display = "block";
-            // document.querySelector('#add-camera-form').innerHTML = ``;
-        }
-
         function openDIAPage(url){
             window.open(url, "DIA Link web","width=1000,height=600");
         }
@@ -560,7 +298,6 @@
                         break;
                     default:
                         var tag_value = document.getElementById("TagValue"+tag_id).value;
-                        document.getElementById("TagValue"+tag_id).value = "";
                 }
                 let url_api = '{{ip_port}}' + 'api/v1/devices/'+ '{{machineInfo.deviceId}}' +'/tags/'+ String(tag_id) +'/value/' + tag_value;
                 const initDetails = {
@@ -578,9 +315,9 @@
                             alert('Status Code: 401 Unauthorized');
                             return;
                         }
-                        // else if(response.status != 204)
-                        else{
-                            let msg = 'Value :' + tag_value + ', Tag ID :' + tag_id + ', Status Code: ' + response.status;
+                        else if(response.status != 204){
+                            let msg = 'Value :' + tag_value + ', MachineID :'+ dID +', Tag ID :' + tag_id + ', Status Code: ' +
+                                response.status;
     
                             console.log(msg);
                             alert(msg);
@@ -622,6 +359,23 @@
             }
         }
         //<<<
+
+        function deleteForm(tid, tag_name){
+            // Appearance Comfirm Form
+            document.getElementById('confirmForm').style.display = "block";
+            document.querySelector('#confirmForm').innerHTML = 
+            `<div class="confirmForm-container">
+            <div class="confirmForm-content">
+                <h1>Question ?</h1>
+                <p>Are you sure you want to delete this indicator id : <strong>${tid}</strong>, name : <strong>${tag_name}</strong> ?</p>
+                <hr>
+                <div class="clearfix">
+                    <button class="btn-delete yes" onclick="location.href='/delete_indicator/pt{{plantInfo.name}}ln{{lineName}}mc{{machineName}}tid${tid}/';">Yes, I'm sure</button>
+                    <button class="btn-delete no" type="button" onclick="document.getElementById('confirmForm').style.display='none'">No</button>
+                </div>
+            </div>
+            </div>`;
+        }
 
         //>>> LED Status 
         p_val = "";
@@ -699,6 +453,3 @@
             
         }
         //<<<<
-    </script>
-</body>
-</html>

@@ -1,0 +1,197 @@
+body {font-family: Arial, Helvetica, sans-serif;}
+* {box-sizing: border-box;}
+.indicator {
+  color: black;
+    width: 100%;
+    padding: 15px;
+    margin: 5px 0 22px 0;
+    display: inline-block;
+    border: none;
+    background: #f1f1f1;
+    border-radius: 4px;
+    font-size: 14px;
+}
+.form,   .confirmForm, .add-camera-form{
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 5; /* Sit on top */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    padding-top: 50px;
+    color: rgb(60, 103, 133);
+    background-color: rgb(60, 103, 133, .8);
+    animation: background-fade 1s;
+  }
+  .form-content {
+    padding: 16px;
+  }
+  .form-container {
+    background-color: #fefefe;
+    margin: 8% 15% 0 auto; /* 5% from the top, 15% from the bottom and centered */
+    border: 1px solid #888;
+    width: 50%; /* Could be more or less, depending on screen size */
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+    border-radius: 25px;
+  }
+  /**/
+  .form-content{
+    font-size: 16px;
+  }
+.form .form-info input[type=text]{
+   margin: 0;
+    width: 22%;
+    border: 0;
+    font-size: 16px;
+    background-color: transparent;
+    cursor: text;
+}
+.form input[type=text], .form input[type=password],select {
+    width: 100%;
+    padding: 15px;
+    margin: 5px 0 22px 0;
+    display: inline-block;
+    border: none;
+    background: #f1f1f1;
+    border-radius: 4px;
+  }
+  
+  /* Add a background color when the inputs get focus */
+  .form input[type=text]:focus, input[type=password]:focus, select:focus {
+    background-color: #ddd;
+    outline: none;
+  }
+
+  .form button{
+    background-color: #078bef;
+    color: white;
+    padding: 14px 20px;
+    margin: 8px 0;
+    border: none;
+    cursor: pointer;
+    width: 100%;
+    border-radius: 8px;
+    text-decoration: none;
+  }
+
+  .form button:hover {
+    opacity:0.8;
+  }
+  .clearfix{
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+  .clearfix .add {
+    padding: 14px 20px;
+    background-color: #04AA6D;
+  }
+  /* Extra styles for the cancel button */
+ .clearfix .cancel {
+    padding: 14px 20px;
+    background-color: #f44336;
+  }
+  
+  /* Float cancel and signup buttons and add an equal width */
+  /* .clearfix .cancel,  .clearfix .add {
+    width: 50%;
+  } */
+  /* Style the horizontal ruler */
+  hr {
+    border: 1px solid #f1f1f1;
+    margin-bottom: 25px;
+  }
+   
+  /* The Close Button (x) */
+  .close {
+    position: absolute;
+    right: 35px;
+    top: 15px;
+    font-size: 40px;
+    font-weight: bold;
+    color: #f1f1f1;
+  }
+  
+  .close:hover,
+  .close:focus {
+    color: #f44336;
+    cursor: pointer;
+  }
+  
+  /* Clear floats */
+  .clearfix::after {
+    /* content: ""; */
+    clear: both;
+    display: table;
+  }
+  
+ a.cancel{
+    font-size: 13px;
+    padding: 14px 20px;
+    background-color: #f44336;
+    color: white;
+    margin: 8px 0;
+    border: none;
+    cursor: pointer;
+    width: 50%;
+    border-radius: 8px;
+    text-decoration: none;
+    text-align: center;
+  }
+
+  @media screen and (max-width: 300px) {
+    .cancel, .add {
+       width: 100%;
+    }
+  }
+
+  .confirmForm-content, .add-camera-content{
+    font-size: 16px;
+    padding: 16px;
+  }
+  .add-camera-container{
+    text-align: center;
+    background-color: #fefefe;
+    margin: 12% 30% 0 auto;
+    border: 1px solid #888;
+    width: 20%; /* Could be more or less, depending on screen size */
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+    border-radius: 25px;
+  }
+  .confirmForm-container{
+    background-color: #fefefe;
+    margin: 12% 25% 0 auto;
+    border: 1px solid #888;
+    width: 30%; /* Could be more or less, depending on screen size */
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+    border-radius: 25px;
+  }
+  .confirmForm-container h1, p{
+    text-align: center;
+  }
+  .confirmForm .btn-delete{
+    border: 0;
+    border-radius: 10px;
+    font-size: 16px;
+    color: white;
+    height: 40px;
+    width: 200px;
+  }
+  .btn-delete.yes{
+    background-color: #078bef;
+  }
+  .btn-delete.no{
+    background-color: #d12424;
+  }
+  .confirmForm .btn-delete.no:hover,  .btn-delete.yes:hover{
+    opacity: 0.9;
+    cursor: pointer;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+  }
+  @keyframes background-fade {
+    0% {
+          opacity: 0;
+    }
+  }
