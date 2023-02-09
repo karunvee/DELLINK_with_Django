@@ -1,6 +1,6 @@
 from django.views import View
 from django.shortcuts import render, redirect
-from django.http import HttpResponse
+from django.http import HttpResponse, StreamingHttpResponse
 import requests
 from .forms import *
 from .models import *
@@ -8,6 +8,9 @@ from .tasks import urlDIA
 import json
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
+import cv2
+import threading
+import urllib.request
 from django.views.decorators import gzip
 from django.conf import settings
 from django.dispatch import receiver
@@ -59,6 +62,7 @@ def machine_view(request, pt, ln, mc):
     str_url = '{}devices/{}/{}/tags'.format(url[0], machineInfo.guid, machineInfo.deviceId)
     ip_port = url[0]
     context = {
+        'machine_view': True,
         'ip_camera' : lineRow.ip_camera,
         'indicator_members' : indicator_members,
         'machineInfo' : machineInfo,
@@ -158,3 +162,59 @@ def AssignCamera(request, pt, ln, mc):
     # data = request.POST['data_lineup']
     # print(data)
     # return redirect('/line_view/pt{}ln{}/'.format(pt, ln))
+def internet_on(http):
+    try:
+        urllib.request.urlopen(http, timeout=2)
+        return True
+    except:
+        return False
+
+@gzip.gzip_page
+def camera_view(request, pt, ln, mc):
+    if(LineRow.objects.filter(plant_name__exact = pt, line_name__exact = ln, name__exact = mc).exists()):
+        machineData = LineRow.objects.filter(plant_name__exact = pt, line_name__exact = ln, name__exact = mc).get()
+        print("%s Data of camera exist! line: %s machine: %s >>> %s" % (request, ln, mc, machineData.ip_camera))
+        if internet_on("http://%s" % ( machineData.ip_camera)) == False:
+            print("IP: %s is not connected the camera" %  machineData.ip_camera)
+            return render(request, 'camera_view.html')
+        else:
+            print("IP: %s is connected!" %  machineData.ip_camera)
+    else:
+        print("%s Data of camera doesn't exist! line: %s id: %s" % (request, ln, mc))
+        return render(request, 'camera_view.html', {'data_exist' : "False"})
+    
+    try:
+        rtsp = "rtsp://admin:admin123@"+ str( machineData.ip_camera) + "/cam/realmonitor?channel=1&subtype=00"
+        cam = VideoCamera(rtsp)
+        return StreamingHttpResponse(gen(cam), content_type="multipart/x-mixed-replace;boundary=frame")
+    except:
+        pass
+    return render(request, 'camera_view.html')
+#to capture video class
+class VideoCamera(object):
+    def __init__(self, rtsp):
+        self.video = cv2.VideoCapture(rtsp)
+        (self.grabbed, self.frame) = self.video.read()
+        threading.Thread(target=self.update, args=()).start()
+
+    def __del__(self):
+        self.video.release()
+
+    def get_frame(self):
+        image = self.frame
+        _, jpeg = cv2.imencode('.jpg', image)
+        return jpeg.tobytes()
+
+    def update(self):
+        while True:
+            (self.grabbed, self.frame) = self.video.read()
+
+def gen(camera):
+    while True:
+        try:
+            frame = camera.get_frame()
+            yield (b'--frame\r\n'
+                b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n')
+        except:
+            print("Can not found the response form this rtsp.")
+            break

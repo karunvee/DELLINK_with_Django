@@ -36,14 +36,15 @@
                             <span class="text nav-text">Overview</span>
                         </a>
                     </li>
-
-                    <li class="nav-link" style="display: none;">
-                        <a href="#">
-                            <i class='bx bx-bar-chart-alt-2 icon' ></i>
-                            <span class="text nav-text">Production status</span>
+                    {% if machine_view %}
+                    <li class="nav-link">
+                        <a href="../../line_view/pt{{plantInfo.name}}ln{{lineName}}/">
+                            <!-- <i class='bx bx-bar-chart-alt-2 icon' ></i> -->
+                            <i class='bx bx-arrow-back icon'></i>
+                            <span class="text nav-text">Line view</span>
                         </a>
                     </li>
-
+                    {% endif %}
                     <li class="nav-link">
                         <a href="">
                             <i class='bx bx-bell icon'></i>

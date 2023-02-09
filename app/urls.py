@@ -8,6 +8,7 @@ urlpatterns = [
     path('', views.home_view , name='home_view'),
     path('remote/', views.remote_view , name='remote_view'),
     path('line_view/pt<str:pt>ln<str:ln>/', views.line_view, name='line_view'),
+    path('camera_view/pt<str:pt>ln<str:ln>mc<str:mc>/', views.camera_view, name='camera_view'),
     path('machine_view/pt<str:pt>ln<str:ln>mc<str:mc>/', views.machine_view, name='machine_view'),
     path('set_line/pt<str:pt>ln<str:ln>/', views.SetLine, name="set_line"),
     path('delete_data/pt<str:pt>ln<str:ln>/', views.DeleteData, name="delete_data"),

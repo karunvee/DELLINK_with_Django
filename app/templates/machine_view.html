@@ -62,7 +62,7 @@
             <section class="body-content">
                 <div class="pnl box-camera">
                     <h5 class="head-pnl">RTSP camera</h5>
-                    <img src="" width="100%" height="470px" 
+                    <img src="{% url 'camera_view' plantInfo.name lineName machineName %}" width="100%" height="470px" 
                     onerror="this.onerror=null; this.src='{% static 'img/camera-not-found.jpg' %}'" loading="lazy">
                     <div class="camera-info">
                         <div>

@@ -33,11 +33,14 @@
                     {% endfor %}
                 </div>
             </div>
-            <div class="error-container">
+            <div class="error-container" >
                 <span><strong>Error shortcut <i class='bx bx-message-rounded-error'></i></strong></span>
-                {% for index in ""|make_list %}
+                    {% for machine in line_row %}
+                    <button id="move{{machine.deviceId}}" type="button" hidden>{{machine.number}}. {{machine.name}}</button>
+                    {% endfor %}
+                    {% for index in ""|make_list %}
                     <button id="move1" type="button">5.Auto Test T2 #HIPOT+ Vibration</button>
-                {% endfor %}
+                    {% endfor %}
             </div>
         </div>
         
@@ -97,17 +100,18 @@
         $(document).ready(function() {
 
             // When Machine occurred some issue and then Click btn to show which machine
-            $("#move1").click(function() {
+            {% for index in line_row %}
+            $("#move{{index.deviceId}}").click(function() {
             $("#machine-field").animate({
-                scrollLeft: $("#5").offset().left - $("#machine-field").offset().left + $("#machine-field").scrollLeft() - 50
+                scrollLeft: $("#{{index.number}}").offset().left - $("#machine-field").offset().left + $("#machine-field").scrollLeft() - 50
                 }, 1000, function() {
-                $("#5").toggleClass("scaling");
+                $("#{{index.number}}").toggleClass("scaling");
                 setTimeout(function() {
-                    $("#5").toggleClass("scaling");
+                    $("#{{index.number}}").toggleClass("scaling");
                 }, 1200);
                 });
             });
-
+            {% endfor %}
 
         $("#btn-upload").on('click',function() {
             
@@ -165,12 +169,13 @@
                         if(raw_data[i]['line'][j]['line_name'] == "{{line_name}}"){
                             for(let k=0; k < raw_data[i]['line'][j]['machine'].length; k++){
 
+                                var error_btn = document.querySelector('#move'+ String(raw_data[i]['line'][j]['machine'][k]['deviceId']))
                                 var light_status = document.querySelector('#light-status'+ String(raw_data[i]['line'][j]['machine'][k]['deviceId']));
                                 if(raw_data[i]['line'][j]['machine'][k]['status'] == 1){
 
                                     for(let l=0 ; l < raw_data[i]['line'][j]['machine'][k]['indicator'].length; l++){
                                         if(raw_data[i]['line'][j]['machine'][k]['indicator'][l]['indicator_name'] == "status"){
-
+                                            
                                             
                                             switch(raw_data[i]['line'][j]['machine'][k]['indicator'][l]['value']) {
                                                 case "0":
@@ -178,18 +183,27 @@
                                                     light_status.innerHTML = `<div class="green-light on"></div>
                                                                             <div class="yellow-light off"></div>
                                                                             <div class="red-light off"></div>`;
+                                                                            if(!error_btn.hasAttribute("hidden")){
+                                                                                error_btn.hidden = true;
+                                                                            }
                                                     break;
                                                 case "1":
                                                     // red
                                                     light_status.innerHTML = `<div class="green-light off"></div>
                                                                             <div class="yellow-light off"></div>
                                                                             <div class="red-light on"></div>`;
+                                                                            if(error_btn.hasAttribute("hidden")){
+                                                                                error_btn.hidden = false;
+                                                                            }       
                                                     break;
                                                 default:
                                                     // yellow
                                                     light_status.innerHTML = `<div class="green-light off"></div>
                                                                             <div class="yellow-light on"></div>
                                                                             <div class="red-light off"></div>`;
+                                                                            if(!error_btn.hasAttribute("hidden")){
+                                                                                error_btn.hidden = true;
+                                                                            }                      
                                                     break;
                                                     
                                                 }
