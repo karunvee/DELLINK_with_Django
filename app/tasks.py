@@ -10,6 +10,20 @@ import json
 
 from .models import *
 
+from linebot.exceptions import InvalidSignatureError
+from linebot import (
+    LineBotApi, WebhookHandler
+)
+from linebot.exceptions import (
+    InvalidSignatureError
+)
+from linebot.models import (
+    MessageEvent, TextMessage, TextSendMessage, AudienceRecipient, Filter, AgeFilter, Limit, RichMenu, RichMenuSize,
+    RichMenuArea, RichMenuBounds, URIAction, FlexSendMessage, BubbleContainer, BoxComponent, TextComponent, SeparatorComponent
+)
+line_bot_api = LineBotApi('AGCpW+ldLVHm5eZKQ7Fm+Ph3mZZbjG9oAZU//pz7vzqH3UYSLQI8LRqPeLwuean6e39MpiC3RT/swpDUGHvDINfpH/ChLhWd0u/sEq+xwi0WC21a5xydQzMkplKB7Ata6D/VPiuLORmj4w4mN3KeYwdB04t89/1O/w1cDnyilFU=')
+
+dicError = {}
 channel_layer = get_channel_layer()
 
 app = Celery('DELLINK')
@@ -57,6 +71,7 @@ def get_api():
 
         dictPlant = {}
         dictPlant["plant_name"] = plant.name
+        plant_name = plant.name
         dictPlant["line"] = []
         machine_list = {}
 
@@ -87,11 +102,13 @@ def get_api():
         for key in machine_list.keys() :
             dictLine = {}
             dictLine["line_name"] = key
+            line_name = key
             dictLine["machine"] = []
 
             for mIndex in machine_list[key]:
                 dictMachine = {}
                 dictMachine["machine_name"] = mIndex[1]
+                machine_name = mIndex[1]
                 dictMachine["deviceId"] = mIndex[2]
                 dictMachine["status"] = mIndex[3]
                 dictMachine["device_name"] = mIndex[4]
@@ -110,9 +127,86 @@ def get_api():
                     dictIndicator["register"] = indicator['register']
                     dictIndicator["gp"] = indicator['gp']
                     dictIndicator["value"] = str(indicator['value'])
+                    statusCode = str(indicator['value'])
 
                     dictMachine["indicator"].append(dictIndicator)
-                
+
+                    #Line notice error
+                    
+                    if(dictIndicator["indicator_name"] == "statusCode" and dictIndicator["value"] != "" and dictIndicator["value"] != "None"):
+                        if(dictIndicator["value"] != "0" and dictMachine["machine_name"] not in dicError):
+                            errorNotice = ErrorNotification.objects.filter(
+                                tag_member__plant_name__exact = dictPlant["plant_name"], 
+                                tag_member__line_name__exact = dictLine["line_name"],
+                                tag_member__machine_name__exact = dictMachine["machine_name"],
+                                error_code__exact = dictIndicator["value"]
+                            )
+                            if(errorNotice.exists()):
+                                msg_error = errorNotice.get()
+                            else:
+                                msg_error = "Error unknown, this error is not defined!"
+
+                            dicError[dictMachine["machine_name"]] = dictIndicator["tid"]
+                            
+                            msg_alert = 'Error Alert\nmachine name:{}\nError code: ({}){}'.format(dictMachine["machine_name"], statusCode, msg_error)
+                            #***** Card Structure *******
+                            # Create the header
+                            header = BoxComponent(
+                                layout='horizontal',
+                                contents=[
+                                    TextComponent(
+                                        text='Error Alert',
+                                        weight='bold',
+                                        size='lg',
+                                        align='center'
+                                        )]
+                            )
+
+                            # Create the body
+                            body = BoxComponent(
+                                layout='horizontal',
+                                contents=[
+                                    TextComponent(
+                                        text='1',
+                                        weight='regular',
+                                        size='lg'
+                                        ),
+                                        SeparatorComponent(),
+                                        TextComponent(
+                                        text='2',
+                                        weight='regular',
+                                        size='lg'
+                                        )
+                                        ]
+                            )
+
+                            # Create the footer
+                            footer = BoxComponent(
+                                layout='horizontal',
+                                contents=[
+                                    TextComponent(
+                                        text='({}). {}'.format(statusCode, msg_error),
+                                        weight='regular',
+                                        size='lg'
+                                        )]
+                            )
+
+                            # Create the card
+                            card = BubbleContainer(
+                                direction='ltr',
+                                header=header,
+                                body=body,
+                                footer=footer
+                            )
+                            #******************************
+                            # line_bot_api.broadcast(TextSendMessage(text=msg_alert))
+                            line_bot_api.broadcast(FlexSendMessage(alt_text="Card", contents=card))
+
+
+                        elif(dictIndicator["value"] == "0" and dictMachine["machine_name"] in dicError):
+                            del dicError[dictMachine["machine_name"]]
+                        
+
                 dictLine["machine"].append(dictMachine)
 
                 
@@ -123,6 +217,7 @@ def get_api():
     data_json = json.dumps(data)
     print("API fetching worker is listening..")
     publish_message_to_group({ "type": "chat_message", "text": data_json }, "app")
+
 
     # publish_message_to_group({ "type": "chat_message", "text": response }, "app")
     # response = requests.get(url).json()
