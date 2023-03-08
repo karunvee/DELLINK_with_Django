@@ -19,6 +19,8 @@ class LineRowForm(forms.ModelForm):
             'type' : '',
             'model' : '',
             'url' : '',
+            'remote_host' : '',
+            'remote_password' : '',
         }
         widgets = {
             'plant_name' : forms.TextInput(attrs={
@@ -66,6 +68,14 @@ class LineRowForm(forms.ModelForm):
                 'style' : 'display: none;'
                 }),
             'url' : forms.TextInput(attrs={
+                'class' : 'input-hidden',
+                'style' : 'display: none;'
+                }),
+            'remote_host' : forms.TextInput(attrs={
+                'class' : 'input-hidden',
+                'style' : 'display: none;'
+                }),
+            'remote_password' : forms.TextInput(attrs={
                 'class' : 'input-hidden',
                 'style' : 'display: none;'
                 }),

@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "@novnc/novnc": "^1.4.0",
+    "@sukkis/node-multi-websockify": "^1.0.4"
+  }
+}

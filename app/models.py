@@ -34,12 +34,12 @@ class LineRow(models.Model):
     ip_camera = models.CharField(max_length = 255, blank=True)
     picturePath = models.ImageField(upload_to='images/', blank=True)
     # picturePath = models.ImageField(upload_to='images/', default=default_image_path)
-
     guid = models.CharField(max_length = 255)
     type = models.CharField(max_length = 255)
     model = models.CharField(max_length = 255)
     url = models.CharField(max_length = 255)
-
+    remote_host = models.CharField(max_length = 255, default="hostname")
+    remote_password = models.CharField(max_length = 255, default="12345678")
     def __str__(self):
         return self.name
 

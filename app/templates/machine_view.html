@@ -81,6 +81,7 @@
                     <div class="cmd-container">
                         <!-- Button generator -->
                         <div class="cmd-btn">
+                            <!-- <a href="{% url 'vnc_viewer' "192.168.1.101" "5900" "12345678" %}">vnc viewer</a> -->
                             {% for indicator in indicator_members %}
                                 {% if indicator.data_type == "STATUS" %}
                                     <input id="assTag{{indicator.tag_id}}"  type="hidden"/>
