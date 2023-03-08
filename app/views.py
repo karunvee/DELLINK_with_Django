@@ -1,6 +1,7 @@
 from django.views import View
 from django.shortcuts import render, redirect
 from django.http import HttpResponse, StreamingHttpResponse
+from django.template import loader
 import requests
 from .forms import *
 from .models import *
@@ -16,6 +17,8 @@ from django.conf import settings
 from django.dispatch import receiver
 from django.db.models.signals import pre_save
 import os
+from vncdotool import client, rfb, api
+import base64
 
 # Create your views here.
 def remote_view(request):
@@ -42,6 +45,19 @@ def line_view(request, pt, ln):
 
 def machine_view(request, pt, ln, mc):
     lineRow = LineRow.objects.filter(plant_name__exact = pt, line_name__exact = ln, name__exact = mc).get()
+
+    if lineRow.remote_host != "" and lineRow.remote_host != "hostname":
+        vnc_files_dir = os.path.join(os.path.dirname(__file__), 'static/js/nossh')
+        jar_path = os.path.join(vnc_files_dir, 'tightvnc-jviewer.jar')
+        # Launch the JAR file with the password argument
+        hostname = lineRow.remote_host.split(':')
+        host = hostname[0]
+        port = hostname[1]
+        password = lineRow.remote_password
+        subprocess.Popen(['java', '-jar', jar_path,'-port={}'.format(port), '-host={}'.format(host) ,'-password={}'.format(password),
+                        '-ViewOnly=no', '-ShowControls=no', '-showConnectionDialog=no'])
+
+    
     notification_error = ErrorNotification.objects.filter(tag_member__line_name = ln, tag_member__machine_name = mc)
     indicator_members = Indicator.objects.filter(plant_name__exact = pt, line_name__exact = ln, machine_name__exact = mc)
     plantInfo = PlantInfo.objects.filter(name__exact = pt).get()
@@ -218,3 +234,23 @@ def gen(camera):
         except:
             print("Can not found the response form this rtsp.")
             break
+
+
+
+import subprocess
+from mimetypes import guess_type
+from websockify import WebSocketProxy
+
+
+# def vnc_viewer(request, host, port, password):
+#     vnc_files_dir = os.path.join(os.path.dirname(__file__), 'static/js/nossh')
+#     jar_path = os.path.join(vnc_files_dir, 'tightvnc-jviewer.jar')
+#     # Launch the JAR file with the password argument
+#     subprocess.Popen(['java', '-jar', jar_path,'-port={}'.format(port), '-host={}'.format(host) ,'-password={}'.format(password),
+#                        '-ViewOnly=no', '-ShowControls=no', '-showConnectionDialog=no'])
+#     response = HttpResponse('VNC viewer is opening ...', {})
+#     return redirect('home_view')
+
+def vnc_viewer(request):
+    WebSocketProxy(request=request, target_host='192.168.1.101', target_port=5900)
+    return render(request, 'vnc_view.html', {})
