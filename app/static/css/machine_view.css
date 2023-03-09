@@ -79,16 +79,35 @@
     display: flex;
     justify-content: space-between;
 }
-.pnl {
-    border-radius: 10px;
-}
+
 .pnl.box-camera{
-    width: 58%;
+  border-radius: 10px;
+    width: 53%;
     height: auto;
     min-height: 570px;
 }
+.body-tags {
+  margin-top: 20px;
+  display: flex;
+  justify-content: space-between;
+}
+.analysis-content{
+  margin-top: 20px;
+}
+
+
 .pnl.box-command-monitor{
-    width: 40%;
+    border-radius: 10px;
+    width: 35%;
+    height: auto;
+}
+.box-machineView{
+  width: 63%;
+    height: auto;
+}
+.pnl.vnc-viewer{
+  border-radius: 10px;
+    width: 45%;
     height: auto;
 }
 .head-container hr{
@@ -194,10 +213,7 @@
     outline: none;
 }
 
-.pnl.box-machineView{
-    margin: 20px 0;
-    height: auto;
-}
+
 h5{
     margin: 0;
     padding: 8px 0;
@@ -213,12 +229,62 @@ h5{
     margin: 0;
     padding: 15px;
 }
-
-.table-container{
+.pnl.table-container, .pnl.error-container{
+  border: solid 2px #005992;
+  border-bottom-left-radius: 10px;
+}
+.pnl.error-container{
+  height: 400px;
+    overflow: auto;
+}
+.pnl.table-container{
+    font-size: 14px;
     height: 530px;
     overflow: auto;
 }
-.table-tag .tags-members.color{background-color: var(--table-color)}
+/* Error Analysis table */
+.table-error tr:first-child th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+.table-error .tags-members.color{background-color: var(--table-color)}
+.table-error th {
+    text-align: left;
+    padding-left: 10px;
+    font-weight: 16;
+    background-color: #3282B8;
+    color: white;
+  }
+.table-error{
+    border-collapse: collapse;
+    width: 100%;
+    font-size: 14px;
+}
+
+.table-error td{
+    text-align: left;
+    padding: 5px 10px;
+    font-weight: 10;
+}
+.error-header-date{
+  width: 120px;
+}
+.error-header-addi{
+  width: 260px;
+}
+.error-header-code, .error-header-counter{
+  width: 100px;
+}
+/* Table Tag of DIA Link */
+.table-tag tr:first-child th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+.table-tag .tags-members.color{
+  background-color: var(--table-color)
+}
 .table-tag th {
     text-align: left;
     padding-left: 10px;
@@ -231,7 +297,7 @@ h5{
     border-collapse: collapse;
     width: 100%;
     border-color: rgb(0, 0, 0);
-    font-size: 18px;
+    font-size: 14px;
 }
 
 .table-tag td{
@@ -278,13 +344,13 @@ h5{
     width: 330px;
 }
   .td-indicator {
-    display: flex;
-    width: auto;
+    /* display:flex;
+    align-items:center; */
 }
   .pnl-write-data{
     margin-left: 5px;
   }
-.table-container button{
+.pnl.table-container button{
     margin: auto;
     padding: 2px 8px;
     background-color: rgb(0, 102, 170);
@@ -293,7 +359,7 @@ h5{
     color: white;
     opacity: 0.8;
 }
-.table-container .btn-assigned:hover ,.table-container .btn-deleted:hover ,.table-container .btn-tag-write:hover{ 
+.pnl.table-container .btn-assigned:hover ,.pnl.table-container .btn-deleted:hover ,.pnl.table-container .btn-tag-write:hover{ 
     opacity: 1;
     /* box-shadow: 0 4px 8px 0 rgba(65, 132, 234, 0.75); */
     cursor: pointer;
@@ -637,7 +703,7 @@ text-align: center;
   margin: 0;
   position: absolute;
   top: 50%;
-  left: 50%;
+  left: 60%;
   transform: translate(-50%, -50%);
   border: 1px solid #888;
   max-width: 600px;

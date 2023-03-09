@@ -145,20 +145,92 @@
   background: rgb(120, 120, 120); 
   cursor: pointer;
 }
+/* Machine list table */
 
-.list-machines {
-  border-radius: 20px;
-  margin: 0 20px 20px 50px;
-  border: 2px solid #fff;
-  padding-bottom: 10px;
+.bg-sorting-table{
+  display: none; /* Hidden by default */
+  position: fixed; /* Stay in place */
+  z-index: 5; /* Sit on top */
+  left: 0;
+  top: 0;
+  width: 100%; /* Full width */
+  height: 100%; /* Full height */
+  overflow: auto; /* Enable scroll if needed */
+  padding-top: 18px;
+  color: rgb(60, 103, 133);
+  background-color: rgb(60, 103, 133, .8);
+  
+  animation: background-fade 1s;
 }
+.sorting-table{
+  border: solid 3px #005992;
+  border-radius: 10px;
+  left: 75%;
+  right: 25%;
+  transform: translate(-75%);
+  position: fixed;
+  width: 60%;
+  display: block;
+  background-color: #fff;
+}
+.header-tags{
+  display: flex;
+  height: 50px;
+  text-align: center;
+  color: #fff;
+  background-color: #005992;
+  border-top-right-radius: 5px;
+  border-top-left-radius: 5px ;
+}
+.table-list-machines{
+    height: 620px;
+    overflow: auto;
+}
+.table-machines tr:first-child th {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+.table-machines th {
+    text-align: left;
+    padding-left: 10px;
+    font-weight: 16;
+    background-color: #3282B8;
+    color: white;
+  }
+.table-machines{
+  white-space: nowrap;
+  text-overflow: ellipsis;
+    border-collapse: collapse;
+    width: 100%;
+    font-size: 14px;
+}
+
+.table-machines td{
+  width: auto;
+    text-align: left;
+    padding: 5px 10px;
+    font-weight: 10;
+}
+.column-hide-detail{
+  max-width: 40px;
+}
+.panel-func{
+  margin-left: 20px;
+  margin-top: 20px;
+}
+.menu-bottom{
+  display: flex;
+  justify-content: space-between;
+}
+/* 
 .table-machines {
   table-layout: auto;
   width: 100%;
   color: var(--text-color);
 }
 .td-hide-detail{
-  max-width:  50px;
+  max-width:  30px;
 }
 .table-machines td, .table-machines th{
   overflow: hidden;
@@ -169,9 +241,13 @@
 .table-machines tr{
   background-color: var(--table-color2);
 }
-.table-machines tr:nth-child(even){background-color: var(--table-color);}
+.table-machines tr:nth-child(even){
+  background-color: var(--table-color);
+}
 
-.table-machines tr:hover {background-color: var(--highlight-text);}
+.table-machines tr:hover {
+  background-color: var(--highlight-text);
+}
 
 .table-machines th:first-child {
    border-top-left-radius: 15px;
@@ -186,7 +262,7 @@
   text-align: left;
   background-color: #0086DB;
   color: #fff;
-}
+} */
 .list-machines .column-drag{
   width: 60px;
 }
@@ -201,10 +277,6 @@
 .column-drag:hover{
   cursor: grab;
 }
-.panel-func{
-  position: absolute;
-  right: 0;
-}
 .btn-set-lineup{
   margin: 0 20px 20px 0;
   padding: 5px 10px;
@@ -218,4 +290,8 @@
   cursor: pointer;
   opacity: 0.8;
   border: 2px solid #004d80;
+}
+.head-pnl {
+  margin: auto;
+  width: 100%;
 }

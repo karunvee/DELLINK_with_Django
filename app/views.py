@@ -252,5 +252,30 @@ from websockify import WebSocketProxy
 #     return redirect('home_view')
 
 def vnc_viewer(request):
-    WebSocketProxy(request=request, target_host='192.168.1.101', target_port=5900)
+    try:
+        print('vnc view')
+        # process  = subprocess.Popen(['node', 'config.js'])
+        # process.wait()
+        # process.terminate()
+
+        # # Open the file in read mode
+        # with open('config.txt', 'r') as file:
+        #     # Read the contents of the file
+        #     file_contents = file.read()
+
+        # print("###########\n{}\n###########".format(file_contents))
+
+        # new_host = ",{target: '192.1681.102:5900', path: '/path3'}\n//"
+        # # Modify the contents of the file
+        # file_contents = file_contents.replace('//', new_host)
+
+        # # Open the file in write mode
+        # with open('config.txt', 'w') as file:
+        #     # Write the modified contents back to the file
+        #     file.write(file_contents)
+
+        
+    except:
+        print("Can not found config.js on this directory path!")
+    
     return render(request, 'vnc_view.html', {})

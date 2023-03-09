@@ -76,12 +76,81 @@
                         </div>
                     </div>
                 </div>
+                <div class="pnl vnc-viewer">
+                    <!-- VNC viewer here -->
+                    <h5>Remote viewer</h5>
+                    <!-- <iframe src="http://localhost:8085/vnc.html?autoconnect=true&host={{vnc.host}}&port={{vnc.port}}&path={{vnc.path}}&password={{vnc.password}}&scallingmode=localscaling" width="100%" height="470px"></iframe> -->
+                    <iframe src="http://localhost:8085/vnc.html?autoconnect=true&scale=auto&resize=scale&host=127.0.0.1&port=8086&path=path1&password=12345678" width="100%" height="470px"></iframe>
+                </div>        
+            </section>
+            <section class="analysis-content">
+                <div class="header-tags">
+                    <h5 class="head-pnl">Error analysis</h5>
+                    <button class="btn-add" id="clear-error" onclick="">Clear all</button>
+                </div>     
+                <div class="pnl error-container">
+
+                    <table class="table-error" id="table-error">
+                        <thead>
+                        <tr>
+                            <th class="error-header-date">Date/Time</th>
+                            <th class="error-header-code">ErrorCode</th>
+                            <th class="error-header-des">Description</th>
+                            <th class="error-header-counter">Counter</th>
+                            <th class="error-header-addi">additional</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for index in 123456789|make_list %}
+                        <tr>
+                            <td>0{{index}}/02/2023 14:05:39</td>
+                            <td>{{index}}</td>
+                            <td>{{index}} Lorem ipsum dolor sit amet consectetur adipisicing elit. Labore saepe nisi eligendi. Sunt, nam praesentium.</td>
+                            <td>{{index}}</td>
+                            <td>{{index}} action do something Lorem ipsum dolor sit amet consectetur.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                    </table>  
+                </div>
+                <div class="header-tags">
+                    <canvas id="myChart" style="width:100%;max-width:500px; max-height: 400px;"></canvas>
+                    <h5 class="head-pnl">Error history</h5>
+                    <button class="btn-add" id="clear-error" onclick="">Clear all</button>
+                </div>     
+                <div class="pnl error-container">
+                    <table class="table-error" id="table-error">
+                        <thead>
+                        <tr>
+                            <th class="error-header-date">Date/Time</th>
+                            <th class="error-header-code">ErrorCode</th>
+                            <th class="error-header-des">Description</th>
+                            <th class="error-header-counter">Counter</th>
+                            <th class="error-header-addi">additional</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for index in 123456789|make_list %}
+                        <tr>
+                            <td>0{{index}}/02/2023 14:05:39</td>
+                            <td>{{index}}</td>
+                            <td>{{index}} Lorem ipsum dolor sit amet consectetur adipisicing elit. Labore saepe nisi eligendi. Sunt, nam praesentium.</td>
+                            <td>{{index}}</td>
+                            <td>{{index}} action do something Lorem ipsum dolor sit amet consectetur.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                    </table>  
+                </div>
+            </section>
+
+            <section class="body-tags">
                 <div class="pnl box-command-monitor">
-                    <h5 class="head-pnl">Monitor & Controller</h5>
+                    <h5 class="head-pnl">Parameter monitoring</h5>
                     <div class="cmd-container">
                         <!-- Button generator -->
                         <div class="cmd-btn">
-                            <!-- <a href="{% url 'vnc_viewer' "192.168.1.101" "5900" "12345678" %}">vnc viewer</a> -->
+                            <!-- VNC Viewer -->
                             {% for indicator in indicator_members %}
                                 {% if indicator.data_type == "STATUS" %}
                                     <input id="assTag{{indicator.tag_id}}"  type="hidden"/>
@@ -134,16 +203,13 @@
                         </div>
                     </div>
                     
-                </div>        
-            </section>
-
-            <section class="body-tags">
-                <div class="pnl box-machineView">
+                </div>
+                <div class="box-machineView">
                     <div class="header-tags">
                         <h5 class="head-pnl">Tag members</h5>
                         <button class="btn-add" id="addTag" onclick="openDIAPage('{{dia_url}}')">DIA Link page</button>
                     </div>
-                    <div class="table-container">
+                    <div class="pnl table-container">
                         <table class="table-tag" id="table-tag">
                             <tr>
                                 <th>No.</th>
@@ -152,8 +218,9 @@
                                 <th>Tag ID</th>
                                 <th>Register</th>
                                 <th>Value</th>
-                                <th class="td-indicator">Indicator</th>
+                                <th class="td-indicator">Option</th>
                             </tr>
+                        </table>
                     </div>
                 </div> 
             </section>
@@ -255,7 +322,8 @@
             </div>
         </form>
     </div>
-
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.6.0/dist/chart.min.js"></script>
+    <script src="{% static 'js/Chart_graph.js' %}"></script>
     <script>
         var socket = new WebSocket('ws://localhost:8000/ws/app/');
         first_loading = false;
@@ -403,7 +471,7 @@
                                 <th>Tag ID</th>
                                 <th>Register</th>
                                 <th>Value</th>
-                                <th class="th-indicator">Indicator</th>
+                                <th class="th-indicator">Option</th>
                             </tr>
             `;
             var rowToggle = false;
@@ -448,10 +516,8 @@
                                                 <button id="btn-assigned${tid}" class="btn-assigned" onclick="openForm(${tid})">Unassigned</button>
                                                 <button id="btn-p-assigned${tid}" class="btn-p-assigned" onclick="" style="display: none; background-color: #ccc; cursor: default;" disabled>Assigned</button>
                                                 <button id="btn-deleted${tid}" class="btn-deleted" onclick="deleteForm(${tid}, '${tag_name}')" style="display: none; background-color: rgb(211, 51, 51); margin-left: 5px;"><i class='bx bx-trash' ></i></button>
-                                                <div class="pnl-write-data">
                                                 <button class="btn-tag-write" id='WriteData' onclick="WriteData(${tid})">Write Data</button>
                                                 <input class="tag-add-value" id="TagValue${tid}"/>
-                                                </div>
                                             </td>
                                         </tr>
                                     `;
@@ -469,7 +535,7 @@
             // Appearance Comfirm Form
             document.getElementById('confirmForm').style.display = "block";
             document.querySelector('#confirmForm').innerHTML = 
-            `<div class="confirmForm-container">
+            `<div class="8">
                 <div class="confirmForm-content">
                     <h1>Question ?</h1>
                     <p>Are you sure you want to delete this indicator id : <strong>${tid}</strong>, name : <strong>${tag_name}</strong> ?</p>
