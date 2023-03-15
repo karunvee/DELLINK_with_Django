@@ -89,6 +89,7 @@ def machine_view(request, pt, ln, mc):
         'dia_url' : str_url,
         'ip_port' : ip_port,
         'notification_error' : notification_error,
+        'errData_count' : [30, 49, 44, 24, 15],
     }
     return render(request, 'machine_view.html', context)
 

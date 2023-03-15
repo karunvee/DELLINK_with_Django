@@ -14,13 +14,20 @@ app.config_from_object('django.conf:settings', namespace='CELERY')
 
 
 app.conf.beat_schedule ={
-    'get_api_3s': {
-        'task' : 'app.tasks.get_api',
+    'data_api_3s': {
+        'task' : 'app.tasks.data_api',
         'schedule' : 3.0,
         'options': {
             'expires': 15.0,
         },
-    }
+    },
+    # 'graph_api_5s': {
+    #     'task' : 'app.tasks.graph_api',
+    #     'schedule' : 5.0,
+    #     'options': {
+    #         'expires': 15.0,
+    #     },
+    # }
 }
 
 # Load task modules from all registered Django apps.

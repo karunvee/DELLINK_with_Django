@@ -16,6 +16,13 @@
     <section class="header">
         <div class="content-item-view">
             <div class="head-container">
+                <!-- Passing data to machine_view.js -->
+                <input id="mcView_plantName"  type="hidden" value="{{plantInfo.name}}"/>
+                <input id="mcView_lineName"  type="hidden" value="{{lineName}}"/>
+                <input id="mcView_machineName"  type="hidden" value="{{machineName}}"/>
+                <input id="mcView_ip_port"  type="hidden" value="{{ip_port}}"/>
+                <input id="mcView_deviceId"  type="hidden" value="{{machineInfo.deviceId}}"/>
+                <!-- Passing data to machine_view.js -->
                 <div class="img">
                     <span class="tooltip">Click to upload</span>
                     {% if machineInfo.picturePath == "" %}
@@ -84,12 +91,16 @@
                 </div>        
             </section>
             <section class="analysis-content">
+                <div class="pnl timeline-container">
+                    <div id="timeline" ></div>
+                </div>
+
                 <div class="header-tags">
-                    <h5 class="head-pnl">Error analysis</h5>
-                    <button class="btn-add" id="clear-error" onclick="">Clear all</button>
+                    <h5 class="head-pnl">Error history</h5>
+                    <!-- <button class="btn-add" id="clear-error" onclick="">Clear all</button> -->
                 </div>     
                 <div class="pnl error-container">
-
+                    <canvas id="error-count-chart"></canvas>
                     <table class="table-error" id="table-error">
                         <thead>
                         <tr>
@@ -101,7 +112,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        {% for index in 123456789|make_list %}
+                        {% for index in 1234567890123456789|make_list %}
                         <tr>
                             <td>0{{index}}/02/2023 14:05:39</td>
                             <td>{{index}}</td>
@@ -114,33 +125,15 @@
                     </table>  
                 </div>
                 <div class="header-tags">
-                    <canvas id="myChart" style="width:100%;max-width:500px; max-height: 400px;"></canvas>
-                    <h5 class="head-pnl">Error history</h5>
-                    <button class="btn-add" id="clear-error" onclick="">Clear all</button>
+                    <h5 class="head-pnl">TBS and Utilization</h5>
+                    <!-- <button class="btn-add" id="clear-error" onclick="">Clear all</button> -->
                 </div>     
-                <div class="pnl error-container">
-                    <table class="table-error" id="table-error">
-                        <thead>
-                        <tr>
-                            <th class="error-header-date">Date/Time</th>
-                            <th class="error-header-code">ErrorCode</th>
-                            <th class="error-header-des">Description</th>
-                            <th class="error-header-counter">Counter</th>
-                            <th class="error-header-addi">additional</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for index in 123456789|make_list %}
-                        <tr>
-                            <td>0{{index}}/02/2023 14:05:39</td>
-                            <td>{{index}}</td>
-                            <td>{{index}} Lorem ipsum dolor sit amet consectetur adipisicing elit. Labore saepe nisi eligendi. Sunt, nam praesentium.</td>
-                            <td>{{index}}</td>
-                            <td>{{index}} action do something Lorem ipsum dolor sit amet consectetur.</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                    </table>  
+                <div class="pnl graph-content-container">
+                    
+                    <div class="tbs-utilize-content">
+                        <canvas id="tbs-chart"></canvas>
+                        <canvas id="utilize-chart"></canvas>
+                    </div> 
                 </div>
             </section>
 
@@ -323,449 +316,188 @@
         </form>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@3.6.0/dist/chart.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <script src="{% static 'js/Chart_graph.js' %}"></script>
+    <script src="{% static 'js/machine_view.js' %}"></script>
     <script>
-        var socket = new WebSocket('ws://localhost:8000/ws/app/');
-        first_loading = false;
-        socket.onmessage = function(e){
-            raw_data = JSON.parse(e.data);
-            if(first_loading == false){
-                ShowMachineTags(raw_data);
-                first_loading = true;
-            }
-            else{
-                UpdateTags(raw_data);
-            }
-            
-        }
-        function UpdateTags(data){
-            for(let i =0; i < raw_data.length; i++){
-                if(raw_data[i]['plant_name'] == "{{plantInfo.name}}" ){
-                    for(let j=0; j < raw_data[i]['line'].length; j++){
 
-                        if(raw_data[i]['line'][j]['line_name'] == "{{lineName}}"){
-                            for(let k=0; k < raw_data[i]['line'][j]['machine'].length; k++){
+var barColors = [ 'rgba(0, 40, 140, 0.6)','rgba(160, 1, 60, 0.6)','rgba(150, 230, 250, 0.6)','rgba(255, 170, 0, 0.6)','rgba(150, 230, 190, 0.6)', 'rgba(0, 130, 35, 0.6)'];
 
-                                if(raw_data[i]['line'][j]['machine'][k]['machine_name'] == "{{machineName}}"){
-
-                                    var status = document.querySelector('#status');
-                                    status.innerHTML = ``;
-                                    if(raw_data[i]['line'][j]['machine'][k]['status'] == 1){
-                                        status.innerHTML += `<div class="display small Online"><label>Online</label></div>`;
-                                    }
-                                    else{
-                                        status.innerHTML += `<div class="display small Offline"><label>Offline</label></div>`;
-                                    }
-
-                                    for(let l=0 ; l < raw_data[i]['line'][j]['machine'][k]['indicator'].length; l++){
-                                        var tid = raw_data[i]['line'][j]['machine'][k]['indicator'][l]['tid'];
-                                        var val = raw_data[i]['line'][j]['machine'][k]['indicator'][l]['value'];
-                                        
-                                        // Update value to tags table
-                                        var ass_tag = document.getElementById("assTag" + String(tid));
-                                        if (ass_tag != null){
-                                            ass_tag.value = val;
-                                            document.getElementById("btn-assigned" + String(tid)).style.display = "none";
-                                            document.getElementById("btn-p-assigned" + String(tid)).style.display = "block";
-                                            document.getElementById("btn-deleted" + String(tid)).style.display = "block";
-                                        }
-                                        document.getElementById("val" + String(tid)).value = val;
-                                        //
-
-                                        // Update value to button
-                                        var btn_tag = document.getElementById("bTagValue" + String(tid));
-                                        if(btn_tag != null){
-                                            document.getElementById("bTagValue"+String(tid)).value = val;
-                                            const btn = document.querySelector('#btn-TagValue'+String(tid));
-                                            if(val == 1){
-                                                btn.classList.remove("OFF");
-                                                btn.classList.add("ON");
-                                            }
-                                            else{
-                                                btn.classList.remove("ON");
-                                                btn.classList.add("OFF");
-                                            }
-                                        }
-                                        //
-                                        
-                                        // Update value to textbox
-                                        var text_tag = document.getElementById("mTagValue" + String(tid));
-                                        if(text_tag != null){
-                                            if(text_tag !== document.activeElement){
-                                                document.getElementById("mTagValue"+String(tid)).value = val;
-                                            }
-                                        }
-                                        //
-
-                                        // Update value to Indicator LED
-                                        var indicator_tag = document.getElementById("indicator"+ String(tid))
-                                        if (indicator_tag != null){
-                                            const ind_show = document.querySelector('#indicator'+String(tid));
-                                            if(val == 1){
-                                                ind_show.classList.remove("OFF");
-                                                ind_show.classList.add("ON");
-                                            }
-                                            else{
-                                                ind_show.classList.remove("ON");
-                                                ind_show.classList.add("OFF");
-                                            }
-                                        }
-                                        //
-
-                                        // Update value to STATUS LED
-                                        var indicator_status = document.getElementById("indicator-status" + String(tid));
-                                        if(indicator_status != null ){
-                                                document.getElementById("indicator-status"+String(tid)).value = val;
-                                                StatusMachine(val);
-                                        }
-                                        //
-
-                                        // Update error to notification
-                                        var errorCode = document.getElementById("errorCode" + String(tid));
-                                        if(errorCode != null){
-                                                document.getElementById("errorCode"+String(tid)).value = val;
-                                                if(val != 0){
-                                                    // document.getElementById('alert-message').style.display = "block";
-                                                    var errorMsg = document.getElementById("errorMsg" + String(val));
-                                                    if(errorMsg != null){
-                                                        var eMsg = document.getElementById("errorMsg" + String(val)).value;
-                                                        document.querySelector('#alert-container').innerHTML = `
-                                                                    <div class="alert">
-                                                                        <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span> 
-                                                                        <strong>Error!</strong> ${eMsg}.
-                                                                    </div>`;
-                                                    }
-                                                    else{
-                                                        document.querySelector('#alert-container').innerHTML = `
-                                                                    <div class="alert">
-                                                                        <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span> 
-                                                                        <strong>Error!</strong> Unknown error message.
-                                                                    </div>`;
-                                                    }
-                                                    
-                                                }
-                                                else{
-                                                    // document.getElementById('alert-message').style.display = "none";
-                                                    document.querySelector('#alert-container').innerHTML = "";
-                                                }
-                                        }
-                                        //
-                                    }
-                                }   
-                            }
-                        }
-                    }
-                }
-            }
-            
+var socket_graph = new WebSocket('ws://localhost:8000/ws/graph/');
+        socket_graph.onmessage = function(e){
+            graph_data = JSON.parse(e.data);
+            console.log(graph_data);
         }
 
-        function ShowMachineTags(data){
-            var table = document.querySelector('#table-tag');
-            table.innerHTML = "";
-            table.innerHTML += `
-                            <tr>
-                                <th>No.</th>
-                                <th>Name</th>
-                                <th>Data type</th>
-                                <th>Tag ID</th>
-                                <th>Register</th>
-                                <th>Value</th>
-                                <th class="th-indicator">Option</th>
-                            </tr>
-            `;
-            var rowToggle = false;
-            for(let i =0; i < raw_data.length; i++){
-                if(raw_data[i]['plant_name'] == "{{plantInfo.name}}" ){
-                    for(let j=0; j < raw_data[i]['line'].length; j++){
+        // Error Counting *************************************************
+        var labels = ["20", "1", "150", "60", "12"];
 
-                        if(raw_data[i]['line'][j]['line_name'] == "{{lineName}}"){
-                            for(let k=0; k < raw_data[i]['line'][j]['machine'].length; k++){
-
-                                if(raw_data[i]['line'][j]['machine'][k]['machine_name'] == "{{machineName}}"){
-
-                                    var status = document.querySelector('#status');
-                                    status.innerHTML = ``;
-                                    if(raw_data[i]['line'][j]['machine'][k]['status'] == 1){
-                                        status.innerHTML += `<div class="display small Online"><label>Online</label></div>`;
-                                    }
-                                    else{
-                                        status.innerHTML += `<div class="display small Offline"><label>Offline</label></div>`;
-                                    }
-
-                                    for(let l=0 ; l < raw_data[i]['line'][j]['machine'][k]['indicator'].length; l++){
-                                    tid = raw_data[i]['line'][j]['machine'][k]['indicator'][l]['tid'];
-                                    tag_name = raw_data[i]['line'][j]['machine'][k]['indicator'][l]['indicator_name'];
-                                    
-                                    newRow = "";
-                                    if(rowToggle){
-                                        newRow += `<tr class="tags-members color">`;
-                                    }
-                                    else{
-                                        newRow += `<tr class="tags-members">`;
-                                    }
-                                    rowToggle = !rowToggle;
-                                    newRow +=`
-                                            <td>${l}</td>
-                                            <td>${raw_data[i]['line'][j]['machine'][k]['indicator'][l]['indicator_name']}<input id="name${tid}" value="${raw_data[i]['line'][j]['machine'][k]['indicator'][l]['indicator_name']}" hidden/></td>
-                                            <td>${raw_data[i]['line'][j]['machine'][k]['indicator'][l]['gp']}</td>
-                                            <td>${tid}</td>
-                                            <td>${raw_data[i]['line'][j]['machine'][k]['indicator'][l]['register']}<input id="reg${tid}" value="${raw_data[i]['line'][j]['machine'][k]['indicator'][l]['register']}" hidden/></td>
-                                            <td><input id="val${tid}" class="tag-value" value="${raw_data[i]['line'][j]['machine'][k]['indicator'][l]['value']}" disabled/></td>
-                                            <td class="td-indicator">
-                                                <button id="btn-assigned${tid}" class="btn-assigned" onclick="openForm(${tid})">Unassigned</button>
-                                                <button id="btn-p-assigned${tid}" class="btn-p-assigned" onclick="" style="display: none; background-color: #ccc; cursor: default;" disabled>Assigned</button>
-                                                <button id="btn-deleted${tid}" class="btn-deleted" onclick="deleteForm(${tid}, '${tag_name}')" style="display: none; background-color: rgb(211, 51, 51); margin-left: 5px;"><i class='bx bx-trash' ></i></button>
-                                                <button class="btn-tag-write" id='WriteData' onclick="WriteData(${tid})">Write Data</button>
-                                                <input class="tag-add-value" id="TagValue${tid}"/>
-                                            </td>
-                                        </tr>
-                                    `;
-
-                                    table.innerHTML += newRow;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        function deleteForm(tid, tag_name){
-            // Appearance Comfirm Form
-            document.getElementById('confirmForm').style.display = "block";
-            document.querySelector('#confirmForm').innerHTML = 
-            `<div class="8">
-                <div class="confirmForm-content">
-                    <h1>Question ?</h1>
-                    <p>Are you sure you want to delete this indicator id : <strong>${tid}</strong>, name : <strong>${tag_name}</strong> ?</p>
-                    <hr>
-                    <div class="clearfix">
-                        <button class="btn-delete yes" onclick="location.href='/delete_indicator/pt{{plantInfo.name}}ln{{lineName}}mc{{machineName}}tid${tid}/';">Yes, I'm sure</button>
-                        <button class="btn-delete no" type="button" onclick="document.getElementById('confirmForm').style.display='none'">No</button>
-                    </div>
-                </div>
-            </div>`;
-        }
-        function showAddCameraForm(){
-            document.getElementById('add-camera-form').style.display = "block";
-            // document.querySelector('#add-camera-form').innerHTML = ``;
-        }
-
-        function openDIAPage(url){
-            window.open(url, "DIA Link web","width=1000,height=600");
-        }
-
-        function openForm(tid) {
-            document.getElementById('tagName').value = document.getElementById("name" + tid).value;
-
-            document.getElementById('register').value = document.getElementById("reg" + tid).value;
-
-            document.getElementById('tagID').innerText = tid;
-            document.getElementById('tagID').value = tid;
-
-            //>>> Appearance Assignment Form
-            document.getElementById('assignForm').style.display = "block";
-            //<<<
-
-            //>>> clear
-            document.getElementById("data_type").value = "";
-            document.getElementById('datatype_bit').style.display = "none";
-            document.getElementById('datatype_text').style.display = "none";
-            document.getElementById('btn-add').style.display = "none";
-            //<<<
-        }
-
-
-
-        //>>> Login to get tokenID
-        var details = {
-            'username': 'root',
-            'password': 'admin',
-        };
-        var formBody  = [];
-        for (var property in details) {
-          var encodedKey = encodeURIComponent(property);
-          var encodedValue = encodeURIComponent(details[property]);
-          formBody.push(encodedKey + "=" + encodedValue);
-        }
-        formBody = formBody.join("&");
-
-        fetch('{{ip_port}}' + 'api/v1/auth/login', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
-            'Content-Length': 0,
-        },
-        body: formBody,
-        })
-        .then((response) => response.json())
-        .then((data) => {
-            console.log('Success:', data);
-            token_ = data.access_token ;
-        })
-        .catch((error) => {
-            console.error('Error:', error);
-        });
-        //<<<
-
-        //>>> Write Data Registor
-        function WriteData(tag_id, tg = 0){
-            // $("body").css("cursor", "progress");
-            console.log("token :" + token_);
-            if (token_ == ""){
-                alert("Authorization error : Token is empty!!");
-            }
-            else{
-                switch(tg){
-                    case 1:
-                        var tag_value = document.getElementById("mTagValue"+tag_id).value;
-                        break;
-                    case 2:
-                        var tag_value = document.getElementById("bTagValue"+tag_id).value;
-                        tag_value = 1 - tag_value ;
-                        break;
-                    default:
-                        var tag_value = document.getElementById("TagValue"+tag_id).value;
-                        document.getElementById("TagValue"+tag_id).value = "";
-                }
-                let url_api = '{{ip_port}}' + 'api/v1/devices/'+ '{{machineInfo.deviceId}}' +'/tags/'+ String(tag_id) +'/value/' + tag_value;
-                const initDetails = {
-                method: 'PUT',
-                headers: {
-                    'Content-Length': 0,
-                    'Authorization': "Bearer " + token_
+        new Chart("error-count-chart", {
+        type: "bar",
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: 'Dec',
+                    backgroundColor: barColors[0],
+                    data: [150, 80, 70,20,7]
                 },
+                {
+                    label: 'Jan',
+                    backgroundColor: barColors[1],
+                    data: [90, 80, 70,20,7]
+                },
+                {
+                    label: 'Feb',
+                    backgroundColor: barColors[2],
+                    data: [120, 55, 42,13,0]
+                },
+                {
+                    label: 'Mar',
+                    backgroundColor: barColors[3],
+                    data: [20, 60, 31,10,0]
                 }
-                fetch(url_api,initDetails).then( response =>
-                    {
-                        if ( response.status == 401 )
-                        {
-                            console.log('Status Code: 401 Unauthorized');
-                            alert('Status Code: 401 Unauthorized');
-                            return;
-                        }
-                        // else if(response.status != 204)
-                        else{
-                            let msg = 'Value :' + tag_value + ', Tag ID :' + tag_id + ', Status Code: ' + response.status;
-    
-                            console.log(msg);
-                            alert(msg);
-                            return;
-                        }
-                        // alert('Write the value success!');
-                        console.log( response.headers.get( "Content-Type" ) );
-                        return 0;
+            ]
+        },
+        options: {
+            plugins: {
+            title: {
+                display: true,
+                text: 'Top 5 : Error counting'
+            }
+            },
+            scales: {
+                    y: {
+                    beginAtZero: true
                     }
-                    )
-            }
-            // $("body").css("cursor", "default");
-        }
-        //<<<
-
-        //>>> On Assignment data was changed
-        const getDataType = () =>{
-            let inputValue = document.getElementById("data_type").value; 
-            if(inputValue == "BIT"){
-                document.getElementById('datatype_bit').style.display = "block";
-                document.getElementById('datatype_text').style.display = "none";
-                document.getElementById('btn-add').style.display = "block";
-            }
-            else if(inputValue == ""){
-                alert("Please select the data type");
-                document.getElementById('datatype_bit').style.display = "none";
-                document.getElementById('datatype_text').style.display = "none";
-                document.getElementById('btn-add').style.display = "none";
-            }
-            else if(inputValue == "STATUS" || inputValue == "ERROR CODE"){
-                document.getElementById('datatype_bit').style.display = "none";
-                document.getElementById('datatype_text').style.display = "none";
-                document.getElementById('btn-add').style.display = "block";
-            }
-            else{
-                document.getElementById('datatype_bit').style.display = "none";
-                document.getElementById('datatype_text').style.display = "block";
-                document.getElementById('btn-add').style.display = "block";
-            }
-        }
-        //<<<
-
-        //>>> LED Status 
-        p_val = "";
-        function StatusMachine(val){
-            const sg = document.querySelector('#status-green');
-            const sy = document.querySelector('#status-yellow');
-            const sr = document.querySelector('#status-red');
-            if( val != p_val){
-                switch (val){
-                    case "0":
-                        document.getElementById("text-indicator-status").innerText = "Normal";
-                        sg.classList.remove("green");
-                        sy.classList.remove("yellow");
-                        sr.classList.remove("red");
-                        sg.classList.add("green");
-                        break;
-                    case "1":
-                        document.getElementById("text-indicator-status").innerText = "Error";
-                        sg.classList.remove("green");
-                        sy.classList.remove("yellow");
-                        sr.classList.remove("red");
-                        sr.classList.add("red");
-                        break;
-                    case "2":
-                        document.getElementById("text-indicator-status").innerText = "Pause";
-                        sg.classList.remove("green");
-                        sy.classList.remove("yellow");
-                        sr.classList.remove("red");
-                        sy.classList.add("yellow");
-                        break;
-                    case "3":
-                        document.getElementById("text-indicator-status").innerText = "standby";
-                        sg.classList.remove("green");
-                        sy.classList.remove("yellow");
-                        sr.classList.remove("red");
-                        sy.classList.add("yellow");
-                        break;
-                    case "4":
-                        document.getElementById("text-indicator-status").innerText = "Wait for material";
-                        sg.classList.remove("green");
-                        sy.classList.remove("yellow");
-                        sr.classList.remove("red");
-                        sy.classList.add("yellow");
-                        break;
-                    case "5":
-                        document.getElementById("text-indicator-status").innerText = "Output full material";
-                        sg.classList.remove("green");
-                        sy.classList.remove("yellow");
-                        sr.classList.remove("red");
-                        sy.classList.add("yellow");
-                        break;
-                    case "6":
-                        document.getElementById("text-indicator-status").innerText = "Material low";
-                        sg.classList.remove("green");
-                        sy.classList.remove("yellow");
-                        sr.classList.remove("red");
-                        sy.classList.add("yellow");
-                        break;
-                    case "7":
-                        document.getElementById("text-indicator-status").innerText = "Change line";
-                        sg.classList.remove("green");
-                        sy.classList.remove("yellow");
-                        sr.classList.remove("red");
-                        sy.classList.add("yellow");
-                        break;
-                    default:
-                        document.getElementById("text-indicator-status").innerText = "Unknown";
-                        sg.classList.remove("green");
-                        sy.classList.remove("yellow");
-                        sr.classList.remove("red");
-                        break;
                 }
             }
-            p_val = val;
-            
-        }
-        //<<<<
+        });
+        // TBS Counting *************************************************
+        new Chart("tbs-chart", {
+        type: "bar",
+        data: {
+            labels: ["(TBS)  {{machineName}}"],
+            datasets: [
+                {
+                    label: 'Jan',
+                    backgroundColor: barColors[0],
+                    data: [55.5]
+                },
+                {
+                    label: 'Feb',
+                    backgroundColor: barColors[1],
+                    data: [60.2]
+                },
+                {
+                    label: 'Mar',
+                    backgroundColor: barColors[2],
+                    data: [48.7]
+                },
+                {
+                    label: 'Apr',
+                    backgroundColor: barColors[3],
+                    data: [58.6]
+                }
+            ]
+        },
+        options: {
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'TBS'
+                }
+            },
+            scales: {
+                    y: {
+                    beginAtZero: true,
+                    max: 100
+                    }
+                }
+            }
+        });
+
+        // Utilization Counting *************************************************
+        var labels = [1, 2, 3, 4, 5, 6, 7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30];
+        var data = [65, 59, 80, 81, 56, 55, 40, 65, 40, 35, 20, 0, 55, 40,20, 35, 70, 65, 62, 40, 55, 0, 0, 25, 35, 45, 68, 79];
+
+        new Chart("utilize-chart", {
+        type: "line",
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                label: 'Feb',
+                data: data,
+                fill: false,
+                borderColor: barColors[0],
+                tension: 0.1
+            }
+        ]
+        },
+        options: {
+            plugins: {
+            title: {
+                display: true,
+                text: 'Utilization'
+            }
+            },
+            scales: {
+                    y: {
+                    beginAtZero: true
+                    }
+                }
+            }
+        });
+        // Timeline bar **************************************************************
+        google.charts.load('current', {'packages':['timeline']});
+      google.charts.setOnLoadCallback(drawChart);
+      function drawChart() {
+        var container = document.getElementById('timeline');
+        var chart = new google.visualization.Timeline(container);
+        var dataTable = new google.visualization.DataTable();
+
+        dataTable.addColumn({ type: 'string', id: 'Timeline' });
+        dataTable.addColumn({ type: 'string', id: 'Name' });
+        dataTable.addColumn({ type: 'string', role: 'tooltip' });
+        dataTable.addColumn({ type: 'date', id: 'Start' });
+        dataTable.addColumn({ type: 'date', id: 'End' });
+        dataTable.addRows([
+            //Color Setting
+          [ 'Timeline', 'Normal', '', new Date(0,0,0,7,39,1), new Date(0,0,0,7,39,2) ],
+          [ 'Timeline', 'Error', '',    new Date(0,0,0,7,39,2), new Date(0,0,0,7,39,3) ],
+          [ 'Timeline',  'Pause', '', new Date(0,0,0,7,39,3), new Date(0,0,0,7,39,4) ],
+          [ 'Timeline',  'Idle', '', new Date(0,0,0,7,39,4), new Date(0,0,0,7,39,5) ],
+            //
+          [ 'Timeline',  'Normal', createCustomTooltip(new Date(0,0,0,7,40,0),new Date(0,0,0,8,30,0)), new Date(0,0,0,7,40,0), new Date(0,0,0,8,30,0) ],
+          [ 'Timeline',  'Error', createCustomTooltip(new Date(0,0,0,7,40,0),new Date(0,0,0,8,40,0)), new Date(0,0,0,8,30,0), new Date(0,0,0,10,35,0) ],
+          [ 'Timeline',  'Normal', createCustomTooltip(new Date(0,0,0,9,0,0),new Date(0,0,0,9,5,0)), new Date(0,0,0,10,35,0), new Date(0,0,0,13,30,0) ],
+          [ 'Timeline',  'Pause', createCustomTooltip(new Date(0,0,0,12,0,0),new Date(0,0,0,15,30,0)), new Date(0,0,0,13,30,0), new Date(0,0,0,15,20,0) ],
+          [ 'Timeline',  'Error', createCustomTooltip(new Date(0,0,0,17,1,0),new Date(0,0,0,18,0,0)), new Date(0,0,0,15,20,0), new Date(0,0,0,15,20,30) ],
+          [ 'Timeline',  'Idle', createCustomTooltip(new Date(0,0,0,17,1,0),new Date(0,0,0,18,0,0)), new Date(0,0,0,15,20,30), new Date(0,0,1,7,39,0) ],
+        ]);
+
+        var options = {
+            tooltip: {isHtml: true},
+            colors: ['#008223', '#FC0000', '#FFA700', '#5A5A5A'],
+        };
+        chart.draw(dataTable, options);
+      }
+
+      function createCustomTooltip(start_time, end_time, errorCode) {
+        var diff = Math.round((end_time - start_time) / 1000);
+        var duration = new Date(diff * 1000).toISOString().substr(11, 8);
+        var errorCode = "Code 1";
+            return '<div style="padding: 10px; width:150px;">errorCode: '+ errorCode +'<hr>Start: '
+                + ((start_time.getHours() < 10)?"0":"") + start_time.getHours() +':'
+                + ((start_time.getMinutes() < 10)?"0":"") + start_time.getMinutes()  +':'
+                + ((start_time.getSeconds() < 10)?"0":"") + start_time.getSeconds() +
+                '<br>End: '
+                + ((end_time.getHours() < 10)?"0":"") + end_time.getHours() +':'
+                + ((end_time.getMinutes() < 10)?"0":"") + end_time.getMinutes()  +':'
+                + ((end_time.getSeconds() < 10)?"0":"") + end_time.getSeconds() + '<br>Duration: '+ duration +'</div>';
+    }
     </script>
 </body>
 </html>

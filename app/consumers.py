@@ -15,6 +15,17 @@ class AppConsumer(AsyncWebsocketConsumer):
         text_message =  event["text"]
         await self.send(text_message)
 
+class GraphConsumer(AsyncWebsocketConsumer):
+    async def connect(self):
+        await self.channel_layer.group_add("graph", self.channel_name)
+        await self.accept()
+
+    async def disconnect(self, close_code):
+        await self.channel_layer.group_discard("graph", self.channel_name)
+
+    async def chat_message(self, event):
+        text_message =  event["text"]
+        await self.send(text_message)
 
 # class AppConsumer(JsonWebsocketConsumer):
 #     def connect(self):

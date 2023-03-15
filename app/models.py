@@ -71,3 +71,16 @@ class ErrorNotification(models.Model):
 
     def __str__(self):
         return self.error_message
+    
+class ErrorCounting(models.Model):
+    plant_name = models.CharField(max_length = 255)
+    line_name = models.CharField(max_length = 255)
+    machine_name = models.CharField(max_length = 255)
+
+    data_time = models.DateTimeField()
+    error_code = models.CharField(max_length = 255)
+    error_des = models.CharField(max_length = 255)
+    error_count = models.IntegerField()
+
+    def __str__(self):
+        return self.error_count

@@ -46,7 +46,7 @@ def publish_message_to_group(message: Dict[str, Any], group: str) -> None:
         )
 
 @shared_task
-def get_api():
+def data_api():
     plant_members = PlantInfo.objects.all()
 
     data = []
@@ -168,6 +168,22 @@ def get_api():
     data_json = json.dumps(data)
     print("API fetching worker is listening..")
     publish_message_to_group({ "type": "chat_message", "text": data_json }, "app")
+
+@shared_task
+def graph_api():
+    data = ['10', '2']
+    data_json = json.dumps(data)
+    print("Graph API fetching worker is listening..")
+    publish_message_to_group({ "type": "chat_message", "text": data_json }, "graph")
+
+
+
+
+
+
+
+
+
 
 
     # publish_message_to_group({ "type": "chat_message", "text": response }, "app")

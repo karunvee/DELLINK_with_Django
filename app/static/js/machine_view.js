@@ -1,3 +1,9 @@
+var plantName = document.getElementById('mcView_plantName').value;
+var lineName = document.getElementById('mcView_lineName').value;
+var machineName = document.getElementById('mcView_machineName').value;
+var ip_port = document.getElementById('mcView_ip_port').value;
+var deviceId = document.getElementById('mcView_deviceId').value;
+
 var socket = new WebSocket('ws://localhost:8000/ws/app/');
         first_loading = false;
         socket.onmessage = function(e){
@@ -13,13 +19,13 @@ var socket = new WebSocket('ws://localhost:8000/ws/app/');
         }
         function UpdateTags(data){
             for(let i =0; i < raw_data.length; i++){
-                if(raw_data[i]['plant_name'] == "{{plantInfo.name}}" ){
+                if(raw_data[i]['plant_name'] == plantName ){
                     for(let j=0; j < raw_data[i]['line'].length; j++){
 
-                        if(raw_data[i]['line'][j]['line_name'] == "{{lineName}}"){
+                        if(raw_data[i]['line'][j]['line_name'] == lineName){
                             for(let k=0; k < raw_data[i]['line'][j]['machine'].length; k++){
 
-                                if(raw_data[i]['line'][j]['machine'][k]['machine_name'] == "{{machineName}}"){
+                                if(raw_data[i]['line'][j]['machine'][k]['machine_name'] == machineName){
 
                                     var status = document.querySelector('#status');
                                     status.innerHTML = ``;
@@ -39,8 +45,8 @@ var socket = new WebSocket('ws://localhost:8000/ws/app/');
                                         if (ass_tag != null){
                                             ass_tag.value = val;
                                             document.getElementById("btn-assigned" + String(tid)).style.display = "none";
-                                            document.getElementById("btn-p-assigned" + String(tid)).style.display = "block";
-                                            document.getElementById("btn-deleted" + String(tid)).style.display = "block";
+                                            document.getElementById("btn-p-assigned" + String(tid)).style.display = "inline-block";
+                                            document.getElementById("btn-deleted" + String(tid)).style.display = "inline-block";
                                         }
                                         document.getElementById("val" + String(tid)).value = val;
                                         //
@@ -98,7 +104,7 @@ var socket = new WebSocket('ws://localhost:8000/ws/app/');
                                         if(errorCode != null){
                                                 document.getElementById("errorCode"+String(tid)).value = val;
                                                 if(val != 0){
-                                                    document.getElementById('alert-message').style.display = "block";
+                                                    // document.getElementById('alert-message').style.display = "block";
                                                     var errorMsg = document.getElementById("errorMsg" + String(val));
                                                     if(errorMsg != null){
                                                         var eMsg = document.getElementById("errorMsg" + String(val)).value;
@@ -118,7 +124,7 @@ var socket = new WebSocket('ws://localhost:8000/ws/app/');
                                                     
                                                 }
                                                 else{
-                                                    document.getElementById('alert-message').style.display = "none";
+                                                    // document.getElementById('alert-message').style.display = "none";
                                                     document.querySelector('#alert-container').innerHTML = "";
                                                 }
                                         }
@@ -144,26 +150,26 @@ var socket = new WebSocket('ws://localhost:8000/ws/app/');
                                 <th>Tag ID</th>
                                 <th>Register</th>
                                 <th>Value</th>
-                                <th class="th-indicator">Indicator</th>
+                                <th class="th-indicator">Option</th>
                             </tr>
             `;
             var rowToggle = false;
             for(let i =0; i < raw_data.length; i++){
-                if(raw_data[i]['plant_name'] == "{{plantInfo.name}}" ){
+                if(raw_data[i]['plant_name'] == plantName ){
                     for(let j=0; j < raw_data[i]['line'].length; j++){
 
-                        if(raw_data[i]['line'][j]['line_name'] == "{{lineName}}"){
+                        if(raw_data[i]['line'][j]['line_name'] == lineName){
                             for(let k=0; k < raw_data[i]['line'][j]['machine'].length; k++){
 
-                                if(raw_data[i]['line'][j]['machine'][k]['machine_name'] == "{{machineName}}"){
+                                if(raw_data[i]['line'][j]['machine'][k]['machine_name'] == machineName){
 
                                     var status = document.querySelector('#status');
                                     status.innerHTML = ``;
                                     if(raw_data[i]['line'][j]['machine'][k]['status'] == 1){
-                                        status.innerHTML += `<div class="display small Online"><label>Online</label></div><span>on DIA Link</span>`;
+                                        status.innerHTML += `<div class="display small Online"><label>Online</label></div>`;
                                     }
                                     else{
-                                        status.innerHTML += `<div class="display small Offline"><label>Offline</label></div><span>on DIA Link</span>`;
+                                        status.innerHTML += `<div class="display small Offline"><label>Offline</label></div>`;
                                     }
 
                                     for(let l=0 ; l < raw_data[i]['line'][j]['machine'][k]['indicator'].length; l++){
@@ -187,12 +193,10 @@ var socket = new WebSocket('ws://localhost:8000/ws/app/');
                                             <td><input id="val${tid}" class="tag-value" value="${raw_data[i]['line'][j]['machine'][k]['indicator'][l]['value']}" disabled/></td>
                                             <td class="td-indicator">
                                                 <button id="btn-assigned${tid}" class="btn-assigned" onclick="openForm(${tid})">Unassigned</button>
-                                                <button id="btn-p-assigned${tid}" class="btn-p-assigned" onclick="" style="display: none; background-color: #ccc; cursor: default;" disabled>Assigned</button>
-                                                <button id="btn-deleted${tid}" class="btn-deleted" onclick="deleteForm(${tid}, '${tag_name}')" style="display: none; background-color: rgb(211, 51, 51); margin-left: 5px;"><i class='bx bx-trash' ></i></button>
-                                                <div class="pnl-write-data">
+                                                <button id="btn-p-assigned${tid}" class="btn-p-assigned" onclick="" style="display: none; background-color: #ccc; cursor: default;" disabled>&ensp;&nbsp;Assigned&ensp;</button>
                                                 <button class="btn-tag-write" id='WriteData' onclick="WriteData(${tid})">Write Data</button>
                                                 <input class="tag-add-value" id="TagValue${tid}"/>
-                                                </div>
+                                                <button id="btn-deleted${tid}" class="btn-deleted" onclick="deleteForm(${tid}, '${tag_name}')" style="display: none; background-color: rgb(211, 51, 51); margin-left: 2px;"><i class='bx bx-trash' ></i></button>
                                             </td>
                                         </tr>
                                     `;
@@ -206,23 +210,27 @@ var socket = new WebSocket('ws://localhost:8000/ws/app/');
                 }
             }
         }
-
-        function showUploadForm(){
-            document.getElementById('upload-form').style.display = "block";
-            document.querySelector('#upload-form').innerHTML = 
-            `<div class="upload-form-container">
-                <div class="form-update">
-                    <h2>Upload image file</h2>
-                    <form method="post" enctype="multipart/form-data">
-                        {% csrf_token %}
-                        {{ form.as_p}}
-                        <hr>
-                        <input type="submit" value="Upload" >
-                        <input type="button" value="Cancel" onclick="document.getElementById('upload-form').style.display='none'">
-                    </form>
+        function deleteForm(tid, tag_name){
+            // Appearance Comfirm Form
+            document.getElementById('confirmForm').style.display = "block";
+            document.querySelector('#confirmForm').innerHTML = 
+            `<div class="8">
+                <div class="confirmForm-content">
+                    <h1>Question ?</h1>
+                    <p>Are you sure you want to delete this indicator id : <strong>${tid}</strong>, name : <strong>${tag_name}</strong> ?</p>
+                    <hr>
+                    <div class="clearfix">
+                        <button class="btn-delete yes" onclick="location.href='/delete_indicator/pt${plantName}ln{{lineName}}mc{{machineName}}tid${tid}/';">Yes, I'm sure</button>
+                        <button class="btn-delete no" type="button" onclick="document.getElementById('confirmForm').style.display='none'">No</button>
+                    </div>
                 </div>
             </div>`;
         }
+        function showAddCameraForm(){
+            document.getElementById('add-camera-form').style.display = "block";
+            // document.querySelector('#add-camera-form').innerHTML = ``;
+        }
+
         function openDIAPage(url){
             window.open(url, "DIA Link web","width=1000,height=600");
         }
@@ -262,7 +270,7 @@ var socket = new WebSocket('ws://localhost:8000/ws/app/');
         }
         formBody = formBody.join("&");
 
-        fetch('{{ip_port}}' + 'api/v1/auth/login', {
+        fetch(ip_port + 'api/v1/auth/login', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
@@ -298,8 +306,9 @@ var socket = new WebSocket('ws://localhost:8000/ws/app/');
                         break;
                     default:
                         var tag_value = document.getElementById("TagValue"+tag_id).value;
+                        document.getElementById("TagValue"+tag_id).value = "";
                 }
-                let url_api = '{{ip_port}}' + 'api/v1/devices/'+ '{{machineInfo.deviceId}}' +'/tags/'+ String(tag_id) +'/value/' + tag_value;
+                let url_api = ip_port + 'api/v1/devices/'+ deviceId +'/tags/'+ String(tag_id) +'/value/' + tag_value;
                 const initDetails = {
                 method: 'PUT',
                 headers: {
@@ -315,9 +324,9 @@ var socket = new WebSocket('ws://localhost:8000/ws/app/');
                             alert('Status Code: 401 Unauthorized');
                             return;
                         }
-                        else if(response.status != 204){
-                            let msg = 'Value :' + tag_value + ', MachineID :'+ dID +', Tag ID :' + tag_id + ', Status Code: ' +
-                                response.status;
+                        // else if(response.status != 204)
+                        else{
+                            let msg = 'Value :' + tag_value + ', Tag ID :' + tag_id + ', Status Code: ' + response.status;
     
                             console.log(msg);
                             alert(msg);
@@ -359,23 +368,6 @@ var socket = new WebSocket('ws://localhost:8000/ws/app/');
             }
         }
         //<<<
-
-        function deleteForm(tid, tag_name){
-            // Appearance Comfirm Form
-            document.getElementById('confirmForm').style.display = "block";
-            document.querySelector('#confirmForm').innerHTML = 
-            `<div class="confirmForm-container">
-            <div class="confirmForm-content">
-                <h1>Question ?</h1>
-                <p>Are you sure you want to delete this indicator id : <strong>${tid}</strong>, name : <strong>${tag_name}</strong> ?</p>
-                <hr>
-                <div class="clearfix">
-                    <button class="btn-delete yes" onclick="location.href='/delete_indicator/pt{{plantInfo.name}}ln{{lineName}}mc{{machineName}}tid${tid}/';">Yes, I'm sure</button>
-                    <button class="btn-delete no" type="button" onclick="document.getElementById('confirmForm').style.display='none'">No</button>
-                </div>
-            </div>
-            </div>`;
-        }
 
         //>>> LED Status 
         p_val = "";
@@ -452,4 +444,4 @@ var socket = new WebSocket('ws://localhost:8000/ws/app/');
             p_val = val;
             
         }
-        //<<<<
+        //<<<<.

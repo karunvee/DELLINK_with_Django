@@ -229,20 +229,79 @@ h5{
     margin: 0;
     padding: 15px;
 }
-.pnl.table-container, .pnl.error-container{
+.pnl.table-container, .pnl.error-container, .pnl.graph-content-container{
   border: solid 2px #005992;
   border-bottom-left-radius: 10px;
+  border-bottom-right-radius: 10px;
 }
 .pnl.error-container{
   height: 400px;
-    overflow: auto;
+  display: inline-flex;
+  padding: 0 0 10px 10px;
 }
+/* TBS and Utilization */
+
+.pnl.graph-content-container{
+  padding: 20px;
+    font-size: 14px;
+    width: 100%;
+    height: 450px;
+    display: block;
+}
+.tbs-utilize-content{
+  display: flex;
+  justify-content: space-around;
+  height: 400px;
+  overflow-X: auto;
+}
+.timeline-container{
+  padding: 10px;
+  height: 100px;
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+}
+#timeline{
+  top: 0;
+  width: auto;
+  
+}
+#tbs-chart{
+  display: block;
+  top: 0;
+  width:45%;
+  max-width:550px;
+  max-height: 390px;
+}
+#utilize-chart{
+  display: block;
+  top: 0;
+  width:45%;
+  max-width:550px;
+  max-height: 390px;
+}
+/* --------------------- */
+
 .pnl.table-container{
     font-size: 14px;
     height: 530px;
     overflow: auto;
 }
 /* Error Analysis table */
+#error-count-chart{
+  display: block;
+  top: 0;
+  position: sticky;
+  width:40%;
+  max-width:500px;
+  max-height: 390px;
+}
+.table-error{
+  display: block;
+  border-collapse: collapse;
+  width: 60%;
+  font-size: 14px;
+  overflow: auto;
+}
 .table-error tr:first-child th {
   position: sticky;
   top: 0;
@@ -256,11 +315,7 @@ h5{
     background-color: #3282B8;
     color: white;
   }
-.table-error{
-    border-collapse: collapse;
-    width: 100%;
-    font-size: 14px;
-}
+
 
 .table-error td{
     text-align: left;
@@ -271,16 +326,16 @@ h5{
   width: 120px;
 }
 .error-header-addi{
-  width: 260px;
+  width: 150px;
 }
 .error-header-code, .error-header-counter{
-  width: 100px;
+  width: 80px;
 }
 /* Table Tag of DIA Link */
 .table-tag tr:first-child th {
   position: sticky;
   top: 0;
-  z-index: 1;
+  z-index: 2;
 }
 .table-tag .tags-members.color{
   background-color: var(--table-color)
@@ -308,14 +363,14 @@ h5{
 
 
 .tag-value{
-    width: 120px;
+    width: 100px;
     font-weight: 10;
-    font-size: 18px;
+    font-size: 14px;
     border: 0;
     background-color: transparent;
 }
 .tag-add-value{
-    width: 80px;
+    width: 60px;
 }
 /* width */
 ::-webkit-scrollbar {
