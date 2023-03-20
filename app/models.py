@@ -72,15 +72,25 @@ class ErrorNotification(models.Model):
     def __str__(self):
         return self.error_message
     
-class ErrorCounting(models.Model):
+class ErrorHistory(models.Model):
     plant_name = models.CharField(max_length = 255)
     line_name = models.CharField(max_length = 255)
     machine_name = models.CharField(max_length = 255)
 
-    data_time = models.DateTimeField()
+    datetime = models.DateTimeField()
     error_code = models.CharField(max_length = 255)
-    error_des = models.CharField(max_length = 255)
-    error_count = models.IntegerField()
+    error_message = models.CharField(max_length = 255)
 
     def __str__(self):
-        return self.error_count
+        return self.error_message
+    
+class TimeLineStatus(models.Model):
+    plant_name = models.CharField(max_length = 255)
+    line_name = models.CharField(max_length = 255)
+    machine_name = models.CharField(max_length = 255)
+    data_date = models.DateField()
+    data_time = models.TimeField()
+    status = models.CharField(max_length = 255)
+
+    def __str__(self):
+        return self.status

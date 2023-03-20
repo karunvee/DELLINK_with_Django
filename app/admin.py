@@ -45,3 +45,23 @@ class ErrorNotificationAdmin(admin.ModelAdmin):
                     'error_message',
     )
 admin.site.register(ErrorNotification, ErrorNotificationAdmin)
+
+class ErrorHistoryAdmin(admin.ModelAdmin):
+    list_display = ('plant_name',
+                    'line_name',
+                    'machine_name',
+                    'datetime',
+                    'error_code',
+                    'error_message'
+    )
+admin.site.register(ErrorHistory, ErrorHistoryAdmin)
+
+class TimeLineStatusAdmin(admin.ModelAdmin):
+    list_display = ('plant_name',
+                    'line_name',
+                    'machine_name',
+                    'data_date',
+                    'data_time',
+                    'status'
+    )
+admin.site.register(TimeLineStatus, TimeLineStatusAdmin)

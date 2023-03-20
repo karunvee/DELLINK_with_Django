@@ -214,7 +214,7 @@ var socket = new WebSocket('ws://localhost:8000/ws/app/');
             // Appearance Comfirm Form
             document.getElementById('confirmForm').style.display = "block";
             document.querySelector('#confirmForm').innerHTML = 
-            `<div class="8">
+            `<div class="deleteForm-container">
                 <div class="confirmForm-content">
                     <h1>Question ?</h1>
                     <p>Are you sure you want to delete this indicator id : <strong>${tid}</strong>, name : <strong>${tag_name}</strong> ?</p>
@@ -375,69 +375,73 @@ var socket = new WebSocket('ws://localhost:8000/ws/app/');
             const sg = document.querySelector('#status-green');
             const sy = document.querySelector('#status-yellow');
             const sr = document.querySelector('#status-red');
+            const sg_m = document.querySelector('#status-green-monitor');
+            const sy_m = document.querySelector('#status-yellow-monitor');
+            const sr_m = document.querySelector('#status-red-monitor');
             if( val != p_val){
                 switch (val){
                     case "0":
                         document.getElementById("text-indicator-status").innerText = "Normal";
-                        sg.classList.remove("green");
-                        sy.classList.remove("yellow");
-                        sr.classList.remove("red");
-                        sg.classList.add("green");
+                        sg.classList.remove("green"); sg_m.classList.remove("green");
+                        sy.classList.remove("yellow"); sy_m.classList.remove("yellow");
+                        sr.classList.remove("red"); sr_m.classList.remove("red");
+                        sg.classList.add("green"); sg_m.classList.add("green");
                         break;
                     case "1":
                         document.getElementById("text-indicator-status").innerText = "Error";
-                        sg.classList.remove("green");
-                        sy.classList.remove("yellow");
-                        sr.classList.remove("red");
-                        sr.classList.add("red");
+                        sg.classList.remove("green"); sg_m.classList.remove("green");
+                        sy.classList.remove("yellow"); sy_m.classList.remove("yellow");
+                        sr.classList.remove("red"); sr_m.classList.remove("red");
+                        sg.classList.add("red"); sg_m.classList.add("red");
                         break;
                     case "2":
                         document.getElementById("text-indicator-status").innerText = "Pause";
-                        sg.classList.remove("green");
-                        sy.classList.remove("yellow");
-                        sr.classList.remove("red");
-                        sy.classList.add("yellow");
+                        sg.classList.remove("green"); sg_m.classList.remove("green");
+                        sy.classList.remove("yellow"); sy_m.classList.remove("yellow");
+                        sr.classList.remove("red"); sr_m.classList.remove("red");
+                        sy.classList.add("yellow"); sy_m.classList.add("yellow");
                         break;
                     case "3":
                         document.getElementById("text-indicator-status").innerText = "standby";
-                        sg.classList.remove("green");
-                        sy.classList.remove("yellow");
-                        sr.classList.remove("red");
-                        sy.classList.add("yellow");
+                        sg.classList.remove("green"); sg_m.classList.remove("green");
+                        sy.classList.remove("yellow"); sy_m.classList.remove("yellow");
+                        sr.classList.remove("red"); sr_m.classList.remove("red");
+                        sy.classList.add("yellow"); sy_m.classList.add("yellow");
                         break;
                     case "4":
                         document.getElementById("text-indicator-status").innerText = "Wait for material";
-                        sg.classList.remove("green");
-                        sy.classList.remove("yellow");
-                        sr.classList.remove("red");
-                        sy.classList.add("yellow");
+                        sg.classList.remove("green"); sg_m.classList.remove("green");
+                        sy.classList.remove("yellow"); sy_m.classList.remove("yellow");
+                        sr.classList.remove("red"); sr_m.classList.remove("red");
+                        sy.classList.add("yellow"); sy_m.classList.add("yellow");
                         break;
                     case "5":
                         document.getElementById("text-indicator-status").innerText = "Output full material";
-                        sg.classList.remove("green");
-                        sy.classList.remove("yellow");
-                        sr.classList.remove("red");
-                        sy.classList.add("yellow");
+                        sg.classList.remove("green"); sg_m.classList.remove("green");
+                        sy.classList.remove("yellow"); sy_m.classList.remove("yellow");
+                        sr.classList.remove("red"); sr_m.classList.remove("red");
+                        sy.classList.add("yellow"); sy_m.classList.add("yellow");
                         break;
                     case "6":
                         document.getElementById("text-indicator-status").innerText = "Material low";
-                        sg.classList.remove("green");
-                        sy.classList.remove("yellow");
-                        sr.classList.remove("red");
-                        sy.classList.add("yellow");
+                        sg.classList.remove("green"); sg_m.classList.remove("green");
+                        sy.classList.remove("yellow"); sy_m.classList.remove("yellow");
+                        sr.classList.remove("red"); sr_m.classList.remove("red");
+                        sy.classList.add("yellow"); sy_m.classList.add("yellow");
                         break;
                     case "7":
                         document.getElementById("text-indicator-status").innerText = "Change line";
-                        sg.classList.remove("green");
-                        sy.classList.remove("yellow");
-                        sr.classList.remove("red");
-                        sy.classList.add("yellow");
+                        sg.classList.remove("green"); sg_m.classList.remove("green");
+                        sy.classList.remove("yellow"); sy_m.classList.remove("yellow");
+                        sr.classList.remove("red"); sr_m.classList.remove("red");
+                        sy.classList.add("yellow"); sy_m.classList.add("yellow");
                         break;
                     default:
                         document.getElementById("text-indicator-status").innerText = "Unknown";
-                        sg.classList.remove("green");
-                        sy.classList.remove("yellow");
-                        sr.classList.remove("red");
+                        sg.classList.remove("green"); sg_m.classList.remove("green");
+                        sy.classList.remove("yellow"); sy_m.classList.remove("yellow");
+                        sr.classList.remove("red"); sr_m.classList.remove("red");
+                        sy.classList.add("yellow"); sy_m.classList.add("yellow");
                         break;
                 }
             }

@@ -9,6 +9,7 @@ import msgpack
 import json
 
 from .models import *
+from datetime import datetime
 
 from linebot.exceptions import InvalidSignatureError
 from linebot import (
@@ -48,7 +49,6 @@ def publish_message_to_group(message: Dict[str, Any], group: str) -> None:
 @shared_task
 def data_api():
     plant_members = PlantInfo.objects.all()
-
     data = []
     urlLine = []
     machine_list = {}
@@ -133,7 +133,7 @@ def data_api():
 
                     #Line notice error
                     
-                    if(dictIndicator["indicator_name"] == "statusCode" and dictIndicator["value"] != "" and dictIndicator["value"] != "None"):
+                    if(dictIndicator["indicator_name"] == "statusCode123" and dictIndicator["value"] != "" and dictIndicator["value"] != "None" and machine_name == "Auto load in router"):
                         if(dictIndicator["value"] != "0" and dictMachine["machine_name"] not in dicError):
                             errorNotice = ErrorNotification.objects.filter(
                                 tag_member__plant_name__exact = dictPlant["plant_name"], 
@@ -153,10 +153,52 @@ def data_api():
                             # line_bot_api.broadcast(TextSendMessage(text=msg_alert))
                             # line_bot_api.broadcast(FlexSendMessage(alt_text="Card", contents=card))
 
-
+                            #------------------------------------------------------------------------------------------------------------------------
+                            # Add to Error history
+                            now = datetime.now()
+                            errorAddCount = ErrorHistory(plant_name = dictPlant["plant_name"], line_name = dictLine["line_name"], machine_name = dictMachine["machine_name"]
+                                                            , datetime = now, error_code = statusCode, error_message = msg_error)
+                            errorAddCount.save()
+                            #------------------------------------------------------------------------------------------------------------------------
                         elif(dictIndicator["value"] == "0" and dictMachine["machine_name"] in dicError):
                             del dicError[dictMachine["machine_name"]]
-                        
+
+                    # Timeline update
+                    if(dictIndicator["indicator_name"] == "statusWarRoom" and dictIndicator["value"] != "" and dictIndicator["value"] != "None" and machine_name == "Auto load in router"):
+                        timelineObj = TimeLineStatus.objects.filter(
+                            plant_name__exact = dictPlant["plant_name"],
+                            line_name__exact = dictLine["line_name"], 
+                            machine_name__exact = dictMachine["machine_name"]
+                        )
+
+                        updateTimeline = False
+                        if(dictIndicator["value"]  == "0"):
+                            current_status = "Normal"
+                        elif(dictIndicator["value"]  == "1"):
+                            current_status = "Error"
+                        else:
+                            current_status = "Pause"
+
+                        if(timelineObj.exists()):
+                            old_value = timelineObj.order_by('-id')[0]
+                            if(str(current_status) != str(old_value)):
+                                updateTimeline = True
+                                print("/{}<<current old>>>{}/".format(current_status, old_value))
+                                print("Update status data")
+                        else:
+                            updateTimeline = True
+                            print("Add new status data to database")
+
+                        if(updateTimeline):
+                                now = datetime.now()
+                                date = now.strftime("%Y-%m-%d")
+                                time = now.strftime("%H:%M:%S")
+
+                                timeline = TimeLineStatus(plant_name = dictPlant["plant_name"], line_name = dictLine["line_name"], machine_name = dictMachine["machine_name"]
+                                                        ,data_date = date, data_time = time, status = current_status)
+                                timeline.save()
+                                    
+                                    
 
                 dictLine["machine"].append(dictMachine)
 
@@ -166,11 +208,24 @@ def data_api():
         data.append(dictPlant)
 
     data_json = json.dumps(data)
-    print("API fetching worker is listening..")
+    # print("API fetching worker is listening..")
     publish_message_to_group({ "type": "chat_message", "text": data_json }, "app")
 
 @shared_task
 def graph_api():
+
+    # errorHistory = ErrorHistory.objects.filter(plant_name__exact = dictPlant["plant_name"], line_name__exact = dictLine["line_name"], machine_name__exact = dictMachine["machine_name"])
+
+    # add day to datetime
+    # oneDay = datetime.timedelta(days=1)
+
+    # d1 = datetime.datetime(2020, 5, 13, 22, 50, 55) 
+    # d2 = datetime.datetime(2020, 5, 13, 22, 50, 55)
+    # d3 = datetime.datetime(2020, 6, 13, 7, 30, 0)
+
+    # print(d1 > d2)
+    # print(d2 > d3)
+
     data = ['10', '2']
     data_json = json.dumps(data)
     print("Graph API fetching worker is listening..")

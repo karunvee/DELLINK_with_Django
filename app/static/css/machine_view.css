@@ -22,7 +22,7 @@
 }
 .header-status {
     text-align: center;
-    /* width: 180px; */
+    width: 150px;
     color: white;
 
 }
@@ -56,6 +56,18 @@
 }
 .header-tags {
     display: flex;
+}
+.btn{
+  padding: 5px 12px;
+  text-align: center;
+  color: white;
+  background-color: rgb(32, 133, 199);
+  border-radius: 25px;
+  border: 0;
+}
+.btn:hover{
+  background-color: rgb(118, 185, 229);
+  cursor: pointer;
 }
 .btn-add {
     right: 60px;
@@ -298,7 +310,7 @@ h5{
 .table-error{
   display: block;
   border-collapse: collapse;
-  width: 60%;
+  width: 100%;
   font-size: 14px;
   overflow: auto;
 }
@@ -444,7 +456,7 @@ input:focus{
 .indicator-status{
     margin: auto;
     width: 30%;
-    height: 20px;
+    height: 25px;
     background-color: #ccc;
     border-radius: 20px;
 }

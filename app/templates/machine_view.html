@@ -35,6 +35,17 @@
                     <div class="header-info">
                         <h3 id="machineName" class="machineName">{{machineInfo.name}}</h3>
                         <div class="header-status">
+                            {% for indicator in indicator_members %}
+                                {% if indicator.data_type == "STATUS" %}
+                                    <input id="assTag{{indicator.tag_id}}"  type="hidden"/>
+                                    <div class="container-status">
+                                        <input id="indicator-status{{indicator.tag_id}}" type="hidden"/>
+                                        <div id="status-green" class="indicator-status"></div>
+                                        <div id="status-yellow" class="indicator-status"></div>
+                                        <div id="status-red" class="indicator-status"></div>
+                                    </div>
+                                {% endif %}
+                            {% endfor %}
                             <div id="status" class="status">
                             </div>
                         </div>
@@ -92,12 +103,12 @@
             </section>
             <section class="analysis-content">
                 <div class="pnl timeline-container">
-                    <div id="timeline" ></div>
+                    <div id="timeline" style="width: 100%;" ></div>
                 </div>
 
                 <div class="header-tags">
                     <h5 class="head-pnl">Error history</h5>
-                    <!-- <button class="btn-add" id="clear-error" onclick="">Clear all</button> -->
+                    <button class="btn-add" id="clear-error" onclick="addrow()">test</button>
                 </div>     
                 <div class="pnl error-container">
                     <canvas id="error-count-chart"></canvas>
@@ -134,6 +145,12 @@
                         <canvas id="tbs-chart"></canvas>
                         <canvas id="utilize-chart"></canvas>
                     </div> 
+                    <div class="date-config">
+                        <button class="btn" id="config-day" onclick="">Day</button>
+                        <button class="btn" id="config-week" onclick="">Week</button>
+                        <button class="btn" id="config-month" onclick="">Month</button>
+                        <button class="btn" id="config-quarter" onclick="">Quarter</button>
+                    </div>
                 </div>
             </section>
 
@@ -143,15 +160,14 @@
                     <div class="cmd-container">
                         <!-- Button generator -->
                         <div class="cmd-btn">
-                            <!-- VNC Viewer -->
                             {% for indicator in indicator_members %}
                                 {% if indicator.data_type == "STATUS" %}
-                                    <input id="assTag{{indicator.tag_id}}"  type="hidden"/>
+                                    <!-- <input id="assTag{{indicator.tag_id}}"  type="hidden"/> -->
                                     <div class="container-status">
-                                        <input id="indicator-status{{indicator.tag_id}}" type="hidden"/>
-                                        <div id="status-green" class="indicator-status"></div>
-                                        <div id="status-yellow" class="indicator-status"></div>
-                                        <div id="status-red" class="indicator-status"></div>
+                                        <!-- <input id="indicator-status{{indicator.tag_id}}" type="hidden"/> -->
+                                        <div id="status-green-monitor" class="indicator-status"></div>
+                                        <div id="status-yellow-monitor" class="indicator-status"></div>
+                                        <div id="status-red-monitor" class="indicator-status"></div>
                                     </div>
                                     <div class="text-status">
                                         <span id="text-indicator-status">Status</span>
@@ -199,7 +215,7 @@
                 </div>
                 <div class="box-machineView">
                     <div class="header-tags">
-                        <h5 class="head-pnl">Tag members</h5>
+                        <h5 class="head-pnl">Tag index</h5>
                         <button class="btn-add" id="addTag" onclick="openDIAPage('{{dia_url}}')">DIA Link page</button>
                     </div>
                     <div class="pnl table-container">
@@ -322,6 +338,12 @@
     <script src="{% static 'js/machine_view.js' %}"></script>
     <script>
 
+    var date = new Date();
+    var currentDate = ((date.getDate() < 10)?"0":"") + date.getDate() +'/' + (((date.getMonth()+1) < 10)?"0":"") + (date.getMonth()+1) +'/' + date.getFullYear();
+    var currentTime = ((date.getHours() < 10)?"0":"") + date.getHours() +':' + ((date.getMinutes() < 10)?"0":"") + date.getMinutes() +':' + ((date.getSeconds() < 10)?"0":"") + date.getSeconds();
+    var datetime = 'Date: ' + currentDate + ' - Time: ' + currentTime;
+    console.log(datetime);
+           
 var barColors = [ 'rgba(0, 40, 140, 0.6)','rgba(160, 1, 60, 0.6)','rgba(150, 230, 250, 0.6)','rgba(255, 170, 0, 0.6)','rgba(150, 230, 190, 0.6)', 'rgba(0, 130, 35, 0.6)'];
 
 var socket_graph = new WebSocket('ws://localhost:8000/ws/graph/');
@@ -452,8 +474,9 @@ var socket_graph = new WebSocket('ws://localhost:8000/ws/graph/');
         });
         // Timeline bar **************************************************************
         google.charts.load('current', {'packages':['timeline']});
-      google.charts.setOnLoadCallback(drawChart);
-      function drawChart() {
+        google.charts.setOnLoadCallback(drawChart);
+
+    function drawChart(dt) {
         var container = document.getElementById('timeline');
         var chart = new google.visualization.Timeline(container);
         var dataTable = new google.visualization.DataTable();
@@ -474,13 +497,21 @@ var socket_graph = new WebSocket('ws://localhost:8000/ws/graph/');
           [ 'Timeline',  'Error', createCustomTooltip(new Date(0,0,0,7,40,0),new Date(0,0,0,8,40,0)), new Date(0,0,0,8,30,0), new Date(0,0,0,10,35,0) ],
           [ 'Timeline',  'Normal', createCustomTooltip(new Date(0,0,0,9,0,0),new Date(0,0,0,9,5,0)), new Date(0,0,0,10,35,0), new Date(0,0,0,13,30,0) ],
           [ 'Timeline',  'Pause', createCustomTooltip(new Date(0,0,0,12,0,0),new Date(0,0,0,15,30,0)), new Date(0,0,0,13,30,0), new Date(0,0,0,15,20,0) ],
-          [ 'Timeline',  'Error', createCustomTooltip(new Date(0,0,0,17,1,0),new Date(0,0,0,18,0,0)), new Date(0,0,0,15,20,0), new Date(0,0,0,15,20,30) ],
-          [ 'Timeline',  'Idle', createCustomTooltip(new Date(0,0,0,17,1,0),new Date(0,0,0,18,0,0)), new Date(0,0,0,15,20,30), new Date(0,0,1,7,39,0) ],
+          [ 'Timeline',  'Error', createCustomTooltip(new Date(0,0,0,15,20,0), new Date(0,0,0,15,20,10)), new Date(0,0,0,15,20,0), new Date(0,0,0,15,20,10) ],
+          [ 'Timeline',  'Idle', createCustomTooltip(new Date(0,0,0,17,1,0),new Date(0,0,0,18,0,0)), new Date(0,0,0,15,20,10), new Date(0,0,1,7,39,0) ],
         ]);
+        if(dt != null){
+            var rowCount = dataTable.getNumberOfRows();
+
+            dataTable.removeRow(rowCount -1)
+            dataTable.addRows(dt);
+        }
+        
 
         var options = {
             tooltip: {isHtml: true},
             colors: ['#008223', '#FC0000', '#FFA700', '#5A5A5A'],
+            timeline: { groupByRowLabel: true }
         };
         chart.draw(dataTable, options);
       }
@@ -498,6 +529,22 @@ var socket_graph = new WebSocket('ws://localhost:8000/ws/graph/');
                 + ((end_time.getMinutes() < 10)?"0":"") + end_time.getMinutes()  +':'
                 + ((end_time.getSeconds() < 10)?"0":"") + end_time.getSeconds() + '<br>Duration: '+ duration +'</div>';
     }
+
+    function addrow(){
+        dt = [ [ 'Timeline',  'Error', createCustomTooltip(new Date(0,0,0,15,20,30),new Date(0,0,0,18,0,0)), new Date(0,0,0,15,20,30), new Date(0,0,0,15,40,15) ],
+          [ 'Timeline',  'Idle', createCustomTooltip(new Date(0,0,0,17,1,0),date), new Date(0,0,0,15,40,15), new Date(0,0,1,7,39,0) ],]
+        drawChart(dt);
+    }
+
+    // Add days to next day
+    Date.prototype.addDays = function(days) {
+    var date = new Date(this.valueOf());
+    date.setDate(date.getDate() + days);
+    return date;
+    }
+    var date = new Date();
+
+    console.log(date.addDays(16));
     </script>
 </body>
 </html>
