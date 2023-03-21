@@ -316,18 +316,7 @@ body.dark .switch::before{
     background-color: var(--body-color);
     transition: var(--tran-05);
 }
-/* .header .machine-item{
-    background-color: var(--sidebar-color);
-}
-.body-content .pnl{
-    background-color: var(--sidebar-color);
-}
-.body-tags .pnl{
-    background-color: var(--sidebar-color);
-} */
-.pnl {
-    background-color: var(--sidebar-color);
-  }
+
 .header .content{
     font-size: 30px;
     font-weight: 500;

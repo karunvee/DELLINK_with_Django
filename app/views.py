@@ -243,15 +243,6 @@ from mimetypes import guess_type
 from websockify import WebSocketProxy
 
 
-# def vnc_viewer(request, host, port, password):
-#     vnc_files_dir = os.path.join(os.path.dirname(__file__), 'static/js/nossh')
-#     jar_path = os.path.join(vnc_files_dir, 'tightvnc-jviewer.jar')
-#     # Launch the JAR file with the password argument
-#     subprocess.Popen(['java', '-jar', jar_path,'-port={}'.format(port), '-host={}'.format(host) ,'-password={}'.format(password),
-#                        '-ViewOnly=no', '-ShowControls=no', '-showConnectionDialog=no'])
-#     response = HttpResponse('VNC viewer is opening ...', {})
-#     return redirect('home_view')
-
 def vnc_viewer(request):
     try:
         print('vnc view')

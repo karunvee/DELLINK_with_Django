@@ -11,7 +11,7 @@
     <link rel="icon" type="image/x-icon" href="{% static 'img/favicon.ico' %}">
     <title>Document</title>
 </head>
-<body>
+<body onload="startTime()">
     {% include "main_templates/menubar.html" %}
     <section class="header">
         <div class="content-item-view">
@@ -103,54 +103,77 @@
             </section>
             <section class="analysis-content">
                 <div class="pnl timeline-container">
+                    <div class="hd">
+                        <h2>Timeline</h2><span id="clock-time"></span>
+                    </div>
                     <div id="timeline" style="width: 100%;" ></div>
                 </div>
 
-                <div class="header-tags">
+                <!-- <div class="header-tags">
                     <h5 class="head-pnl">Error history</h5>
                     <button class="btn-add" id="clear-error" onclick="addrow()">test</button>
-                </div>     
-                <div class="pnl error-container">
-                    <canvas id="error-count-chart"></canvas>
-                    <table class="table-error" id="table-error">
-                        <thead>
-                        <tr>
-                            <th class="error-header-date">Date/Time</th>
-                            <th class="error-header-code">ErrorCode</th>
-                            <th class="error-header-des">Description</th>
-                            <th class="error-header-counter">Counter</th>
-                            <th class="error-header-addi">additional</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for index in 1234567890123456789|make_list %}
-                        <tr>
-                            <td>0{{index}}/02/2023 14:05:39</td>
-                            <td>{{index}}</td>
-                            <td>{{index}} Lorem ipsum dolor sit amet consectetur adipisicing elit. Labore saepe nisi eligendi. Sunt, nam praesentium.</td>
-                            <td>{{index}}</td>
-                            <td>{{index}} action do something Lorem ipsum dolor sit amet consectetur.</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                    </table>  
-                </div>
-                <div class="header-tags">
-                    <h5 class="head-pnl">TBS and Utilization</h5>
-                    <!-- <button class="btn-add" id="clear-error" onclick="">Clear all</button> -->
-                </div>     
-                <div class="pnl graph-content-container">
-                    
-                    <div class="tbs-utilize-content">
-                        <canvas id="tbs-chart"></canvas>
-                        <canvas id="utilize-chart"></canvas>
-                    </div> 
-                    <div class="date-config">
-                        <button class="btn" id="config-day" onclick="">Day</button>
-                        <button class="btn" id="config-week" onclick="">Week</button>
-                        <button class="btn" id="config-month" onclick="">Month</button>
-                        <button class="btn" id="config-quarter" onclick="">Quarter</button>
+                </div>      -->
+                
+                <div class="pnl error-content-container">
+                    <h2>Error history</h2>
+                    <div class="error-container">
+                        <div class="error-content">
+                            <canvas id="error-count-chart" style="height: 320px;"></canvas>
+                            <div class="filter-config">
+                                <button class="btn" id="error-config-day" onclick="">Day</button>
+                                <button class="btn" id="error-config-week" onclick="">Week</button>
+                                <button class="btn" id="error-config-month" onclick="">Month</button>
+                                <button class="btn" id="error-config-quarter" onclick="">Quarter</button>
+                            </div>
+                        </div>
+                        <table class="table-error" id="table-error">
+                            <thead>
+                            <tr>
+                                <th class="error-header-date">Date/Time</th>
+                                <th class="error-header-code">ErrorCode</th>
+                                <th class="error-header-des">Description</th>
+                                <th class="error-header-counter">Counter</th>
+                                <th class="error-header-addi">additional</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- {--% for index in 1234567890123456789|make_list %}
+                            <tr>
+                                <td>0{{index}}/02/2023 14:05:39</td>
+                                <td>{{index}}</td>
+                                <td>{{index}} Lorem ipsum dolor sit amet consectetur adipisicing elit. Labore saepe nisi eligendi. Sunt, nam praesentium.</td>
+                                <td>{{index}}</td>
+                                <td>{{index}} action do something Lorem ipsum dolor sit amet consectetur.</td>
+                            </tr>
+                            {--% endfor %} -->
+                        </tbody>
+                        </table>  
                     </div>
+                </div>
+                
+
+                <div class="graph-content-container">
+                    <div class="pnl tbs-content">
+                        <h2>TBS</h2>
+                        <canvas id="tbs-chart" style="height: 300px;"></canvas>
+                        <div class="filter-config">
+                            <button class="btn" id="tbs-config-day" onclick="">Day</button>
+                            <button class="btn" id="tbs-config-week" onclick="">Week</button>
+                            <button class="btn" id="tbs-config-month" onclick="">Month</button>
+                            <button class="btn" id="tbs-config-quarter" onclick="">Quarter</button>
+                        </div>
+                    </div>
+                    <div class="pnl utilize-content">
+                        <h2>Utilization</h2>
+                        <canvas id="utilize-chart" style="height: 300px;"></canvas>
+                        <div class="filter-config">
+                            <button class="btn" id="util-config-day" onclick="">Day</button>
+                            <button class="btn" id="util-config-week" onclick="">Week</button>
+                            <button class="btn" id="util-config-month" onclick="">Month</button>
+                            <button class="btn" id="util-config-quarter" onclick="">Quarter</button>
+                        </div>
+                    </div> 
+                    
                 </div>
             </section>
 
@@ -347,10 +370,11 @@
 var barColors = [ 'rgba(0, 40, 140, 0.6)','rgba(160, 1, 60, 0.6)','rgba(150, 230, 250, 0.6)','rgba(255, 170, 0, 0.6)','rgba(150, 230, 190, 0.6)', 'rgba(0, 130, 35, 0.6)'];
 
 var socket_graph = new WebSocket('ws://localhost:8000/ws/graph/');
-        socket_graph.onmessage = function(e){
-            graph_data = JSON.parse(e.data);
-            console.log(graph_data);
-        }
+
+socket_graph.onmessage = function(e){
+    raw_data_error = JSON.parse(e.data);
+    updateErrorTable(raw_data_error);
+}
 
         // Error Counting *************************************************
         var labels = ["20", "1", "150", "60", "12"];
@@ -384,10 +408,10 @@ var socket_graph = new WebSocket('ws://localhost:8000/ws/graph/');
         },
         options: {
             plugins: {
-            title: {
-                display: true,
-                text: 'Top 5 : Error counting'
-            }
+            // title: {
+            //     display: true,
+            //     text: 'Top 5 : Error counting'
+            // }
             },
             scales: {
                     y: {
@@ -397,54 +421,11 @@ var socket_graph = new WebSocket('ws://localhost:8000/ws/graph/');
             }
         });
         // TBS Counting *************************************************
-        new Chart("tbs-chart", {
-        type: "bar",
-        data: {
-            labels: ["(TBS)  {{machineName}}"],
-            datasets: [
-                {
-                    label: 'Jan',
-                    backgroundColor: barColors[0],
-                    data: [55.5]
-                },
-                {
-                    label: 'Feb',
-                    backgroundColor: barColors[1],
-                    data: [60.2]
-                },
-                {
-                    label: 'Mar',
-                    backgroundColor: barColors[2],
-                    data: [48.7]
-                },
-                {
-                    label: 'Apr',
-                    backgroundColor: barColors[3],
-                    data: [58.6]
-                }
-            ]
-        },
-        options: {
-            plugins: {
-                title: {
-                    display: true,
-                    text: 'TBS'
-                }
-            },
-            scales: {
-                    y: {
-                    beginAtZero: true,
-                    max: 100
-                    }
-                }
-            }
-        });
-
-        // Utilization Counting *************************************************
+        
         var labels = [1, 2, 3, 4, 5, 6, 7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30];
         var data = [65, 59, 80, 81, 56, 55, 40, 65, 40, 35, 20, 0, 55, 40,20, 35, 70, 65, 62, 40, 55, 0, 0, 25, 35, 45, 68, 79];
 
-        new Chart("utilize-chart", {
+        new Chart("tbs-chart", {
         type: "line",
         data: {
             labels: labels,
@@ -460,10 +441,52 @@ var socket_graph = new WebSocket('ws://localhost:8000/ws/graph/');
         },
         options: {
             plugins: {
-            title: {
-                display: true,
-                text: 'Utilization'
+            // title: {
+            //     display: true,
+            //     text: 'Utilization'
+            // }
+            },
+            scales: {
+                    y: {
+                    beginAtZero: true
+                    }
+                }
             }
+        });
+        // Utilization Counting *************************************************
+
+        var labels = [1, 2, 3, 4, 5, 6, 7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30];
+        var data = [65, 59, 80, 81, 56, 55, 40, 65, 40, 35, 20, 0, 55, 40,20, 35, 70, 65, 62, 40, 55, 0, 0, 25, 35, 45, 68, 79];
+
+        new Chart("utilize-chart", {
+        type: "line",
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                label: 'data',
+                data: data,
+                fill: false,
+                borderColor: barColors[0],
+                tension: 0.1
+            }
+        ]
+        },
+        options: {
+            plugins: {
+                autocolors: false,
+                annotation: {
+                        annotations: {
+                        line1: {
+                        adjustScaleRange: true,
+                        drawTime: 'afterDatasetsDraw',
+                        type: 'line',
+                        scaleID: 'y',
+                        value: 60,
+                        backgroundColor: 'rgba(255, 99, 132)'
+                        }
+                    }
+                }
             },
             scales: {
                     y: {
@@ -481,24 +504,24 @@ var socket_graph = new WebSocket('ws://localhost:8000/ws/graph/');
         var chart = new google.visualization.Timeline(container);
         var dataTable = new google.visualization.DataTable();
 
-        dataTable.addColumn({ type: 'string', id: 'Timeline' });
+        dataTable.addColumn({ type: 'string', id: 'Status' });
         dataTable.addColumn({ type: 'string', id: 'Name' });
         dataTable.addColumn({ type: 'string', role: 'tooltip' });
         dataTable.addColumn({ type: 'date', id: 'Start' });
         dataTable.addColumn({ type: 'date', id: 'End' });
         dataTable.addRows([
             //Color Setting
-          [ 'Timeline', 'Normal', '', new Date(0,0,0,7,39,1), new Date(0,0,0,7,39,2) ],
-          [ 'Timeline', 'Error', '',    new Date(0,0,0,7,39,2), new Date(0,0,0,7,39,3) ],
-          [ 'Timeline',  'Pause', '', new Date(0,0,0,7,39,3), new Date(0,0,0,7,39,4) ],
-          [ 'Timeline',  'Idle', '', new Date(0,0,0,7,39,4), new Date(0,0,0,7,39,5) ],
+          [ 'Status', 'Normal', '', new Date(0,0,0,7,39,1), new Date(0,0,0,7,39,2) ],
+          [ 'Status', 'Error', '',    new Date(0,0,0,7,39,2), new Date(0,0,0,7,39,3) ],
+          [ 'Status',  'Pause', '', new Date(0,0,0,7,39,3), new Date(0,0,0,7,39,4) ],
+          [ 'Status',  'Idle', '', new Date(0,0,0,7,39,4), new Date(0,0,0,7,39,5) ],
             //
-          [ 'Timeline',  'Normal', createCustomTooltip(new Date(0,0,0,7,40,0),new Date(0,0,0,8,30,0)), new Date(0,0,0,7,40,0), new Date(0,0,0,8,30,0) ],
-          [ 'Timeline',  'Error', createCustomTooltip(new Date(0,0,0,7,40,0),new Date(0,0,0,8,40,0)), new Date(0,0,0,8,30,0), new Date(0,0,0,10,35,0) ],
-          [ 'Timeline',  'Normal', createCustomTooltip(new Date(0,0,0,9,0,0),new Date(0,0,0,9,5,0)), new Date(0,0,0,10,35,0), new Date(0,0,0,13,30,0) ],
-          [ 'Timeline',  'Pause', createCustomTooltip(new Date(0,0,0,12,0,0),new Date(0,0,0,15,30,0)), new Date(0,0,0,13,30,0), new Date(0,0,0,15,20,0) ],
-          [ 'Timeline',  'Error', createCustomTooltip(new Date(0,0,0,15,20,0), new Date(0,0,0,15,20,10)), new Date(0,0,0,15,20,0), new Date(0,0,0,15,20,10) ],
-          [ 'Timeline',  'Idle', createCustomTooltip(new Date(0,0,0,17,1,0),new Date(0,0,0,18,0,0)), new Date(0,0,0,15,20,10), new Date(0,0,1,7,39,0) ],
+          [ 'Status',  'Normal', createCustomTooltip(new Date(0,0,0,7,40,0),new Date(0,0,0,8,30,0)), new Date(0,0,0,7,40,0), new Date(0,0,0,8,30,0) ],
+          [ 'Status',  'Error', createCustomTooltip(new Date(0,0,0,7,40,0),new Date(0,0,0,8,40,0)), new Date(0,0,0,8,30,0), new Date(0,0,0,10,35,0) ],
+          [ 'Status',  'Normal', createCustomTooltip(new Date(0,0,0,9,0,0),new Date(0,0,0,9,5,0)), new Date(0,0,0,10,35,0), new Date(0,0,0,13,30,0) ],
+          [ 'Status',  'Pause', createCustomTooltip(new Date(0,0,0,12,0,0),new Date(0,0,0,15,30,0)), new Date(0,0,0,13,30,0), new Date(0,0,0,15,20,0) ],
+          [ 'Status',  'Error', createCustomTooltip(new Date(0,0,0,15,20,0), new Date(0,0,0,15,20,10)), new Date(0,0,0,15,20,0), new Date(0,0,0,15,20,10) ],
+          [ 'Status',  'Idle', createCustomTooltip(new Date(0,0,0,17,1,0),new Date(0,0,0,18,0,0)), new Date(0,0,0,15,20,10), new Date(0,0,1,7,39,0) ],
         ]);
         if(dt != null){
             var rowCount = dataTable.getNumberOfRows();

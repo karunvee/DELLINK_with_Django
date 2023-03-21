@@ -21,13 +21,13 @@ app.conf.beat_schedule ={
             'expires': 15.0,
         },
     },
-    # 'graph_api_5s': {
-    #     'task' : 'app.tasks.graph_api',
-    #     'schedule' : 5.0,
-    #     'options': {
-    #         'expires': 15.0,
-    #     },
-    # }
+    'graph_api_5s': {
+        'task' : 'app.tasks.graph_api',
+        'schedule' : 5.0,
+        'options': {
+            'expires': 15.0,
+        },
+    }
 }
 
 # Load task modules from all registered Django apps.

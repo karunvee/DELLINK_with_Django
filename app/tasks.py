@@ -213,9 +213,41 @@ def data_api():
 
 @shared_task
 def graph_api():
+    data = []
+    dictType = {}
+    dictTimeline = {}
+    dictError = {}
 
-    # errorHistory = ErrorHistory.objects.filter(plant_name__exact = dictPlant["plant_name"], line_name__exact = dictLine["line_name"], machine_name__exact = dictMachine["machine_name"])
 
+    timeline  = TimeLineStatus.objects.all()
+    dictType["timeline"] = []
+    for index in timeline:
+        dictTimeline = {}
+        dictTimeline["plant_name"] = index.plant_name
+        dictTimeline["line_name"] = index.line_name
+        dictTimeline["machine_name"] = index.machine_name
+        dictTimeline["data_date"] = "{}".format(index.data_date)
+        dictTimeline["data_time"] = "{}".format(index.data_time)
+        dictTimeline["status"] = index.status
+
+        dictType["timeline"].append(dictTimeline)
+
+
+    errorHistory = ErrorHistory.objects.all()
+    dictType["error-history"] = []
+    for index in errorHistory:
+        dictError = {}
+        dictError["plant_name"] = index.plant_name
+        dictError["line_name"] = index.line_name
+        dictError["machine_name"] = index.machine_name
+        dictError["datetime"] = "{}".format(index.datetime)
+        dictError["error_code"] = index.error_code
+        dictError["error_message"] = index.error_message
+        
+        dictType["error-history"].append(dictError)
+
+
+    data.append(dictType)
     # add day to datetime
     # oneDay = datetime.timedelta(days=1)
 
@@ -225,10 +257,10 @@ def graph_api():
 
     # print(d1 > d2)
     # print(d2 > d3)
-
-    data = ['10', '2']
+    
     data_json = json.dumps(data)
-    print("Graph API fetching worker is listening..")
+    # print(data_json)
+    # print("Graph API fetching worker is listening..")
     publish_message_to_group({ "type": "chat_message", "text": data_json }, "graph")
 
 
