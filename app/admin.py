@@ -60,8 +60,7 @@ class TimeLineStatusAdmin(admin.ModelAdmin):
     list_display = ('plant_name',
                     'line_name',
                     'machine_name',
-                    'data_date',
-                    'data_time',
+                    'datetime',
                     'status'
     )
 admin.site.register(TimeLineStatus, TimeLineStatusAdmin)

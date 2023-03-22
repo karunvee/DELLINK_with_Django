@@ -88,8 +88,7 @@ class TimeLineStatus(models.Model):
     plant_name = models.CharField(max_length = 255)
     line_name = models.CharField(max_length = 255)
     machine_name = models.CharField(max_length = 255)
-    data_date = models.DateField()
-    data_time = models.TimeField()
+    datetime = models.DateTimeField()
     status = models.CharField(max_length = 255)
 
     def __str__(self):

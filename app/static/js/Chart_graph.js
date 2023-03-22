@@ -1,5 +1,12 @@
 
 function startTime() {
+    if(timeReset.getTime() < today.getTime()){
+        timeReset = new Date();
+        timeReset.setHours(7, 30, 0, 0);
+        timeStart = new Date();
+        timeStart.setHours(7, 30, 0, 0);
+        console("Reset time!!\n Start Time: "+ timeStart + "\n Reset Time: " + timeReset);
+    }
     const today = new Date();
     let d = today.getDate();
     let M = today.getMonth() + 1;

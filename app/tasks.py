@@ -191,11 +191,11 @@ def data_api():
 
                         if(updateTimeline):
                                 now = datetime.now()
-                                date = now.strftime("%Y-%m-%d")
-                                time = now.strftime("%H:%M:%S")
+                                # date = now.strftime("%Y-%m-%d")
+                                # time = now.strftime("%H:%M:%S")
 
                                 timeline = TimeLineStatus(plant_name = dictPlant["plant_name"], line_name = dictLine["line_name"], machine_name = dictMachine["machine_name"]
-                                                        ,data_date = date, data_time = time, status = current_status)
+                                                        ,datetime = now, status = current_status)
                                 timeline.save()
                                     
                                     
@@ -226,8 +226,9 @@ def graph_api():
         dictTimeline["plant_name"] = index.plant_name
         dictTimeline["line_name"] = index.line_name
         dictTimeline["machine_name"] = index.machine_name
-        dictTimeline["data_date"] = "{}".format(index.data_date)
-        dictTimeline["data_time"] = "{}".format(index.data_time)
+        dictTimeline["datetime"] = "{}".format(index.datetime)
+        # dictTimeline["data_date"] = "{}".format(index.data_date)
+        # dictTimeline["data_time"] = "{}".format(index.data_time)
         dictTimeline["status"] = index.status
 
         dictType["timeline"].append(dictTimeline)

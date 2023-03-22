@@ -157,7 +157,7 @@
                         <h2>TBS</h2>
                         <canvas id="tbs-chart" style="height: 300px;"></canvas>
                         <div class="filter-config">
-                            <button class="btn" id="tbs-config-day" onclick="">Day</button>
+                            <button class="btn" id="tbs-config-day" onclick="tbsPlus()">Day</button>
                             <button class="btn" id="tbs-config-week" onclick="">Week</button>
                             <button class="btn" id="tbs-config-month" onclick="">Month</button>
                             <button class="btn" id="tbs-config-quarter" onclick="">Quarter</button>
@@ -167,7 +167,7 @@
                         <h2>Utilization</h2>
                         <canvas id="utilize-chart" style="height: 300px;"></canvas>
                         <div class="filter-config">
-                            <button class="btn" id="util-config-day" onclick="">Day</button>
+                            <button class="btn" id="util-config-day" onclick="sPlus()">Day</button>
                             <button class="btn" id="util-config-week" onclick="">Week</button>
                             <button class="btn" id="util-config-month" onclick="">Month</button>
                             <button class="btn" id="util-config-quarter" onclick="">Quarter</button>
@@ -355,26 +355,176 @@
         </form>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@3.6.0/dist/chart.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@1.1.0"></script>
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js" integrity="sha512-JPcRR8yFa8mmCsfrw4TNte1ZvF1e3+1SdGMslZvmrzDYxS69J7J49vkFL8u6u8PlPJK+H3voElBtUCzaXj+6ig==" crossorigin="anonymous" referrerpolicy="no-referrer"></script> -->
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-annotation/2.2.1/chartjs-plugin-annotation.min.js" integrity="sha512-qF3T5CaMgSRNrxzu69V3ZrYGnrbRMIqrkE+OrE01DDsYDNo8R1VrtYL8pk+fqhKxUBXQ2z+yV/irk+AbbHtBAg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script> -->
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <script src="{% static 'js/Chart_graph.js' %}"></script>
     <script src="{% static 'js/machine_view.js' %}"></script>
     <script>
 
+
+    // Add days to next day
+    Date.prototype.addDays = function(days) {
+    var date = new Date(this.valueOf());
+    date.setDate(date.getDate() + days);
+    return date;
+    }
+    // console.log(date.addDays(16));
+
     var date = new Date();
+    let timeReset = new Date();
+    timeReset.setHours(7, 30, 0, 0);
+    timeReset.setDate(timeReset.getDate() + 1);
+    let timeStart = new Date();
+    timeStart.setHours(7, 30, 0, 0);
+
+
     var currentDate = ((date.getDate() < 10)?"0":"") + date.getDate() +'/' + (((date.getMonth()+1) < 10)?"0":"") + (date.getMonth()+1) +'/' + date.getFullYear();
     var currentTime = ((date.getHours() < 10)?"0":"") + date.getHours() +':' + ((date.getMinutes() < 10)?"0":"") + date.getMinutes() +':' + ((date.getSeconds() < 10)?"0":"") + date.getSeconds();
     var datetime = 'Date: ' + currentDate + ' - Time: ' + currentTime;
-    console.log(datetime);
-           
+    console.log(timeStart);
+    console.log(timeReset);
 var barColors = [ 'rgba(0, 40, 140, 0.6)','rgba(160, 1, 60, 0.6)','rgba(150, 230, 250, 0.6)','rgba(255, 170, 0, 0.6)','rgba(150, 230, 190, 0.6)', 'rgba(0, 130, 35, 0.6)'];
 
 var socket_graph = new WebSocket('ws://localhost:8000/ws/graph/');
 
 socket_graph.onmessage = function(e){
+    date = new Date();
     raw_data_error = JSON.parse(e.data);
     updateErrorTable(raw_data_error);
+    updateTimeline(raw_data_error);
 }
+
+function updateTimeline(rw){
+    
+    var dataTable = []
+    var raw = rw[0]["timeline"];
+    if(raw.length > 0){
+        for(let i =0; i < raw.length; i++){
+            const time1 = raw[i]["datetime"];
+            const timeIndex1 = new Date(time1);
+            timeIndex1.setHours(timeIndex1.getHours() - 7);
+
+            if(timeStart.getTime() < timeIndex1.getTime()){
+                if(plantName == raw[i]["plant_name"] && lineName == raw[i]["line_name"] && machineName == raw[i]["machine_name"]){
+                    
+                    if(i == raw.length - 1){
+                        dt = [
+                            [ 'Status',  raw[i]["status"], createCustomTooltip(timeIndex1, date), timeIndex1, date ],
+                            [ 'Status',  'Idle', createCustomTooltip(date, timeReset), date, timeReset ],
+                        ];
+                        dataTable.push(dt);
+                    }
+                    else{
+                        const time2 = raw[i+1]["datetime"];
+                        const timeIndex2 = new Date(time2);
+                        timeIndex2.setHours(timeIndex2.getHours() - 7);
+                        dt = [
+                            [ 'Status',  raw[i]["status"], createCustomTooltip(timeIndex1, timeIndex2), timeIndex1, timeIndex2 ],
+                            // [ 'Status',  'Idle', createCustomTooltip(date, timeReset), date, timeReset ],
+                        ];
+                        dataTable.push(dt);
+                    }
+                    
+                }
+            }
+        }
+        drawChart(dataTable)
+    }
+    else{
+        console.log("Timeline not exist in database!");
+    }
+    
+}
+
+// Timeline bar **************************************************************
+google.charts.load('current', {'packages':['timeline']});
+google.charts.setOnLoadCallback(drawChart);
+
+function drawChart(dt) {
+
+    let ini_normal =  new Date();
+    let ini_error =  new Date()
+    let ini_pause =  new Date()
+    let ini_idle =  new Date()
+    let ini_idle_end =  new Date()
+
+        ini_normal.setHours(7, 30, 0, 1);
+        ini_error.setHours(7, 30, 0, 2);
+        ini_pause.setHours(7, 30, 0, 3);
+        ini_idle.setHours(7, 30, 0, 4);
+        ini_idle_end.setHours(7, 30, 0, 5);
+
+
+        var container = document.getElementById('timeline');
+        var chart = new google.visualization.Timeline(container);
+        var dataTable = new google.visualization.DataTable();
+
+        dataTable.addColumn({ type: 'string', id: 'Status' });
+        dataTable.addColumn({ type: 'string', id: 'Name' });
+        dataTable.addColumn({ type: 'string', role: 'tooltip' });
+        dataTable.addColumn({ type: 'date', id: 'Start' });
+        dataTable.addColumn({ type: 'date', id: 'End' });
+        dataTable.addRows([
+            //Color Setting
+          [ 'Status', 'Normal', '', ini_normal, ini_error ],
+          [ 'Status', 'Error', '',    ini_error, ini_pause ],
+          [ 'Status',  'Pause', '', ini_pause, ini_idle ],
+          [ 'Status',  'Idle', '', ini_idle, ini_idle_end ],
+          [ 'Status',  'Idle', createCustomTooltip(date, timeReset), date, timeReset ],
+            //
+
+        //   [ 'Status',  'Normal', createCustomTooltip(new Date(0,0,0,7,40,0),new Date(0,0,0,8,30,0)), new Date(0,0,0,7,40,0), new Date(0,0,0,8,30,0) ],
+        //   [ 'Status',  'Error', createCustomTooltip(new Date(0,0,0,7,40,0),new Date(0,0,0,8,40,0)), new Date(0,0,0,8,30,0), new Date(0,0,0,10,35,0) ],
+        //   [ 'Status',  'Normal', createCustomTooltip(new Date(0,0,0,9,0,0),new Date(0,0,0,9,5,0)), new Date(0,0,0,10,35,0), new Date(0,0,0,13,30,0) ],
+        //   [ 'Status',  'Pause', createCustomTooltip(new Date(0,0,0,12,0,0),new Date(0,0,0,15,30,0)), new Date(0,0,0,13,30,0), new Date(0,0,0,15,20,0) ],
+        //   [ 'Status',  'Error', createCustomTooltip(new Date(0,0,0,15,20,0), new Date(0,0,0,15,20,10)), new Date(0,0,0,15,20,0), new Date(0,0,0,15,20,10) ],
+        //   [ 'Status',  'Idle', createCustomTooltip(new Date(0,0,0,17,1,0),new Date(0,0,0,18,0,0)), new Date(0,0,0,15,20,10), new Date(0,0,1,7,39,0) ],
+        ]);
+        if(dt != null){
+            var rowCount = dataTable.getNumberOfRows();
+
+            dataTable.removeRow(rowCount -1)
+            for(let index = 0; index < dt.length ; index++){
+                dataTable.addRows(dt[index]);
+            }
+            
+        }
+        
+
+        var options = {
+            tooltip: {isHtml: true},
+            colors: ['#008223', '#FC0000', '#FFA700', '#5A5A5A'],
+            timeline: { groupByRowLabel: true }
+        };
+        chart.draw(dataTable, options);
+}
+
+function createCustomTooltip(start_time, end_time, errorCode) {
+        var diff = Math.round((end_time - start_time) / 1000);
+        var duration = new Date(diff * 1000).toISOString().substr(11, 8);
+        errorCode = "Code 1";
+            return '<div style="padding: 10px; width:150px;">errorCode: '+ errorCode +'<hr>Start: '
+                + ((start_time.getHours() < 10)?"0":"") + start_time.getHours() +':'
+                + ((start_time.getMinutes() < 10)?"0":"") + start_time.getMinutes()  +':'
+                + ((start_time.getSeconds() < 10)?"0":"") + start_time.getSeconds() +
+                '<br>End: '
+                + ((end_time.getHours() < 10)?"0":"") + end_time.getHours() +':'
+                + ((end_time.getMinutes() < 10)?"0":"") + end_time.getMinutes()  +':'
+                + ((end_time.getSeconds() < 10)?"0":"") + end_time.getSeconds() + '<br>Duration: '+ duration +'</div>';
+}
+
+function addrow(){
+        dt = [ [ 'Timeline',  'Error', createCustomTooltip(new Date(0,0,0,15,20,30),new Date(0,0,0,18,0,0)), new Date(0,0,0,15,20,30), new Date(0,0,0,15,40,15) ],
+          [ 'Timeline',  'Idle', createCustomTooltip(new Date(0,0,0,17,1,0),date), new Date(0,0,0,15,40,15), new Date(0,0,1,7,39,0) ],]
+        drawChart(dt);
+}
+
+
+
+
 
         // Error Counting *************************************************
         var labels = ["20", "1", "150", "60", "12"];
@@ -422,152 +572,107 @@ socket_graph.onmessage = function(e){
         });
         // TBS Counting *************************************************
         
-        var labels = [1, 2, 3, 4, 5, 6, 7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30];
-        var data = [65, 59, 80, 81, 56, 55, 40, 65, 40, 35, 20, 0, 55, 40,20, 35, 70, 65, 62, 40, 55, 0, 0, 25, 35, 45, 68, 79];
-
-        new Chart("tbs-chart", {
-        type: "line",
-        data: {
-            labels: labels,
-            datasets: [
-                {
-                label: 'Feb',
-                data: data,
-                fill: false,
-                borderColor: barColors[0],
-                tension: 0.1
+        var x = 0;
+            function tbsPlus(){
+                x = x + 1;
+                tbsChart.data.datasets[0].data[1] = x;
+                console.log(x);
+                tbsChart.update();
             }
-        ]
-        },
-        options: {
-            plugins: {
-            // title: {
-            //     display: true,
-            //     text: 'Utilization'
-            // }
-            },
-            scales: {
-                    y: {
-                    beginAtZero: true
-                    }
-                }
-            }
-        });
-        // Utilization Counting *************************************************
+            
+        var tbs_ctx = document.getElementById('tbs-chart');
+        var tbs_labels = [1, 2, 3, 4, 5, 6, 7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30];
+        var tbs_raw_data = [8, 59, 80, 81, 56, 55, 40, 65, 40, 35, 20, 8, 55, 40,20, 35, 70, 65, 62, 40, 55, 10, 12, 25, 35, 45, 68, 0];
 
-        var labels = [1, 2, 3, 4, 5, 6, 7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30];
-        var data = [65, 59, 80, 81, 56, 55, 40, 65, 40, 35, 20, 0, 55, 40,20, 35, 70, 65, 62, 40, 55, 0, 0, 25, 35, 45, 68, 79];
-
-        new Chart("utilize-chart", {
-        type: "line",
-        data: {
-            labels: labels,
-            datasets: [
-                {
+        const tbs_data = {
+            labels: tbs_labels,
+            datasets : [{
                 label: 'data',
-                data: data,
+                data: tbs_raw_data,
                 fill: false,
                 borderColor: barColors[0],
                 tension: 0.1
-            }
-        ]
-        },
-        options: {
-            plugins: {
-                autocolors: false,
-                annotation: {
+            }]
+        }
+        const tbs_config = {
+            type: "line",
+            data: tbs_data,
+            options:{
+                scales:{
+                    y:{
+                        beginAtZero: true
+                    }
+                },
+                plugins: {
+                    annotation: {
                         annotations: {
-                        line1: {
-                        adjustScaleRange: true,
-                        drawTime: 'afterDatasetsDraw',
-                        type: 'line',
-                        scaleID: 'y',
-                        value: 60,
-                        backgroundColor: 'rgba(255, 99, 132)'
+                            line1: {
+                                adjustScaleRange: true,
+                                drawTime: 'afterDatasetsDraw',
+                                type: 'line',
+                                scaleID: 'y',
+                                value: 240,
+                                borderColor: 'rgba(255, 99, 132)',
+                                backgroundColor: 'rgba(255, 99, 132)'
                         }
                     }
-                }
-            },
-            scales: {
-                    y: {
-                    beginAtZero: true
-                    }
-                }
+                }   
             }
-        });
-        // Timeline bar **************************************************************
-        google.charts.load('current', {'packages':['timeline']});
-        google.charts.setOnLoadCallback(drawChart);
-
-    function drawChart(dt) {
-        var container = document.getElementById('timeline');
-        var chart = new google.visualization.Timeline(container);
-        var dataTable = new google.visualization.DataTable();
-
-        dataTable.addColumn({ type: 'string', id: 'Status' });
-        dataTable.addColumn({ type: 'string', id: 'Name' });
-        dataTable.addColumn({ type: 'string', role: 'tooltip' });
-        dataTable.addColumn({ type: 'date', id: 'Start' });
-        dataTable.addColumn({ type: 'date', id: 'End' });
-        dataTable.addRows([
-            //Color Setting
-          [ 'Status', 'Normal', '', new Date(0,0,0,7,39,1), new Date(0,0,0,7,39,2) ],
-          [ 'Status', 'Error', '',    new Date(0,0,0,7,39,2), new Date(0,0,0,7,39,3) ],
-          [ 'Status',  'Pause', '', new Date(0,0,0,7,39,3), new Date(0,0,0,7,39,4) ],
-          [ 'Status',  'Idle', '', new Date(0,0,0,7,39,4), new Date(0,0,0,7,39,5) ],
-            //
-          [ 'Status',  'Normal', createCustomTooltip(new Date(0,0,0,7,40,0),new Date(0,0,0,8,30,0)), new Date(0,0,0,7,40,0), new Date(0,0,0,8,30,0) ],
-          [ 'Status',  'Error', createCustomTooltip(new Date(0,0,0,7,40,0),new Date(0,0,0,8,40,0)), new Date(0,0,0,8,30,0), new Date(0,0,0,10,35,0) ],
-          [ 'Status',  'Normal', createCustomTooltip(new Date(0,0,0,9,0,0),new Date(0,0,0,9,5,0)), new Date(0,0,0,10,35,0), new Date(0,0,0,13,30,0) ],
-          [ 'Status',  'Pause', createCustomTooltip(new Date(0,0,0,12,0,0),new Date(0,0,0,15,30,0)), new Date(0,0,0,13,30,0), new Date(0,0,0,15,20,0) ],
-          [ 'Status',  'Error', createCustomTooltip(new Date(0,0,0,15,20,0), new Date(0,0,0,15,20,10)), new Date(0,0,0,15,20,0), new Date(0,0,0,15,20,10) ],
-          [ 'Status',  'Idle', createCustomTooltip(new Date(0,0,0,17,1,0),new Date(0,0,0,18,0,0)), new Date(0,0,0,15,20,10), new Date(0,0,1,7,39,0) ],
-        ]);
-        if(dt != null){
-            var rowCount = dataTable.getNumberOfRows();
-
-            dataTable.removeRow(rowCount -1)
-            dataTable.addRows(dt);
         }
+    }
+        const tbsChart = new Chart(tbs_ctx, tbs_config);
         
+        // Utilization Counting *************************************************
+        var x = 0;
+            function sPlus(){
+                x = x + 1;
+                utilChart.data.datasets[0].data[1] = x;
+                console.log(x);
+                utilChart.update();
+            }
 
-        var options = {
-            tooltip: {isHtml: true},
-            colors: ['#008223', '#FC0000', '#FFA700', '#5A5A5A'],
-            timeline: { groupByRowLabel: true }
-        };
-        chart.draw(dataTable, options);
-      }
+        var util_ctx = document.getElementById('utilize-chart');
+        var util_labels = [1, 2, 3, 4, 5, 6, 7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30];
+        var util_raw_data = [8, 59, 80, 81, 56, 55, 40, 65, 40, 35, 20, 8, 55, 40,20, 35, 70, 65, 62, 40, 55, 10, 12, 25, 35, 45, 68, 0];
 
-      function createCustomTooltip(start_time, end_time, errorCode) {
-        var diff = Math.round((end_time - start_time) / 1000);
-        var duration = new Date(diff * 1000).toISOString().substr(11, 8);
-        var errorCode = "Code 1";
-            return '<div style="padding: 10px; width:150px;">errorCode: '+ errorCode +'<hr>Start: '
-                + ((start_time.getHours() < 10)?"0":"") + start_time.getHours() +':'
-                + ((start_time.getMinutes() < 10)?"0":"") + start_time.getMinutes()  +':'
-                + ((start_time.getSeconds() < 10)?"0":"") + start_time.getSeconds() +
-                '<br>End: '
-                + ((end_time.getHours() < 10)?"0":"") + end_time.getHours() +':'
-                + ((end_time.getMinutes() < 10)?"0":"") + end_time.getMinutes()  +':'
-                + ((end_time.getSeconds() < 10)?"0":"") + end_time.getSeconds() + '<br>Duration: '+ duration +'</div>';
+        const util_data = {
+            labels: util_labels,
+            datasets : [{
+                label: 'data',
+                data: util_raw_data,
+                fill: false,
+                borderColor: barColors[0],
+                tension: 0.1
+            }]
+        }
+        const util_config = {
+            type: "line",
+            data: util_data,
+            options:{
+                scales:{
+                    y:{
+                        beginAtZero: true
+                    }
+                },
+                plugins: {
+                    annotation: {
+                        annotations: {
+                            line1: {
+                                adjustScaleRange: true,
+                                drawTime: 'afterDatasetsDraw',
+                                type: 'line',
+                                scaleID: 'y',
+                                value: 60,
+                                borderColor: 'rgba(255, 99, 132)',
+                                backgroundColor: 'rgba(255, 99, 132)'
+                        }
+                    }
+                }   
+            }
+        }
     }
+        const utilChart = new Chart(util_ctx, util_config);
 
-    function addrow(){
-        dt = [ [ 'Timeline',  'Error', createCustomTooltip(new Date(0,0,0,15,20,30),new Date(0,0,0,18,0,0)), new Date(0,0,0,15,20,30), new Date(0,0,0,15,40,15) ],
-          [ 'Timeline',  'Idle', createCustomTooltip(new Date(0,0,0,17,1,0),date), new Date(0,0,0,15,40,15), new Date(0,0,1,7,39,0) ],]
-        drawChart(dt);
-    }
-
-    // Add days to next day
-    Date.prototype.addDays = function(days) {
-    var date = new Date(this.valueOf());
-    date.setDate(date.getDate() + days);
-    return date;
-    }
-    var date = new Date();
-
-    console.log(date.addDays(16));
     </script>
 </body>
 </html>
