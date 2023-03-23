@@ -29,6 +29,14 @@
     color: white;
 
 }
+.header-info span{
+  font-size: 28px;
+  margin-right: 20px;
+  border-radius: 15px;
+  padding: 0 15px;
+  color: #fff;
+  background-color: #0086DB;
+}
 .header-info h3{
     margin-left: 10px;
     padding-bottom: 10px;
@@ -292,8 +300,61 @@ h5{
 }
 .timeline-container{
   padding: 20px;
-  height: 170px;
+  height: 230px;
   border-radius: 10px;
+}
+.timeline{
+  overflow-x: scroll;
+  overflow-y: hidden;
+}
+.timeline-detail{
+  margin-top: 15px;
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+}
+.option-control button{
+  color: #fff;
+  padding: 5px 10px 0 10px;
+  background-color: #22a0ee;
+  border: 0;
+  border-radius: 5px;
+}
+.option-control button.on{
+  background-color: #25ee22;
+}
+.option-control button:hover{
+  opacity: 0.8;
+  cursor: pointer;
+}
+.timeline-detail .time-limit span{
+  padding: 0 5px;
+  border: solid 1px #ccc;
+}
+.labels-des{
+  display: flex;
+  gap: 10px;
+  margin-top: auto;
+  margin-bottom: auto;
+}
+.labels-des .box-color{
+  margin-top: auto;
+  margin-bottom: auto;
+  display: block;
+  width: 10px;
+  height: 10px;
+}
+.box-color.normal{
+  background-color: #008223;
+}
+.box-color.pause{
+  background-color: #FFA700;
+}
+.box-color.error{
+  background-color: #FC0000;
+}
+.box-color.empty{
+  background-color: #5A5A5A;
 }
 #clock-time{
   height: 30px;
@@ -417,25 +478,21 @@ h5{
 .tag-add-value{
     width: 60px;
 }
-/* width */
+
 ::-webkit-scrollbar {
     width: 10px;
+    height: 10px;
   }
-  
-  /* Track */
   ::-webkit-scrollbar-track {
     background: #f1f1f1; 
   }
-   
-  /* Handle */
   ::-webkit-scrollbar-thumb {
     background: #888; 
   }
-  
-  /* Handle on hover */
   ::-webkit-scrollbar-thumb:hover {
     background: #555; 
   }
+
   .ip-camera{
     width: 100%;
     height: 500px;

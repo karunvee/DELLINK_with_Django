@@ -90,6 +90,7 @@ class TimeLineStatus(models.Model):
     machine_name = models.CharField(max_length = 255)
     datetime = models.DateTimeField()
     status = models.CharField(max_length = 255)
+    error_code = models.CharField(max_length = 255)
 
     def __str__(self):
         return self.status

@@ -78,14 +78,14 @@
                 </li>
                 {% if user.is_authenticated %}
                 <li class="">
-                    <a href="">
+                    <a href="{% url 'logout_user' %}">
                         <i class='bx bx-log-out icon'></i>
                         <span class="text nav-text">Logout</span>
                     </a>
                 </li>
                 {% else %}
                 <li class="">
-                    <a href="">
+                    <a href="{% url 'login_user' %}">
                         <i class='bx bx-log-out icon'></i>
                         <span class="text nav-text">Login</span>
                     </a>

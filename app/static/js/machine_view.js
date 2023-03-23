@@ -395,10 +395,6 @@ var socket = new WebSocket('ws://localhost:8000/ws/app/');
                         break;
                     case "1":
                         document.getElementById("text-indicator-status").innerText = "Error";
-                        // sg.classList.remove("green"); sg_m.classList.remove("green");
-                        // sy.classList.remove("yellow"); sy_m.classList.remove("yellow");
-                        // sr.classList.remove("red"); sr_m.classList.remove("red");
-                        // sg.classList.add("red"); sg_m.classList.add("red");
                         sg_m.className = "indicator-status";
                         sg.className = "indicator-status";
                         sy.className = "indicator-status";
@@ -408,10 +404,6 @@ var socket = new WebSocket('ws://localhost:8000/ws/app/');
                         break;
                     case "2":
                         document.getElementById("text-indicator-status").innerText = "Pause";
-                        // sg.classList.remove("green"); sg_m.classList.remove("green");
-                        // sy.classList.remove("yellow"); sy_m.classList.remove("yellow");
-                        // sr.classList.remove("red"); sr_m.classList.remove("red");
-                        // sy.classList.add("yellow"); sy_m.classList.add("yellow");
                         sg_m.className = "indicator-status";
                         sg.className = "indicator-status";
                         sy.className = "indicator-status yellow";
@@ -421,10 +413,6 @@ var socket = new WebSocket('ws://localhost:8000/ws/app/');
                         break;
                     case "3":
                         document.getElementById("text-indicator-status").innerText = "standby";
-                        // sg.classList.remove("green"); sg_m.classList.remove("green");
-                        // sy.classList.remove("yellow"); sy_m.classList.remove("yellow");
-                        // sr.classList.remove("red"); sr_m.classList.remove("red");
-                        // sy.classList.add("yellow"); sy_m.classList.add("yellow");
                         sg_m.className = "indicator-status";
                         sg.className = "indicator-status";
                         sy.className = "indicator-status yellow";
@@ -434,10 +422,6 @@ var socket = new WebSocket('ws://localhost:8000/ws/app/');
                         break;
                     case "4":
                         document.getElementById("text-indicator-status").innerText = "Wait for material";
-                        // sg.classList.remove("green"); sg_m.classList.remove("green");
-                        // sy.classList.remove("yellow"); sy_m.classList.remove("yellow");
-                        // sr.classList.remove("red"); sr_m.classList.remove("red");
-                        // sy.classList.add("yellow"); sy_m.classList.add("yellow");
                         sg_m.className = "indicator-status";
                         sg.className = "indicator-status";
                         sy.className = "indicator-status yellow";
@@ -447,10 +431,6 @@ var socket = new WebSocket('ws://localhost:8000/ws/app/');
                         break;
                     case "5":
                         document.getElementById("text-indicator-status").innerText = "Output full material";
-                        // sg.classList.remove("green"); sg_m.classList.remove("green");
-                        // sy.classList.remove("yellow"); sy_m.classList.remove("yellow");
-                        // sr.classList.remove("red"); sr_m.classList.remove("red");
-                        // sy.classList.add("yellow"); sy_m.classList.add("yellow");
                         sg_m.className = "indicator-status";
                         sg.className = "indicator-status";
                         sy.className = "indicator-status yellow";
@@ -460,10 +440,6 @@ var socket = new WebSocket('ws://localhost:8000/ws/app/');
                         break;
                     case "6":
                         document.getElementById("text-indicator-status").innerText = "Material low";
-                        // sg.classList.remove("green"); sg_m.classList.remove("green");
-                        // sy.classList.remove("yellow"); sy_m.classList.remove("yellow");
-                        // sr.classList.remove("red"); sr_m.classList.remove("red");
-                        // sy.classList.add("yellow"); sy_m.classList.add("yellow");
                         sg_m.className = "indicator-status";
                         sg.className = "indicator-status";
                         sy.className = "indicator-status yellow";
@@ -473,10 +449,6 @@ var socket = new WebSocket('ws://localhost:8000/ws/app/');
                         break;
                     case "7":
                         document.getElementById("text-indicator-status").innerText = "Change line";
-                        // sg.classList.remove("green"); sg_m.classList.remove("green");
-                        // sy.classList.remove("yellow"); sy_m.classList.remove("yellow");
-                        // sr.classList.remove("red"); sr_m.classList.remove("red");
-                        // sy.classList.add("yellow"); sy_m.classList.add("yellow");
                         sg_m.className = "indicator-status";
                         sg.className = "indicator-status";
                         sy.className = "indicator-status yellow";
@@ -486,10 +458,6 @@ var socket = new WebSocket('ws://localhost:8000/ws/app/');
                         break;
                     default:
                         document.getElementById("text-indicator-status").innerText = "Unknown";
-                        // sg.classList.remove("green"); sg_m.classList.remove("green");
-                        // sy.classList.remove("yellow"); sy_m.classList.remove("yellow");
-                        // sr.classList.remove("red"); sr_m.classList.remove("red");
-                        // sy.classList.add("yellow"); sy_m.classList.add("yellow");
                         sg_m.className = "indicator-status";
                         sg.className = "indicator-status";
                         sy.className = "indicator-status yellow";

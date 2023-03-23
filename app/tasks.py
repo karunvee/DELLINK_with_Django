@@ -127,13 +127,13 @@ def data_api():
                     dictIndicator["register"] = indicator['register']
                     dictIndicator["gp"] = indicator['gp']
                     dictIndicator["value"] = str(indicator['value'])
-                    statusCode = str(indicator['value'])
+                    error_code = "0"
 
                     dictMachine["indicator"].append(dictIndicator)
 
                     #Line notice error
                     
-                    if(dictIndicator["indicator_name"] == "statusCode123" and dictIndicator["value"] != "" and dictIndicator["value"] != "None" and machine_name == "Auto load in router"):
+                    if(dictIndicator["indicator_name"] == "statusCode" and dictIndicator["value"] != "" and dictIndicator["value"] != "None" and (machine_name == "Auto load in router" or machine_name == "Auto Apply Glue") ):
                         if(dictIndicator["value"] != "0" and dictMachine["machine_name"] not in dicError):
                             errorNotice = ErrorNotification.objects.filter(
                                 tag_member__plant_name__exact = dictPlant["plant_name"], 
@@ -148,7 +148,7 @@ def data_api():
 
                             dicError[dictMachine["machine_name"]] = dictIndicator["tid"]
                             
-                            msg_alert = 'Error Alert\nmachine name:{}\nError code: ({}){}'.format(dictMachine["machine_name"], statusCode, msg_error)
+                            msg_alert = 'Error Alert\nmachine name:{}\nError code: ({}){}'.format(dictMachine["machine_name"], dictIndicator["value"], msg_error)
                             
                             # line_bot_api.broadcast(TextSendMessage(text=msg_alert))
                             # line_bot_api.broadcast(FlexSendMessage(alt_text="Card", contents=card))
@@ -156,15 +156,16 @@ def data_api():
                             #------------------------------------------------------------------------------------------------------------------------
                             # Add to Error history
                             now = datetime.now()
+                            error_code = dictIndicator["value"]
                             errorAddCount = ErrorHistory(plant_name = dictPlant["plant_name"], line_name = dictLine["line_name"], machine_name = dictMachine["machine_name"]
-                                                            , datetime = now, error_code = statusCode, error_message = msg_error)
+                                                            , datetime = now, error_code = dictIndicator["value"], error_message = msg_error)
                             errorAddCount.save()
                             #------------------------------------------------------------------------------------------------------------------------
                         elif(dictIndicator["value"] == "0" and dictMachine["machine_name"] in dicError):
                             del dicError[dictMachine["machine_name"]]
 
                     # Timeline update
-                    if(dictIndicator["indicator_name"] == "statusWarRoom" and dictIndicator["value"] != "" and dictIndicator["value"] != "None" and machine_name == "Auto load in router"):
+                    if(dictIndicator["indicator_name"] == "status" and dictIndicator["value"] != "" and dictIndicator["value"] != "None" and (machine_name == "Auto load in router" or machine_name == "Auto Apply Glue")):
                         timelineObj = TimeLineStatus.objects.filter(
                             plant_name__exact = dictPlant["plant_name"],
                             line_name__exact = dictLine["line_name"], 
@@ -173,6 +174,7 @@ def data_api():
 
                         updateTimeline = False
                         if(dictIndicator["value"]  == "0"):
+                            error_code = "0"
                             current_status = "Normal"
                         elif(dictIndicator["value"]  == "1"):
                             current_status = "Error"
@@ -195,7 +197,7 @@ def data_api():
                                 # time = now.strftime("%H:%M:%S")
 
                                 timeline = TimeLineStatus(plant_name = dictPlant["plant_name"], line_name = dictLine["line_name"], machine_name = dictMachine["machine_name"]
-                                                        ,datetime = now, status = current_status)
+                                                        ,datetime = now, status = current_status, error_code = error_code)
                                 timeline.save()
                                     
                                     
@@ -230,6 +232,7 @@ def graph_api():
         # dictTimeline["data_date"] = "{}".format(index.data_date)
         # dictTimeline["data_time"] = "{}".format(index.data_time)
         dictTimeline["status"] = index.status
+        dictTimeline["error_code"] = index.error_code
 
         dictType["timeline"].append(dictTimeline)
 

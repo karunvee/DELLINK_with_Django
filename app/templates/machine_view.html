@@ -11,7 +11,7 @@
     <link rel="icon" type="image/x-icon" href="{% static 'img/favicon.ico' %}">
     <title>Document</title>
 </head>
-<body onload="startTime()">
+<body onload="initialPage()">
     {% include "main_templates/menubar.html" %}
     <section class="header">
         <div class="content-item-view">
@@ -33,7 +33,7 @@
                 </div>
                 <div class="container-content">
                     <div class="header-info">
-                        <h3 id="machineName" class="machineName">{{machineInfo.name}}</h3>
+                        <h3 id="machineName" class="machineName"><span>{{lineName}}</span>{{machineInfo.name}}</h3>
                         <div class="header-status">
                             {% for indicator in indicator_members %}
                                 {% if indicator.data_type == "STATUS" %}
@@ -106,7 +106,28 @@
                     <div class="hd">
                         <h2>Timeline</h2><span id="clock-time"></span>
                     </div>
-                    <div id="timeline" style="width: 100%;" ></div>
+                    <div id="timeline-id" class="timeline">
+                        <div  id="timeline" style="width: 1500px; height: 100px;" ></div>
+                    </div>    
+                    <div class="timeline-detail">
+                        <div class="time-limit">
+                            <span>time start : 7:30</span>
+                            <span>time end   : 7:30 on tomorrow</span>
+                        </div>
+                        <div class="option-control">
+                            <button onclick="zoominTimeline()"><i class='bx bx-zoom-in bx-xs'></i></button>
+                            <button onclick="zoomoutTimeline()"><i class='bx bx-zoom-out bx-xs' ></i></button>
+                            <button onclick="refreshTimeline()"><i class='bx bx-refresh bx-xs'></i></button>
+                            <button onclick="tonowTimeline()"><i class='bx bxs-arrow-to-right bx-xs'></i></button>
+                            <button onclick="autofollowTimeline()" class="on" id="autofollow_btn"><i class='bx bx-play-circle'></i></button>
+                        </div>
+                        <div class="labels-des">
+                            <span class="box-color normal"></span><span>Normal</span><br>
+                            <span class="box-color pause"></span><span>Pause/Idle</span><br>
+                            <span class="box-color error"></span><span>Error</span>
+                            <span class="box-color empty"></span><span>Empty</span>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- <div class="header-tags">
@@ -133,7 +154,7 @@
                                 <th class="error-header-code">ErrorCode</th>
                                 <th class="error-header-des">Description</th>
                                 <th class="error-header-counter">Counter</th>
-                                <th class="error-header-addi">additional</th>
+                                <th class="error-header-addi">-</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -364,7 +385,8 @@
     <script src="{% static 'js/machine_view.js' %}"></script>
     <script>
 
-
+    var raw_data_error;
+    var widthTimeline = 1500;
     // Add days to next day
     Date.prototype.addDays = function(days) {
     var date = new Date(this.valueOf());
@@ -399,39 +421,42 @@ socket_graph.onmessage = function(e){
 
 function updateTimeline(rw){
     
-    var dataTable = []
+    var dtTimeline = []
     var raw = rw[0]["timeline"];
-    if(raw.length > 0){
-        for(let i =0; i < raw.length; i++){
-            const time1 = raw[i]["datetime"];
+    var this_data = [];
+    for(let i = 0; i < raw.length ; i++){
+        if(plantName == raw[i]["plant_name"] && lineName == raw[i]["line_name"] && machineName == raw[i]["machine_name"]){
+            this_data.push(raw[i]);
+        }
+    }
+
+    if(this_data.length > 0){
+        for(let i =0; i < this_data.length; i++){
+            const time1 = this_data[i]["datetime"];
             const timeIndex1 = new Date(time1);
             timeIndex1.setHours(timeIndex1.getHours() - 7);
 
             if(timeStart.getTime() < timeIndex1.getTime()){
-                if(plantName == raw[i]["plant_name"] && lineName == raw[i]["line_name"] && machineName == raw[i]["machine_name"]){
-                    
-                    if(i == raw.length - 1){
+                    if(i == this_data.length - 1){
                         dt = [
-                            [ 'Status',  raw[i]["status"], createCustomTooltip(timeIndex1, date), timeIndex1, date ],
-                            [ 'Status',  'Idle', createCustomTooltip(date, timeReset), date, timeReset ],
+                            [ 'Status',  this_data[i]["status"], createCustomTooltip(timeIndex1, date, this_data[i]["error_code"]), timeIndex1, date ],
+                            // [ 'Status',  '-', createCustomTooltip(date, timeReset), date, timeReset ],
                         ];
-                        dataTable.push(dt);
+                        dtTimeline.push(dt);
                     }
                     else{
-                        const time2 = raw[i+1]["datetime"];
+                        const time2 = this_data[i+1]["datetime"];
                         const timeIndex2 = new Date(time2);
                         timeIndex2.setHours(timeIndex2.getHours() - 7);
                         dt = [
-                            [ 'Status',  raw[i]["status"], createCustomTooltip(timeIndex1, timeIndex2), timeIndex1, timeIndex2 ],
+                            [ 'Status',  this_data[i]["status"], createCustomTooltip(timeIndex1, timeIndex2, this_data[i]["error_code"]), timeIndex1, timeIndex2 ],
                             // [ 'Status',  'Idle', createCustomTooltip(date, timeReset), date, timeReset ],
                         ];
-                        dataTable.push(dt);
+                        dtTimeline.push(dt);
                     }
-                    
-                }
             }
         }
-        drawChart(dataTable)
+        drawChart(dtTimeline)
     }
     else{
         console.log("Timeline not exist in database!");
@@ -472,16 +497,9 @@ function drawChart(dt) {
           [ 'Status', 'Normal', '', ini_normal, ini_error ],
           [ 'Status', 'Error', '',    ini_error, ini_pause ],
           [ 'Status',  'Pause', '', ini_pause, ini_idle ],
-          [ 'Status',  'Idle', '', ini_idle, ini_idle_end ],
-          [ 'Status',  'Idle', createCustomTooltip(date, timeReset), date, timeReset ],
+          [ 'Status',  '-', '', ini_idle, ini_idle_end ],
+          [ 'Status',  '-', createCustomTooltip(date, timeReset, "-"), date, timeReset ],
             //
-
-        //   [ 'Status',  'Normal', createCustomTooltip(new Date(0,0,0,7,40,0),new Date(0,0,0,8,30,0)), new Date(0,0,0,7,40,0), new Date(0,0,0,8,30,0) ],
-        //   [ 'Status',  'Error', createCustomTooltip(new Date(0,0,0,7,40,0),new Date(0,0,0,8,40,0)), new Date(0,0,0,8,30,0), new Date(0,0,0,10,35,0) ],
-        //   [ 'Status',  'Normal', createCustomTooltip(new Date(0,0,0,9,0,0),new Date(0,0,0,9,5,0)), new Date(0,0,0,10,35,0), new Date(0,0,0,13,30,0) ],
-        //   [ 'Status',  'Pause', createCustomTooltip(new Date(0,0,0,12,0,0),new Date(0,0,0,15,30,0)), new Date(0,0,0,13,30,0), new Date(0,0,0,15,20,0) ],
-        //   [ 'Status',  'Error', createCustomTooltip(new Date(0,0,0,15,20,0), new Date(0,0,0,15,20,10)), new Date(0,0,0,15,20,0), new Date(0,0,0,15,20,10) ],
-        //   [ 'Status',  'Idle', createCustomTooltip(new Date(0,0,0,17,1,0),new Date(0,0,0,18,0,0)), new Date(0,0,0,15,20,10), new Date(0,0,1,7,39,0) ],
         ]);
         if(dt != null){
             var rowCount = dataTable.getNumberOfRows();
@@ -497,7 +515,10 @@ function drawChart(dt) {
         var options = {
             tooltip: {isHtml: true},
             colors: ['#008223', '#FC0000', '#FFA700', '#5A5A5A'],
-            timeline: { groupByRowLabel: true }
+            timeline: { 
+                groupByRowLabel: true ,
+                showRowLabels: false,
+                showBarLabels: false}
         };
         chart.draw(dataTable, options);
 }
@@ -505,25 +526,15 @@ function drawChart(dt) {
 function createCustomTooltip(start_time, end_time, errorCode) {
         var diff = Math.round((end_time - start_time) / 1000);
         var duration = new Date(diff * 1000).toISOString().substr(11, 8);
-        errorCode = "Code 1";
-            return '<div style="padding: 10px; width:150px;">errorCode: '+ errorCode +'<hr>Start: '
+            return '<div style="padding: 10px; width:150px; z-index: 10;"> <strong>errorCode: '+ errorCode +'</strong><hr style="margin: 0;">Start: '
                 + ((start_time.getHours() < 10)?"0":"") + start_time.getHours() +':'
                 + ((start_time.getMinutes() < 10)?"0":"") + start_time.getMinutes()  +':'
                 + ((start_time.getSeconds() < 10)?"0":"") + start_time.getSeconds() +
-                '<br>End: '
+                '<br>End:&nbsp;&nbsp;&nbsp;'
                 + ((end_time.getHours() < 10)?"0":"") + end_time.getHours() +':'
                 + ((end_time.getMinutes() < 10)?"0":"") + end_time.getMinutes()  +':'
                 + ((end_time.getSeconds() < 10)?"0":"") + end_time.getSeconds() + '<br>Duration: '+ duration +'</div>';
 }
-
-function addrow(){
-        dt = [ [ 'Timeline',  'Error', createCustomTooltip(new Date(0,0,0,15,20,30),new Date(0,0,0,18,0,0)), new Date(0,0,0,15,20,30), new Date(0,0,0,15,40,15) ],
-          [ 'Timeline',  'Idle', createCustomTooltip(new Date(0,0,0,17,1,0),date), new Date(0,0,0,15,40,15), new Date(0,0,1,7,39,0) ],]
-        drawChart(dt);
-}
-
-
-
 
 
         // Error Counting *************************************************

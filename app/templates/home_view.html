@@ -68,8 +68,12 @@
                             errorClass = "";
                         }
                     }
-                    content += `
-                    <a href="line_view/pt${raw_data[i]['plant_name']}ln${raw_data[i]['line'][j]['line_name']}/">
+                    {% if user.is_authenticated %}
+                        authentication_link = `<a href="line_view/pt${raw_data[i]['plant_name']}ln${raw_data[i]['line'][j]['line_name']}/">`;
+                    {% else %}
+                        authentication_link = ` <a href="{% url 'login_user' %}">`;
+                    {% endif %}
+                    content += authentication_link +`
                          <div class="line-item">
                             <div class="item-header">
                                 <span>Line</span>

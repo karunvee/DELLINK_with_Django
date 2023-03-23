@@ -61,6 +61,7 @@ class TimeLineStatusAdmin(admin.ModelAdmin):
                     'line_name',
                     'machine_name',
                     'datetime',
-                    'status'
+                    'status',
+                    'error_code'
     )
 admin.site.register(TimeLineStatus, TimeLineStatusAdmin)
