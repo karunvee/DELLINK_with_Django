@@ -84,8 +84,8 @@
                     onerror="this.onerror=null; this.src='{% static 'img/camera-not-found.jpg' %}'" loading="lazy">
                     <div class="camera-info">
                         <div>
-                            {% if ip_camera != "" %}
-                            <span>IP camera : {{ip_camera}}</span>
+                            {% if machineInfo.ip_camera != "" %}
+                            <span>IP camera : {{machineInfo.ip_camera}}</span>
                             <button onclick="document.getElementById('add-camera-form').style.display='block'">Edit</button>
                             {% else %}
                             <span>This machine have not been assigned an IP.</span>
@@ -98,7 +98,18 @@
                     <!-- VNC viewer here -->
                     <h5>Remote viewer</h5>
                     <!-- <iframe src="http://localhost:8085/vnc.html?autoconnect=true&host={{vnc.host}}&port={{vnc.port}}&path={{vnc.path}}&password={{vnc.password}}&scallingmode=localscaling" width="100%" height="470px"></iframe> -->
-                    <iframe src="http://localhost:8085/vnc.html?autoconnect=true&scale=auto&resize=scale&host=127.0.0.1&port=8086&path=path1&password=12345678" width="100%" height="470px"></iframe>
+                    <iframe src="http://localhost:8085/vnc.html?autoconnect=true&scale=auto&resize=scale&host=127.0.0.1&port=8086&path={{machineInfo.deviceName}}&password={{machineInfo.remote_password}}" width="100%" height="470px"></iframe>
+                    
+                    <div class="remote-info">
+                        {% if machineInfo.remote_host != "hostname" %}
+                            <span>Remote IP : {{machineInfo.remote_host}}</span>
+                            <button onclick="document.getElementById('add-remote-form').style.display='block'">Edit</button>
+                            {% else %}
+                            <span>Remote IP have not been assigned</span>
+                        <button onclick="document.getElementById('add-remote-form').style.display='block'">Assign</button>
+                            {% endif %}
+                        
+                    </div>
                 </div>        
             </section>
             <section class="analysis-content">
@@ -107,7 +118,7 @@
                         <h2>Timeline</h2><span id="clock-time"></span>
                     </div>
                     <div id="timeline-id" class="timeline">
-                        <div  id="timeline" style="width: 1500px; height: 100px;" ></div>
+                        <div  id="timeline" style="width: 3000px; height: 100px;" ></div>
                     </div>    
                     <div class="timeline-detail">
                         <div class="time-limit">
@@ -279,6 +290,22 @@
             </section>
         </div>
     </section>
+    <!-- Add Romote IP -->
+    <div id="add-remote-form" class="add-remote-form">
+        <form action="{% url 'update_config' plantInfo.name lineName machineName  %}" method="post">
+            {% csrf_token %}
+            <div class="add-remote-container">
+                <div class="add-remote-content">
+                    <h1>Add Remote</h1>
+                    <label for="remote_host">Host name : </label><input type="text" id="remote_host" name="remote_host" placeholder="{{machineInfo.remote_host}}"/><br><br>
+                    <label for="remote_password">Password : </label><input type="text" id="remote_password" name="remote_password" placeholder="{{machineInfo.remote_password}}"/>
+                    <hr>
+                    <input type="submit" value="Save" >
+                    <input type="button" value="Cancel" onclick="document.getElementById('add-remote-form').style.display='none'">
+                </div>
+            </div>
+        </form>
+    </div>
     <!-- Add RTSP IP Camera -->
     <div id="add-camera-form" class="add-camera-form">
         <form action="/assign_camera/pt{{plantInfo.name}}ln{{lineName}}mc{{machineName}}/" method="post">
@@ -286,7 +313,7 @@
             <div class="add-camera-container">
                 <div class="add-camera-content">
                     <h1>Add IP camera</h1>
-                    <label for="ip_camera">IP Address : </label><input type="text" id="ip_camera" name="ip_camera" placeholder="{{ip_camera}}"/>
+                    <label for="ip_camera">IP Address : </label><input type="text" id="ip_camera" name="ip_camera" placeholder="{{machineInfo.ip_camera}}"/>
                     <hr>
                     <input type="submit" value="Save" >
                     <input type="button" value="Cancel" onclick="document.getElementById('add-camera-form').style.display='none'">
@@ -418,7 +445,39 @@ socket_graph.onmessage = function(e){
     updateErrorTable(raw_data_error);
     updateTimeline(raw_data_error);
 }
+function updateErrorTable(rw){
+    var raw = rw[0]["error-history"];
+    var errorTable = document.getElementById("table-error");
 
+    errorTable.innerHTML = `
+    <thead>
+        <tr>
+            <th class="error-header-date">Date/Time</th>
+            <th class="error-header-code">ErrorCode</th>
+            <th class="error-header-des">Description</th>
+            <th class="error-header-counter">Counter</th>
+            <th class="error-header-addi">-</th>
+        </tr>
+    </thead>`;
+
+    // errorTable.innerHTML = "";
+    for(let i =0; i < raw.length; i++){
+        if(plantName == raw[i]["plant_name"] && lineName == raw[i]["line_name"] && machineName == raw[i]["machine_name"]){
+            var new_row = errorTable.insertRow(1);
+            var date_cell = new_row.insertCell(0);
+            var errorCode_cell = new_row.insertCell(1);
+            var des_cell = new_row.insertCell(2);
+            var count_cell = new_row.insertCell(3);
+            var add_cell = new_row.insertCell(4);
+            date_cell.innerHTML = raw[i]["datetime"].split('.')[0];
+            errorCode_cell.innerHTML = raw[i]["error_code"];
+            des_cell.innerHTML = raw[i]["error_message"];
+            count_cell.innerHTML = "999";
+            add_cell.innerHTML = "";
+        }
+        
+    }
+}
 function updateTimeline(rw){
     
     var dtTimeline = []
@@ -434,12 +493,13 @@ function updateTimeline(rw){
         for(let i =0; i < this_data.length; i++){
             const time1 = this_data[i]["datetime"];
             const timeIndex1 = new Date(time1);
-            timeIndex1.setHours(timeIndex1.getHours() - 7);
+            // timeIndex1.setHours(timeIndex1.getHours() - 7);
+            timeIndex1.setHours(timeIndex1.getHours());
 
             if(timeStart.getTime() < timeIndex1.getTime()){
                     if(i == this_data.length - 1){
                         dt = [
-                            [ 'Status',  this_data[i]["status"], createCustomTooltip(timeIndex1, date, this_data[i]["error_code"]), timeIndex1, date ],
+                            [ 'Status',  this_data[i]["status"], createCustomTooltip(timeIndex1, date, this_data[i]["status"], this_data[i]["error_code"]), timeIndex1, date ],
                             // [ 'Status',  '-', createCustomTooltip(date, timeReset), date, timeReset ],
                         ];
                         dtTimeline.push(dt);
@@ -447,9 +507,10 @@ function updateTimeline(rw){
                     else{
                         const time2 = this_data[i+1]["datetime"];
                         const timeIndex2 = new Date(time2);
-                        timeIndex2.setHours(timeIndex2.getHours() - 7);
+                        // timeIndex2.setHours(timeIndex2.getHours() - 7);
+                        timeIndex2.setHours(timeIndex2.getHours());
                         dt = [
-                            [ 'Status',  this_data[i]["status"], createCustomTooltip(timeIndex1, timeIndex2, this_data[i]["error_code"]), timeIndex1, timeIndex2 ],
+                            [ 'Status',  this_data[i]["status"], createCustomTooltip(timeIndex1, timeIndex2, this_data[i]["status"], this_data[i]["error_code"]), timeIndex1, timeIndex2 ],
                             // [ 'Status',  'Idle', createCustomTooltip(date, timeReset), date, timeReset ],
                         ];
                         dtTimeline.push(dt);
@@ -498,7 +559,7 @@ function drawChart(dt) {
           [ 'Status', 'Error', '',    ini_error, ini_pause ],
           [ 'Status',  'Pause', '', ini_pause, ini_idle ],
           [ 'Status',  '-', '', ini_idle, ini_idle_end ],
-          [ 'Status',  '-', createCustomTooltip(date, timeReset, "-"), date, timeReset ],
+          [ 'Status',  '-', createCustomTooltip(date, timeReset, "-", "-"), date, timeReset ],
             //
         ]);
         if(dt != null){
@@ -523,10 +584,25 @@ function drawChart(dt) {
         chart.draw(dataTable, options);
 }
 
-function createCustomTooltip(start_time, end_time, errorCode) {
+function createCustomTooltip(start_time, end_time, status,errorCode) {
         var diff = Math.round((end_time - start_time) / 1000);
         var duration = new Date(diff * 1000).toISOString().substr(11, 8);
-            return '<div style="padding: 10px; width:150px; z-index: 10;"> <strong>errorCode: '+ errorCode +'</strong><hr style="margin: 0;">Start: '
+        var headerToolTip = ""
+        switch (status){
+            case "Normal":
+                headerToolTip = '<strong style="color: #008223;">Normal</strong>';
+                break;
+            case "Pause":
+                headerToolTip = '<strong style="color: #FFA700;">Pause</strong>';
+                break;
+            case "Error":
+                headerToolTip = '<strong style="color: #FC0000;">errorCode: '+ errorCode +'</strong>';
+                break;
+            default:
+                headerToolTip = '<strong>--</strong>';
+                break;
+        }
+            return '<div style="padding: 10px; width:150px; z-index: 10;">'+ headerToolTip + '<hr style="margin: 0;">Start: '
                 + ((start_time.getHours() < 10)?"0":"") + start_time.getHours() +':'
                 + ((start_time.getMinutes() < 10)?"0":"") + start_time.getMinutes()  +':'
                 + ((start_time.getSeconds() < 10)?"0":"") + start_time.getSeconds() +
@@ -535,6 +611,14 @@ function createCustomTooltip(start_time, end_time, errorCode) {
                 + ((end_time.getMinutes() < 10)?"0":"") + end_time.getMinutes()  +':'
                 + ((end_time.getSeconds() < 10)?"0":"") + end_time.getSeconds() + '<br>Duration: '+ duration +'</div>';
 }
+
+
+// Initialized Data
+var tbs_labels = [1, 2, 3, 4, 5, 6, 7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30];
+var tbs_raw_data = [8, 59, 80, 81, 56, 55, 40, 65, 40, 35, 20, 8, 55, 40,20, 35, 70, 65, 62, 40, 55, 10, 12, 25, 35, 45, 68, 0];
+var util_labels = [1, 2, 3, 4, 5, 6, 7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30];
+var util_raw_data = [8, 59, 80, 81, 56, 55, 40, 65, 40, 35, 20, 8, 55, 40,20, 35, 70, 65, 62, 40, 55, 10, 12, 25, 35, 45, 68, 0];
+
 
 
         // Error Counting *************************************************
@@ -581,7 +665,7 @@ function createCustomTooltip(start_time, end_time, errorCode) {
                 }
             }
         });
-        // TBS Counting *************************************************
+        // TBS  *************************************************
         
         var x = 0;
             function tbsPlus(){
@@ -592,9 +676,6 @@ function createCustomTooltip(start_time, end_time, errorCode) {
             }
             
         var tbs_ctx = document.getElementById('tbs-chart');
-        var tbs_labels = [1, 2, 3, 4, 5, 6, 7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30];
-        var tbs_raw_data = [8, 59, 80, 81, 56, 55, 40, 65, 40, 35, 20, 8, 55, 40,20, 35, 70, 65, 62, 40, 55, 10, 12, 25, 35, 45, 68, 0];
-
         const tbs_data = {
             labels: tbs_labels,
             datasets : [{
@@ -633,7 +714,7 @@ function createCustomTooltip(start_time, end_time, errorCode) {
     }
         const tbsChart = new Chart(tbs_ctx, tbs_config);
         
-        // Utilization Counting *************************************************
+        // Utilization  *************************************************
         var x = 0;
             function sPlus(){
                 x = x + 1;
@@ -643,9 +724,6 @@ function createCustomTooltip(start_time, end_time, errorCode) {
             }
 
         var util_ctx = document.getElementById('utilize-chart');
-        var util_labels = [1, 2, 3, 4, 5, 6, 7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30];
-        var util_raw_data = [8, 59, 80, 81, 56, 55, 40, 65, 40, 35, 20, 8, 55, 40,20, 35, 70, 65, 62, 40, 55, 10, 12, 25, 35, 45, 68, 0];
-
         const util_data = {
             labels: util_labels,
             datasets : [{
