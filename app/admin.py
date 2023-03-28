@@ -65,3 +65,16 @@ class TimeLineStatusAdmin(admin.ModelAdmin):
                     'error_code'
     )
 admin.site.register(TimeLineStatus, TimeLineStatusAdmin)
+
+class TimeLineStartEndAdmin(admin.ModelAdmin):
+    list_display = ('pk',
+                    'start', 
+                    'end'
+    )
+admin.site.register(TimeLineStartEnd, TimeLineStartEndAdmin)
+
+class ErrorMessageAdmin(admin.ModelAdmin):
+    list_display = ('machine_type',
+                    'error_message'
+    )
+admin.site.register(ErrorMessage, ErrorMessageAdmin)

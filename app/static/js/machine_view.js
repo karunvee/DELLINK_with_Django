@@ -139,7 +139,7 @@ var socket = new WebSocket('ws://localhost:8000/ws/app/');
             
         }
 
-        function ShowMachineTags(data){
+        function ShowMachineTags(raw_data){
             var table = document.querySelector('#table-tag');
             table.innerHTML = "";
             table.innerHTML += `

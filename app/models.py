@@ -61,14 +61,21 @@ class Indicator(models.Model):
     color = models.CharField(max_length = 255,blank=True)
 
     def __str__(self):
-        # return "%s %s %s" % (self.tag_name, self.tag_id, self.data_type)
-        return self.tag_name
+        return "%s %s %s" % (self.line_name, self.machine_name, self.tag_name)
+        # return self.tag_name
+
+class ErrorMessage(models.Model):
+    machine_type = models.CharField(max_length= 255)
+    error_message = models.CharField(max_length= 255)
+
+    def __str__(self):
+        return self.error_message
 
 class ErrorNotification(models.Model):
     tag_member = models.ForeignKey(Indicator, on_delete=models.CASCADE, null=True)
     error_code = models.CharField(max_length= 255)
     error_message = models.CharField(max_length= 255)
-
+    
     def __str__(self):
         return self.error_message
     
@@ -94,3 +101,10 @@ class TimeLineStatus(models.Model):
 
     def __str__(self):
         return self.status
+    
+class TimeLineStartEnd(models.Model):
+    start = models.DateTimeField()
+    end = models.DateTimeField()
+
+    def __int__(self):
+        return self.pk

@@ -16,8 +16,9 @@ urlpatterns = [
     path('assign_indicator/pt<str:pt>ln<str:ln>mc<str:mc>/', views.AssignIndicator, name='assign_indicator'),
     path('delete_indicator/pt<str:pt>ln<str:ln>mc<str:mc>tid<str:tid>/', views.DeleteIndicator, name='delete_indicator'),
     # path('vnc_view/host<str:host>port<str:port>password<str:password>/', views.vnc_viewer, name='vnc_viewer'),
+    path('delete_timeline/', views.DeleteTimeline, name='delete_timeline'),
     path('vnc_view/', views.vnc_viewer, name='vnc_viewer'),
+    path('update_config/pt<str:pt>ln<str:ln>mc<str:mc>/', views.updateConfig, name='update_config'),
 ]
-
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

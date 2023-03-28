@@ -11,7 +11,7 @@ body {font-family: Arial, Helvetica, sans-serif;}
     border-radius: 4px;
     font-size: 14px;
 }
-.form,   .confirmForm, .add-camera-form{
+.form,   .confirmForm, .add-camera-form, .add-remote-form{
     display: none; /* Hidden by default */
     position: fixed; /* Stay in place */
     z-index: 5; /* Sit on top */
@@ -147,16 +147,16 @@ body {font-family: Arial, Helvetica, sans-serif;}
     }
   }
 
-  .confirmForm-content, .add-camera-content{
+  .confirmForm-content, .add-camera-content, .add-remote-content{
     font-size: 16px;
     padding: 16px;
   }
-  .add-camera-container{
+  .add-camera-container, .add-remote-container{
     text-align: center;
     background-color: #fefefe;
     margin: 12% 30% 0 auto;
     border: 1px solid #888;
-    width: 20%; /* Could be more or less, depending on screen size */
+    width: 25%; /* Could be more or less, depending on screen size */
     box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
     border-radius: 25px;
   }

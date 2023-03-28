@@ -19,6 +19,10 @@ from django.db.models.signals import pre_save
 import os
 from vncdotool import client, rfb, api
 import base64
+import subprocess
+from mimetypes import guess_type
+from websockify import WebSocketProxy
+
 
 # Create your views here.
 def remote_view(request):
@@ -44,19 +48,6 @@ def line_view(request, pt, ln):
     return render(request, 'line_view.html', context)
 
 def machine_view(request, pt, ln, mc):
-    lineRow = LineRow.objects.filter(plant_name__exact = pt, line_name__exact = ln, name__exact = mc).get()
-
-    if lineRow.remote_host != "" and lineRow.remote_host != "hostname":
-        vnc_files_dir = os.path.join(os.path.dirname(__file__), 'static/js/nossh')
-        jar_path = os.path.join(vnc_files_dir, 'tightvnc-jviewer.jar')
-        # Launch the JAR file with the password argument
-        hostname = lineRow.remote_host.split(':')
-        host = hostname[0]
-        port = hostname[1]
-        password = lineRow.remote_password
-        subprocess.Popen(['java', '-jar', jar_path,'-port={}'.format(port), '-host={}'.format(host) ,'-password={}'.format(password),
-                        '-ViewOnly=no', '-ShowControls=no', '-showConnectionDialog=no'])
-
     
     notification_error = ErrorNotification.objects.filter(tag_member__line_name = ln, tag_member__machine_name = mc)
     indicator_members = Indicator.objects.filter(plant_name__exact = pt, line_name__exact = ln, machine_name__exact = mc)
@@ -79,7 +70,6 @@ def machine_view(request, pt, ln, mc):
     ip_port = url[0]
     context = {
         'machine_view': True,
-        'ip_camera' : lineRow.ip_camera,
         'indicator_members' : indicator_members,
         'machineInfo' : machineInfo,
         'form': form,
@@ -162,23 +152,11 @@ def AssignIndicator(request, pt, ln, mc):
         return redirect('../../machine_view/pt{}ln{}mc{}/'.format(pt, ln, mc))
 
 def AssignCamera(request, pt, ln, mc):
-
     if request.method == 'POST':
         LineRow.objects.filter(plant_name__exact = pt, line_name__exact = ln, name__exact = mc).update(ip_camera = request.POST['ip_camera'])
         return redirect('../../machine_view/pt{}ln{}mc{}/'.format(pt, ln, mc))
 
-
-
-    # else:
-    #     return redirect('/line_view/pt{}ln{}/'.format(pt, ln))
-    # if request.is_ajax():
-    #     if request.method == 'POST':
-    #         print('Raw Data: {}' .format(request.body)) 
-    # data = json.loads(request.POST.get('data_dictionary'))
-    # print(data)
-    # data = request.POST['data_lineup']
-    # print(data)
-    # return redirect('/line_view/pt{}ln{}/'.format(pt, ln))
+    
 def internet_on(http):
     try:
         urllib.request.urlopen(http, timeout=2)
@@ -236,19 +214,61 @@ def gen(camera):
             print("Can not found the response form this rtsp.")
             break
 
+#Run Node config.js after start the server ---------------
+#.
+js_file = "./Config.js"
+# node_process  = subprocess.Popen(['node', js_file]) 
+#---------------------------------------------------------
+def restart_process(process, command):
+    global node_process
+    process.terminate()
+    process.wait()
+    node_process = subprocess.Popen(command)
+    return node_process
+
+def updateConfig(request, pt, ln, mc):
+    
+    if request.method == 'POST':
+        LineRow.objects.filter(plant_name__exact = pt, line_name__exact = ln, name__exact = mc).update(remote_host = request.POST['remote_host'], remote_password = request.POST['remote_password'])
+
+    line_row = LineRow.objects.all()
+    path_txt = """"""
+    for item in line_row:
+        if(item.remote_host != "hostname"):
+            path_txt += "{target: '"+item.remote_host+"', path: '/"+ item.deviceName +"'},"
+    try:
+        if os.path.exists(js_file):
+            os.remove(js_file)
+
+        context = """
+            const http = require('http')
+            const port = process.env.PORT || 8086
+            const websockify = require('@sukkis/node-multi-websockify')
+            const server = http.createServer()
+            server.listen(port)
+            websockify(server, 
+            [
+                {}
+                ])""".format(path_txt)
+
+        with open(js_file, 'a') as file:
+            file.write(context.strip())
+
+        # global node_process
+        # node_process = restart_process( node_process, ['node', js_file])
 
 
-import subprocess
-from mimetypes import guess_type
-from websockify import WebSocketProxy
-
+        print("***  Node is running with new config.js  ***")
+    
+        return redirect('../../machine_view/pt{}ln{}mc{}/'.format(pt, ln, mc))
+    except Exception as e:
+        return HttpResponse(e)
+    
 
 def vnc_viewer(request):
     try:
         print('vnc view')
-        # process  = subprocess.Popen(['node', 'config.js'])
-        # process.wait()
-        # process.terminate()
+        
 
         # # Open the file in read mode
         # with open('config.txt', 'r') as file:
@@ -271,3 +291,10 @@ def vnc_viewer(request):
         print("Can not found config.js on this directory path!")
     
     return render(request, 'vnc_view.html', {})
+
+
+def DeleteTimeline(request):
+
+    TimeLineStatus.objects.all().delete()
+
+    return HttpResponse("Delete all data success!")

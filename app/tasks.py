@@ -9,7 +9,8 @@ import msgpack
 import json
 
 from .models import *
-from datetime import datetime
+from datetime import datetime, timedelta
+import pytz
 
 from linebot.exceptions import InvalidSignatureError
 from linebot import (
@@ -49,6 +50,7 @@ def publish_message_to_group(message: Dict[str, Any], group: str) -> None:
 @shared_task
 def data_api():
     plant_members = PlantInfo.objects.all()
+    e_code = "0"
     data = []
     urlLine = []
     machine_list = {}
@@ -119,7 +121,6 @@ def data_api():
                 dictMachine["indicator"] = []
 
                 indicator_members = requests.get(mIndex[0] + "/" + str(mIndex[2]) + "/tags").json()
-
                 for indicator in indicator_members:
                     dictIndicator = {}
                     dictIndicator["indicator_name"] = indicator['name']
@@ -127,14 +128,15 @@ def data_api():
                     dictIndicator["register"] = indicator['register']
                     dictIndicator["gp"] = indicator['gp']
                     dictIndicator["value"] = str(indicator['value'])
-                    error_code = "0"
+                    
 
                     dictMachine["indicator"].append(dictIndicator)
 
                     #Line notice error
-                    
-                    if(dictIndicator["indicator_name"] == "statusCode" and dictIndicator["value"] != "" and dictIndicator["value"] != "None" and (machine_name == "Auto load in router" or machine_name == "Auto Apply Glue") ):
-                        if(dictIndicator["value"] != "0" and dictMachine["machine_name"] not in dicError):
+                    errorKey = "{}-{}".format(dictLine["line_name"], dictMachine["machine_name"])
+
+                    if(dictIndicator["indicator_name"] == "statusCode" and dictIndicator["value"] != "" and dictIndicator["value"] != "None" ):
+                        if(dictIndicator["value"] != "0" and errorKey not in dicError):
                             errorNotice = ErrorNotification.objects.filter(
                                 tag_member__plant_name__exact = dictPlant["plant_name"], 
                                 tag_member__line_name__exact = dictLine["line_name"],
@@ -146,8 +148,9 @@ def data_api():
                             else:
                                 msg_error = "Error unknown, this error is not defined!"
 
-                            dicError[dictMachine["machine_name"]] = dictIndicator["tid"]
-                            
+                            dicError[errorKey] = dictIndicator["value"]
+                            print(dicError)
+
                             msg_alert = 'Error Alert\nmachine name:{}\nError code: ({}){}'.format(dictMachine["machine_name"], dictIndicator["value"], msg_error)
                             
                             # line_bot_api.broadcast(TextSendMessage(text=msg_alert))
@@ -156,28 +159,42 @@ def data_api():
                             #------------------------------------------------------------------------------------------------------------------------
                             # Add to Error history
                             now = datetime.now()
-                            error_code = dictIndicator["value"]
                             errorAddCount = ErrorHistory(plant_name = dictPlant["plant_name"], line_name = dictLine["line_name"], machine_name = dictMachine["machine_name"]
                                                             , datetime = now, error_code = dictIndicator["value"], error_message = msg_error)
                             errorAddCount.save()
                             #------------------------------------------------------------------------------------------------------------------------
                         elif(dictIndicator["value"] == "0" and dictMachine["machine_name"] in dicError):
-                            del dicError[dictMachine["machine_name"]]
+                            del dicError[errorKey]
 
                     # Timeline update
-                    if(dictIndicator["indicator_name"] == "status" and dictIndicator["value"] != "" and dictIndicator["value"] != "None" and (machine_name == "Auto load in router" or machine_name == "Auto Apply Glue")):
+                    if(dictIndicator["indicator_name"] == "status" and dictIndicator["value"] != "" and dictIndicator["value"] != "None" ):
+                        
+                        updateTimeline = False
+                        now = datetime.now(pytz.timezone('UTC'))
+                        #update datetime start - end
+                        datetimeStartEnd = TimeLineStartEnd.objects.all().order_by('-id')[0]
+                        if(datetimeStartEnd.end < now):
+                            new_start = now.replace(hour=7, minute=30)
+                            new_end = new_start + timedelta(days = 1)
+                            TimeLineStartEnd.objects.filter(pk = 2).update(start = new_start, end = new_end)
+                            print(" \n############## Update datetime start - end ##############\n")
+                        
                         timelineObj = TimeLineStatus.objects.filter(
                             plant_name__exact = dictPlant["plant_name"],
                             line_name__exact = dictLine["line_name"], 
                             machine_name__exact = dictMachine["machine_name"]
                         )
-
-                        updateTimeline = False
+                        
                         if(dictIndicator["value"]  == "0"):
-                            error_code = "0"
+                            e_code = "0"
                             current_status = "Normal"
                         elif(dictIndicator["value"]  == "1"):
                             current_status = "Error"
+                            if(errorKey in dicError):
+                                e_code = dicError[errorKey]
+                            else:
+                                e_code = "status 1 but errorCode 0"
+                            
                         else:
                             current_status = "Pause"
 
@@ -185,19 +202,17 @@ def data_api():
                             old_value = timelineObj.order_by('-id')[0]
                             if(str(current_status) != str(old_value)):
                                 updateTimeline = True
-                                print("/{}<<current old>>>{}/".format(current_status, old_value))
-                                print("Update status data")
+                                print("\n{} {} \nstatus has change from <{}> to <{}> <<errorCode: {}>>".format(dictLine["line_name"], dictMachine["machine_name"], current_status, old_value, e_code))
+                            elif(old_value.datetime < datetimeStartEnd.start):
+                                print("Last status under datetime-start >> updated!")
+                                updateTimeline = True
                         else:
                             updateTimeline = True
-                            print("Add new status data to database")
+                            print("Add first status data to database")
 
                         if(updateTimeline):
-                                now = datetime.now()
-                                # date = now.strftime("%Y-%m-%d")
-                                # time = now.strftime("%H:%M:%S")
-
                                 timeline = TimeLineStatus(plant_name = dictPlant["plant_name"], line_name = dictLine["line_name"], machine_name = dictMachine["machine_name"]
-                                                        ,datetime = now, status = current_status, error_code = error_code)
+                                                        ,datetime = now, status = current_status, error_code = e_code)
                                 timeline.save()
                                     
                                     

@@ -768,25 +768,22 @@ input:focus{
   color: #ffff;
 text-align: center;
 }
-.camera-info{
+.camera-info, .remote-info{
   top: 0;
   margin-top: 0;
-}
-.camera-info div{
   margin: auto;
   text-align: center;
-}
-.camera-info span{
   font-size: 16px;
 }
-.camera-info button{
+
+.camera-info button, .remote-info button{
   margin: 0 10px;
   border: 0;
   border-radius: 5px;
   color: white;
   background-color: #3282B8;
 }
-.camera-info button:hover{
+.camera-info button:hover, .remote-info button:hover{
   cursor: pointer;
   background-color: #005992;
 }
@@ -794,24 +791,25 @@ text-align: center;
   font-size: 16px;
 
 }
-.add-camera-content input[type=text]{
+.add-camera-content input[type=text], .add-remote-content input[type=text]{
   padding: 5px 10px;
   border-radius: 5px;
   color: rgb(0, 0, 0);
 }
-.form-update input, .add-camera-content input[type=submit],.add-camera-content input[type=button]{
+.form-update input, .add-camera-content input[type=submit],.add-camera-content input[type=button], .add-remote-content input[type=submit],.add-remote-content input[type=button]{
   padding: 10px 40px;
   border: 0;
   border-radius: 5px;
   color: white;
 }
-.form-update input[type=submit], .add-camera-content input[type=submit]{
+.form-update input[type=submit], .add-camera-content input[type=submit], .add-remote-content input[type=submit]{
   background-color: #3282B8;
 }
-.form-update input[type=button], .add-camera-content input[type=button]{
+.form-update input[type=button], .add-camera-content input[type=button], .add-remote-content input[type=button]{
   background-color: #b83d32;
 }
-.form-update input[type=submit]:hover, .form-update input[type=button]:hover, .add-camera-content input[type=submit]:hover, .add-camera-content input[type=button]:hover{
+.form-update input[type=submit]:hover, .form-update input[type=button]:hover, .add-camera-content input[type=submit]:hover, .add-camera-content input[type=button]:hover
+, .add-remote-content input[type=submit]:hover, .add-remote-content input[type=button]:hover{
   cursor: pointer;
   opacity: 0.8;
 }
