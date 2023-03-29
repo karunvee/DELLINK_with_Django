@@ -39,13 +39,6 @@ class IndicatorAdmin(admin.ModelAdmin):
     )
 admin.site.register(Indicator, IndicatorAdmin)
 
-class ErrorNotificationAdmin(admin.ModelAdmin):
-    list_display = ('tag_member',
-                    'error_code',
-                    'error_message',
-    )
-admin.site.register(ErrorNotification, ErrorNotificationAdmin)
-
 class ErrorHistoryAdmin(admin.ModelAdmin):
     list_display = ('plant_name',
                     'line_name',
@@ -73,8 +66,22 @@ class TimeLineStartEndAdmin(admin.ModelAdmin):
     )
 admin.site.register(TimeLineStartEnd, TimeLineStartEndAdmin)
 
+class ErrorTypeAdmin(admin.ModelAdmin):
+    list_display = ('pk',
+                    'machine_type',
+                    'comment'
+    )
+admin.site.register(ErrorType, ErrorTypeAdmin)
+
 class ErrorMessageAdmin(admin.ModelAdmin):
     list_display = ('machine_type',
+                    'error_code',
                     'error_message'
     )
 admin.site.register(ErrorMessage, ErrorMessageAdmin)
+
+class ErrorNotificationAdmin(admin.ModelAdmin):
+    list_display = ('tag_member',
+                    'error_msg',
+    )
+admin.site.register(ErrorNotification, ErrorNotificationAdmin)

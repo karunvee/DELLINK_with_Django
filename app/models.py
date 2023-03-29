@@ -64,20 +64,26 @@ class Indicator(models.Model):
         return "%s %s %s" % (self.line_name, self.machine_name, self.tag_name)
         # return self.tag_name
 
-class ErrorMessage(models.Model):
-    machine_type = models.CharField(max_length= 255)
-    error_message = models.CharField(max_length= 255)
-
+class ErrorType(models.Model):
+    machine_type = models.CharField(max_length=255)
+    comment = models.CharField(max_length=255)
     def __str__(self):
-        return self.error_message
+        return "%s - %s" % (self.machine_type, self.comment)
 
-class ErrorNotification(models.Model):
-    tag_member = models.ForeignKey(Indicator, on_delete=models.CASCADE, null=True)
+class ErrorMessage(models.Model):
+    machine_type = models.ForeignKey(ErrorType, on_delete=models.CASCADE, null=True)
     error_code = models.CharField(max_length= 255)
     error_message = models.CharField(max_length= 255)
+
+    def __str__(self):
+        return self.error_code
+    
+class ErrorNotification(models.Model):
+    tag_member = models.ForeignKey(Indicator, on_delete=models.CASCADE, null=True)
+    error_msg = models.ForeignKey(ErrorMessage, on_delete=models.CASCADE, null=True, related_name='error_msg')
     
     def __str__(self):
-        return self.error_message
+        return self.error_msg.error_message
     
 class ErrorHistory(models.Model):
     plant_name = models.CharField(max_length = 255)

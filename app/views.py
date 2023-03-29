@@ -22,7 +22,8 @@ import base64
 import subprocess
 from mimetypes import guess_type
 from websockify import WebSocketProxy
-
+from datetime import datetime, timedelta
+import pytz
 
 # Create your views here.
 def remote_view(request):
@@ -68,6 +69,7 @@ def machine_view(request, pt, ln, mc):
     url = machineInfo.url.split('api')
     str_url = '{}devices/{}/{}/tags'.format(url[0], machineInfo.guid, machineInfo.deviceId)
     ip_port = url[0]
+
     context = {
         'machine_view': True,
         'indicator_members' : indicator_members,
@@ -217,7 +219,7 @@ def gen(camera):
 #Run Node config.js after start the server ---------------
 #.
 js_file = "./Config.js"
-# node_process  = subprocess.Popen(['node', js_file]) 
+# node_process  = subprocess.Popen(['node', js_file])  <<< Open Websockify here
 #---------------------------------------------------------
 def restart_process(process, command):
     global node_process
@@ -268,24 +270,6 @@ def updateConfig(request, pt, ln, mc):
 def vnc_viewer(request):
     try:
         print('vnc view')
-        
-
-        # # Open the file in read mode
-        # with open('config.txt', 'r') as file:
-        #     # Read the contents of the file
-        #     file_contents = file.read()
-
-        # print("###########\n{}\n###########".format(file_contents))
-
-        # new_host = ",{target: '192.1681.102:5900', path: '/path3'}\n//"
-        # # Modify the contents of the file
-        # file_contents = file_contents.replace('//', new_host)
-
-        # # Open the file in write mode
-        # with open('config.txt', 'w') as file:
-        #     # Write the modified contents back to the file
-        #     file.write(file_contents)
-
         
     except:
         print("Can not found config.js on this directory path!")

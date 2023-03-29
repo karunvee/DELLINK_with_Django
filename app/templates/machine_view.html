@@ -444,6 +444,7 @@ socket_graph.onmessage = function(e){
     raw_data_error = JSON.parse(e.data);
     updateErrorTable(raw_data_error);
     updateTimeline(raw_data_error);
+    updateTBSGraph(raw_data_error);
 }
 function updateErrorTable(rw){
     var raw = rw[0]["error-history"];
@@ -469,7 +470,7 @@ function updateErrorTable(rw){
             var des_cell = new_row.insertCell(2);
             var count_cell = new_row.insertCell(3);
             var add_cell = new_row.insertCell(4);
-            date_cell.innerHTML = raw[i]["datetime"].split('.')[0];
+            date_cell.innerHTML = DateTimeFormat(raw[i]["datetime"]);
             errorCode_cell.innerHTML = raw[i]["error_code"];
             des_cell.innerHTML = raw[i]["error_message"];
             count_cell.innerHTML = "999";
@@ -619,7 +620,9 @@ var tbs_raw_data = [8, 59, 80, 81, 56, 55, 40, 65, 40, 35, 20, 8, 55, 40,20, 35,
 var util_labels = [1, 2, 3, 4, 5, 6, 7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30];
 var util_raw_data = [8, 59, 80, 81, 56, 55, 40, 65, 40, 35, 20, 8, 55, 40,20, 35, 70, 65, 62, 40, 55, 10, 12, 25, 35, 45, 68, 0];
 
+function updateTBSGraph(){
 
+}
 
         // Error Counting *************************************************
         var labels = ["20", "1", "150", "60", "12"];

@@ -5,16 +5,25 @@ function initialPage(){
     timelineContainer.scrollTo(timelineContainer.scrollWidth, 0);
 }
 
+function DateTimeFormat(datetime){
+    const dt = new Date(datetime);
+
+    let d = dt.getDate();
+    let M = dt.getMonth() + 1;
+    let y = dt.getFullYear();
+    let h = dt.getHours();
+    let m = dt.getMinutes();
+    let s = dt.getSeconds();
+    m = checkTime(m);
+    s = checkTime(s);
+    datetime_txt = d + "/" + M + "/"+ y + " - " +h + ":" + m + ":" + s;
+    return datetime_txt;
+}
+
 function startTime() {
 
     const today = new Date();
-    // if(timeReset.getTime() < today.getTime()){
-    //     timeReset = new Date();
-    //     timeReset.setHours(7, 30, 0, 0);
-    //     timeStart = new Date();
-    //     timeStart.setHours(7, 30, 0, 0);
-    //     console("Reset time!!\n Start Time: "+ timeStart + "\n Reset Time: " + timeReset);
-    // }
+
     let d = today.getDate();
     let M = today.getMonth() + 1;
     let y = today.getFullYear();
