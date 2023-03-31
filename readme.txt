@@ -28,3 +28,11 @@ nginx -s quit
 
 @maximegris/node-websockify    to proxy single server connection
 @sukkis/node-multi-websockify   to proxy multiple server connection
+
+
++ Add Server. Enter vditw.deltaww.com
+Name : THWGRWARROOM
+IP : 10.204.209.1
+Domain : mesth.deltames.corp
+User : mesth\SRV-THD7WARROOM
+Pass : W@rServ1ce
