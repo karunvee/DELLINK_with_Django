@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="{% static 'css/main-css/display.css' %}">
     <link rel="stylesheet" href="{% static 'css/main-css/form.css' %}">
     <link rel="icon" type="image/x-icon" href="{% static 'img/favicon.ico' %}">
+
     <title>Document</title>
 </head>
 <body onload="initialPage()">
@@ -113,9 +114,10 @@
                 </div>        
             </section>
             <section class="analysis-content">
-                <div class="pnl timeline-container">
+                <div class="pnl timeline-container" id="timeline-container">
                     <div class="hd">
-                        <h2>Timeline</h2><span id="clock-time"></span>
+                        <h2>Timeline</h2>
+                        <span id="clock-time"></span>
                     </div>
                     <div id="timeline-id" class="timeline">
                         <div  id="timeline" style="width: 3000px; height: 100px;" ></div>
@@ -138,6 +140,34 @@
                             <span class="box-color error"></span><span>Error</span>
                             <span class="box-color empty"></span><span>Empty</span>
                         </div>
+                    </div>
+                    <hr>
+                    <button class="btn-trans" id="btn-showmore" onclick="timelineMore()">More</button>
+                    <div class="timeline-detail-more">
+                        <div class="tab-header">
+                            <button class="btn-tab seleced">Calculated Utilization Rate</button>
+                            <button class="btn-tab" style="z-index: 3;">Tab 2</button>
+                            <!-- <button class="btn-tab" style="z-index: 2;">Tab 3</button>
+                            <button class="btn-tab" style="z-index: 1;">Tab 4</button> -->
+                        </div>
+                        <div class="utilize-cal open">
+                            <div class="time-picker">
+                                <div class="time-picker-cal">
+                                    <span class="time-picker-number">UR</span>
+                                    <label for="appt-time-start">Start with: </label>
+                                    <input id="appt-time-start" type="time" name="appt-time" />
+                                    <label for="appt-time-end">End with: </label>
+                                    <input id="appt-time-end" type="time" name="appt-time" />
+                                    <button class="btn" onclick="UtilizationCalBar()">Cal</button>
+                                </div>
+                                <div class="utilize-bar-container">
+                                    <label for="utilize-bar">Utilization Rate : 00%</label>
+                                    <span  id="utilize-bar"></span>
+                                </div>
+                            </div>
+
+                        </div>
+                        
                     </div>
                 </div>
 
@@ -404,8 +434,6 @@
     </div>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@3.6.0/dist/chart.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@1.1.0"></script>
-    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js" integrity="sha512-JPcRR8yFa8mmCsfrw4TNte1ZvF1e3+1SdGMslZvmrzDYxS69J7J49vkFL8u6u8PlPJK+H3voElBtUCzaXj+6ig==" crossorigin="anonymous" referrerpolicy="no-referrer"></script> -->
-    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-annotation/2.2.1/chartjs-plugin-annotation.min.js" integrity="sha512-qF3T5CaMgSRNrxzu69V3ZrYGnrbRMIqrkE+OrE01DDsYDNo8R1VrtYL8pk+fqhKxUBXQ2z+yV/irk+AbbHtBAg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script> -->
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <script src="{% static 'js/Chart_graph.js' %}"></script>
@@ -413,6 +441,7 @@
     <script>
 
     var raw_data_error;
+    var timeline_self;
     var widthTimeline = 1500;
     // Add days to next day
     Date.prototype.addDays = function(days) {
@@ -483,35 +512,34 @@ function updateTimeline(rw){
     
     var dtTimeline = []
     var raw = rw[0]["timeline"];
-    var this_data = [];
+    timeline_self = [];
     for(let i = 0; i < raw.length ; i++){
         if(plantName == raw[i]["plant_name"] && lineName == raw[i]["line_name"] && machineName == raw[i]["machine_name"]){
-            this_data.push(raw[i]);
+            timeline_self.push(raw[i]);
         }
     }
 
-    if(this_data.length > 0){
-        for(let i =0; i < this_data.length; i++){
-            const time1 = this_data[i]["datetime"];
+    if(timeline_self.length > 0){
+        for(let i =0; i < timeline_self.length; i++){
+            const time1 = timeline_self[i]["datetime"];
             const timeIndex1 = new Date(time1);
             // timeIndex1.setHours(timeIndex1.getHours() - 7);
-            timeIndex1.setHours(timeIndex1.getHours());
 
             if(timeStart.getTime() < timeIndex1.getTime()){
-                    if(i == this_data.length - 1){
+                    if(i == timeline_self.length - 1){
                         dt = [
-                            [ 'Status',  this_data[i]["status"], createCustomTooltip(timeIndex1, date, this_data[i]["status"], this_data[i]["error_code"]), timeIndex1, date ],
+                            [ 'Status',  timeline_self[i]["status"], createCustomTooltip(timeIndex1, date, timeline_self[i]["status"], timeline_self[i]["error_code"]), timeIndex1, date ],
                             // [ 'Status',  '-', createCustomTooltip(date, timeReset), date, timeReset ],
                         ];
                         dtTimeline.push(dt);
                     }
                     else{
-                        const time2 = this_data[i+1]["datetime"];
+                        const time2 = timeline_self[i+1]["datetime"];
                         const timeIndex2 = new Date(time2);
                         // timeIndex2.setHours(timeIndex2.getHours() - 7);
                         timeIndex2.setHours(timeIndex2.getHours());
                         dt = [
-                            [ 'Status',  this_data[i]["status"], createCustomTooltip(timeIndex1, timeIndex2, this_data[i]["status"], this_data[i]["error_code"]), timeIndex1, timeIndex2 ],
+                            [ 'Status',  timeline_self[i]["status"], createCustomTooltip(timeIndex1, timeIndex2, timeline_self[i]["status"], timeline_self[i]["error_code"]), timeIndex1, timeIndex2 ],
                             // [ 'Status',  'Idle', createCustomTooltip(date, timeReset), date, timeReset ],
                         ];
                         dtTimeline.push(dt);
@@ -765,6 +793,73 @@ function updateTBSGraph(){
     }
         const utilChart = new Chart(util_ctx, util_config);
 
+    function timelineMore(){
+        document.getElementById('timeline-container').classList.toggle('show');
+        var btn_showmore = document.getElementById('btn-showmore');
+        var timelineForm = document.querySelector('.timeline-detail-more');
+        if(timelineForm.style.display == "block"){
+            timelineForm.style.display = "none";
+            btn_showmore.innerHTML = "More";
+        }
+        else{
+            timelineForm.style.display = "block";
+            btn_showmore.innerHTML = "Hide";
+        }
+    }
+
+function UtilizationCalBar(){
+
+    var data;
+
+    var time_start = document.getElementById('appt-time-start').value;
+    var time_end = document.getElementById('appt-time-end').value;
+    var bar1 = document.getElementById('utilize-bar');
+
+    var timeList_start = time_start.split(':');
+    var timeList_end = time_end.split(':');
+
+    var sec_start = (+timeList_start[0]) * 60 * 60 + (+timeList_start[1]) * 60; 
+    var sec_end = (+timeList_end[0]) * 60 * 60 + (+timeList_end[1]) * 60; 
+
+    console.log(timeline_self);
+    if(timeline_self != undefined){
+        for(let i = 0; i < timeline_self.length; i++){
+            const time = timeline_self[i]["datetime"];
+            const timeIndex = new Date(time);
+            
+            // if(timeStart.getTime() < timeIndex.getTime()){  // Clear all Timeline to be today data 
+
+            //     if()
+            //     if(timeline_self[i]["status"] == "Normal"){
+
+            //     }
+            //     else{
+                    
+            //     }
+            // }
+        }
+
+        
+        bar1.style.backgroundColor = '#008223';
+        AnimationUtilBar(bar1, 90);
+    }
+    else{
+        alert("Timeline data is not exist in Json, please wait a moment and try again.")
+    }
+    
+}
+function AnimationUtilBar(elementID, percent){
+    var width = 1;
+    var id = setInterval(frame, 10);
+    function frame() {
+      if (width >= percent) {
+        clearInterval(id);
+      } else {
+        width++; 
+        elementID.style.width = width + '%'; 
+      }
+    }
+}
     </script>
 </body>
 </html>
