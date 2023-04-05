@@ -161,7 +161,7 @@
                                     <button class="btn" onclick="UtilizationCalBar()">Cal</button>
                                 </div>
                                 <div class="utilize-bar-container">
-                                    <label for="utilize-bar">Utilization Rate : 00%</label>
+                                    <label for="utilize-bar">Utilization Rate : <label id="Utilize_percent"></label>%</label>
                                     <span  id="utilize-bar"></span>
                                 </div>
                             </div>
@@ -809,39 +809,65 @@ function updateTBSGraph(){
 
 function UtilizationCalBar(){
 
-    var data;
+    var data = [];
 
     var time_start = document.getElementById('appt-time-start').value;
     var time_end = document.getElementById('appt-time-end').value;
     var bar1 = document.getElementById('utilize-bar');
-
+    var Utilize_percent = document.getElementById('Utilize_percent');
     var timeList_start = time_start.split(':');
     var timeList_end = time_end.split(':');
 
     var sec_start = (+timeList_start[0]) * 60 * 60 + (+timeList_start[1]) * 60; 
     var sec_end = (+timeList_end[0]) * 60 * 60 + (+timeList_end[1]) * 60; 
 
-    console.log(timeline_self);
-    if(timeline_self != undefined){
+    if(timeline_self != undefined & timeline_self != []){
         for(let i = 0; i < timeline_self.length; i++){
             const time = timeline_self[i]["datetime"];
+            const status = timeline_self[i]["status"];
             const timeIndex = new Date(time);
-            
-            // if(timeStart.getTime() < timeIndex.getTime()){  // Clear all Timeline to be today data 
-
-            //     if()
-            //     if(timeline_self[i]["status"] == "Normal"){
-
-            //     }
-            //     else{
-                    
-            //     }
-            // }
+           
+            if(timeStart.getTime() < timeIndex.getTime()){  // Clear all Timeline to be today data 
+                var sec_StatusChanged = (+timeIndex.getHours()) * 60 * 60 + (+timeIndex.getMinutes()) * 60 + timeIndex.getSeconds(); 
+               
+                if(sec_start <= sec_StatusChanged & sec_StatusChanged <= sec_end){
+                    if(data.length == 0){
+                        const first_time = timeline_self[i-1]["datetime"];
+                        const first_status = timeline_self[i-1]["status"];
+                        const first_timeIndex = new Date(first_time);
+                        var first_StatusChanged = (+first_timeIndex.getHours()) * 60 * 60 + (+first_timeIndex.getMinutes()) * 60 + first_timeIndex.getSeconds(); 
+                        data.push({time_sec : first_StatusChanged, status : first_status, time : first_timeIndex.getHours() + ":" + first_timeIndex.getMinutes() + ":" + first_timeIndex.getSeconds()});
+                    }
+                 data.push({time_sec : sec_StatusChanged, status : status, time : timeIndex.getHours() + ":" + timeIndex.getMinutes() + ":" + timeIndex.getSeconds()});
+                }
+            }
         }
 
-        
+        console.log(data);
+        console.log("start :" + sec_start + "\nend :" + sec_end);
+        var time_Green = 0;
+        var time_notGreen = 0;
+        for(let i = 0; i < data.length; i++){
+            if(data[i]['status'] == "Normal"){
+                if(i == 0){
+                    time_Green += data[i+1]['time_sec'] - sec_start;
+                }
+                else if(i == data.length - 1){
+                    time_Green += sec_end - data[i]['time_sec'];
+
+                }
+                else{
+                    time_Green += data[i+1]['time_sec'] - data[i]['time_sec'];
+                }
+            }
+        }
+        console.log("time_green :" + time_Green);
+        console.log("time_total : " + (sec_end-sec_start));
+        var UtilizationPercent = (time_Green*100)/(sec_end-sec_start);
+
         bar1.style.backgroundColor = '#008223';
-        AnimationUtilBar(bar1, 90);
+        Utilize_percent.innerText = UtilizationPercent.toFixed(2);
+        AnimationUtilBar(bar1, UtilizationPercent);
     }
     else{
         alert("Timeline data is not exist in Json, please wait a moment and try again.")
