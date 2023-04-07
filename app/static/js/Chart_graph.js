@@ -48,15 +48,12 @@ function startTime() {
 function refreshTimeline(){
     widthTimeline = 1500;
     timelineContainer.scrollTo(timelineContainer.scrollWidth, 0);
-    updateTimeline(raw_data_error);
 }
 function zoominTimeline(){
     widthTimeline = widthTimeline * 2;
-    updateTimeline(raw_data_error);
 }
 function zoomoutTimeline(){
     widthTimeline = widthTimeline / 2;
-    updateTimeline(raw_data_error);
 }
 function tonowTimeline(){
     timelineContainer.scrollTo(timelineContainer.scrollWidth, 0);

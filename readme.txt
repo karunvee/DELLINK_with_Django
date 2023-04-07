@@ -1,3 +1,8 @@
+rabbitmq setting after INSTALLED
+    Run RabbitMQ command
+        type "rabbitmq-plugins enable rabbitmq_management"
+
+
 celery -A DELLINK worker -P gevent
 
 celery -A DELLINK beat -l INFO

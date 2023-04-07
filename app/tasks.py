@@ -2,7 +2,7 @@ import requests
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
 from celery import shared_task
-
+import urllib.request
 from celery import Celery
 from typing import Any, Dict
 import msgpack
@@ -30,6 +30,21 @@ channel_layer = get_channel_layer()
 
 app = Celery('DELLINK')
 
+# def get_client_ip(request):
+#     x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+#     if x_forwarded_for:
+#         ip = x_forwarded_for.split(',')[0]
+#     else:
+#         ip = request.META.get('REMOTE_ADDR')
+#     return ip
+
+def internet_on(http):
+    try:
+        urllib.request.urlopen(http, timeout=2)
+        return True
+    except:
+        return False
+    
 def urlDIA(ip, port, method):
     http_name = 'http://' + ip + ':' + port + '/api/v1/' + method
     return http_name
@@ -172,34 +187,35 @@ def data_api():
         machine_list = {}
 
         for url in urlLine:
-            line_members = requests.get(url).json()
-            for line in line_members:
-                #get value of key from API 
-                deviceNo = line['deviceId']
-                status = line['status']
-                deviceName = line['name']
-                guid = line['guid']
-                type = line['type']
-                model = line['model']
+            if(internet_on(url)):
+                line_members = requests.get(url).json()
+                for line in line_members:
+                    #get value of key from API 
+                    deviceNo = line['deviceId']
+                    status = line['status']
+                    deviceName = line['name']
+                    guid = line['guid']
+                    type = line['type']
+                    model = line['model']
 
-                if line['comment'].find('@') != -1:
-                    try:
-                        line_word = line['comment'].split("@")[0]
-                        machine_word = line['comment'].split("@")[1]
-                        machine_type = line['comment'].split("@")[2]
-                    except Exception as e:
-                        # print(e) 
-                        machine_type = "No equipment type"
-                else:
-                    line_word = "Unknown"
-                    machine_word = line['comment']
+                    if line['comment'].find('@') != -1:
+                        try:
+                            line_word = line['comment'].split("@")[0]
+                            machine_word = line['comment'].split("@")[1]
+                            machine_type = line['comment'].split("@")[2]
+                        except Exception as e:
+                            # print(e) 
+                            machine_type = "No equipment type"
+                    else:
+                        line_word = "Unknown"
+                        machine_word = line['comment']
 
 
-                if line_word in machine_list:
-                    machine_list[line_word].append([url, machine_word, deviceNo, status, deviceName, guid, type, model])
-                else:
-                    machine_list[line_word] = [[url, machine_word, deviceNo, status, deviceName, guid, type, model]]
-
+                    if line_word in machine_list:
+                        machine_list[line_word].append([url, machine_word, deviceNo, status, deviceName, guid, type, model])
+                    else:
+                        machine_list[line_word] = [[url, machine_word, deviceNo, status, deviceName, guid, type, model]]
+                
         for key in machine_list.keys() :
             dictLine = {}
             dictLine["line_name"] = key

@@ -9,8 +9,12 @@ def login_user(request):
         user = authenticate(request, username=username, password=password)
         if user is not None:
             login(request, user)
+            next_page = request.GET.get('next', '/')
+            if  next_page == '/members/login_user':
             # Redirect to a success page.
-            return redirect('home_view')
+                return redirect('home_view')
+            else:
+                return redirect(next_page)
         else:
             # Return an 'invalid login' error message.
             messages.success(request, ("Username or password is not correct, Please try again!"))

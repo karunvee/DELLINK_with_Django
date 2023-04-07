@@ -142,7 +142,7 @@
                         </div>
                     </div>
                     <hr>
-                    <button class="btn-trans" id="btn-showmore" onclick="timelineMore()">More</button>
+                    <button class="btn-more" id="btn-showmore" onclick="timelineMore()">More</button>
                     <div class="timeline-detail-more">
                         <div class="tab-header">
                             <button class="btn-tab seleced">Calculated Utilization Rate</button>
@@ -182,10 +182,10 @@
                         <div class="error-content">
                             <canvas id="error-count-chart" style="height: 320px;"></canvas>
                             <div class="filter-config">
-                                <button class="btn" id="error-config-day" onclick="">Day</button>
-                                <button class="btn" id="error-config-week" onclick="">Week</button>
-                                <button class="btn" id="error-config-month" onclick="">Month</button>
-                                <button class="btn" id="error-config-quarter" onclick="">Quarter</button>
+                                <button class="btn-trans" id="error-config-day" onclick="">Day</button>
+                                <button class="btn-trans" id="error-config-week" onclick="">Week</button>
+                                <button class="btn-trans" id="error-config-month" onclick="">Month</button>
+                                <button class="btn-trans" id="error-config-quarter" onclick="">Quarter</button>
                             </div>
                         </div>
                         <table class="table-error" id="table-error">
@@ -219,20 +219,20 @@
                         <h2>TBS</h2>
                         <canvas id="tbs-chart" style="height: 300px;"></canvas>
                         <div class="filter-config">
-                            <button class="btn" id="tbs-config-day" onclick="tbsPlus()">Day</button>
-                            <button class="btn" id="tbs-config-week" onclick="">Week</button>
-                            <button class="btn" id="tbs-config-month" onclick="">Month</button>
-                            <button class="btn" id="tbs-config-quarter" onclick="">Quarter</button>
+                            <button class="btn-trans selected" id="tbs-config-day" onclick="TBSSelectData('day')">Day</button>
+                            <button class="btn-trans" id="tbs-config-week" onclick="TBSSelectData('week')">Week</button>
+                            <button class="btn-trans" id="tbs-config-month" onclick="TBSSelectData('month')">Month</button>
+                            <button class="btn-trans" id="tbs-config-quarter" onclick="TBSSelectData('quarter')">Quarter</button>
                         </div>
                     </div>
                     <div class="pnl utilize-content">
                         <h2>Utilization</h2>
                         <canvas id="utilize-chart" style="height: 300px;"></canvas>
                         <div class="filter-config">
-                            <button class="btn" id="util-config-day" onclick="sPlus()">Day</button>
-                            <button class="btn" id="util-config-week" onclick="">Week</button>
-                            <button class="btn" id="util-config-month" onclick="">Month</button>
-                            <button class="btn" id="util-config-quarter" onclick="">Quarter</button>
+                            <button class="btn-trans selected" id="util-config-day" onclick="UtilizedSelectData('day')">Day</button>
+                            <button class="btn-trans" id="util-config-week" onclick="UtilizedSelectData('week')">Week</button>
+                            <button class="btn-trans" id="util-config-month" onclick="UtilizedSelectData('month')">Month</button>
+                            <button class="btn-trans" id="util-config-quarter" onclick="UtilizedSelectData('quarter')">Quarter</button>
                         </div>
                     </div> 
                     
@@ -432,14 +432,19 @@
             </div>
         </form>
     </div>
+    <!--  link to the providing CDN (Content Delivery Network) -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@3.6.0/dist/chart.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@1.1.0"></script>
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <script src="{% static 'js/Chart_graph.js' %}"></script>
     <script src="{% static 'js/machine_view.js' %}"></script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+
     <script>
 
+// Initialized parameter
     var raw_data_error;
     var timeline_self;
     var widthTimeline = 1500;
@@ -473,7 +478,7 @@ socket_graph.onmessage = function(e){
     raw_data_error = JSON.parse(e.data);
     updateErrorTable(raw_data_error);
     updateTimeline(raw_data_error);
-    updateTBSGraph(raw_data_error);
+    updateGraph();
 }
 function updateErrorTable(rw){
     var raw = rw[0]["error-history"];
@@ -641,17 +646,104 @@ function createCustomTooltip(start_time, end_time, status,errorCode) {
                 + ((end_time.getSeconds() < 10)?"0":"") + end_time.getSeconds() + '<br>Duration: '+ duration +'</div>';
 }
 
+// var util_config_day = document.getElementById('util-config-day');
+// var util_config_week = document.getElementById('util-config-week');
+// var util_config_month = document.getElementById('util-config-month');
+// var util_config_quarter = document.getElementById('util-config-quarter');
 
+// var tbs_config_day = document.getElementById('tbs-config-day');
+// var tbs_config_week = document.getElementById('tbs-config-week');
+// var tbs_config_month = document.getElementById('tbs-config-month');
+// var tbs_config_quarter = document.getElementById('tbs-config-quarter');
+
+var UtilizedFilter = "day";
+function UtilizedSelectData(filter){
+    var btn_was_released = document.getElementById('util-config-' + UtilizedFilter)
+    var btn_was_clicked = document.getElementById('util-config-' + filter);
+    
+    btn_was_released.classList.toggle('selected');
+    btn_was_clicked.classList.toggle('selected');
+    UtilizedFilter = filter;
+
+    switch(UtilizedFilter){
+        case "day" :
+            console.log("utilization >>> day ");
+            break;
+        case "week":
+            console.log("utilization >>> week ");
+            break;
+        case "month":
+            console.log("utilization >>> month ");
+            break;
+        case "quarter":
+            console.log("utilization >>> quarter ");
+            break;
+        default:
+            break;
+    }
+}
+var TBSFilter = "day";
+function TBSSelectData(filter){
+    var btn_was_released = document.getElementById('tbs-config-' + TBSFilter)
+    var btn_was_clicked = document.getElementById('tbs-config-' + filter);
+    
+    btn_was_released.classList.toggle('selected');
+    btn_was_clicked.classList.toggle('selected');
+    TBSFilter = filter;
+
+    switch(TBSFilter){
+        case "day" :
+            console.log("TBS >>> day ");
+            break;
+        case "week":
+            console.log("TBS >>> week ");
+            break;
+        case "month":
+            console.log("TBS >>> month ");
+            break;
+        case "quarter":
+            console.log("TBS >>> quarter ");
+            break;
+        default:
+            break;
+    }
+}
 // Initialized Data
-var tbs_labels = [1, 2, 3, 4, 5, 6, 7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30];
+var tbs_labels = [1, 2, 3, 4, 5, 6, 7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31];
 var tbs_raw_data = [8, 59, 80, 81, 56, 55, 40, 65, 40, 35, 20, 8, 55, 40,20, 35, 70, 65, 62, 40, 55, 10, 12, 25, 35, 45, 68, 0];
-var util_labels = [1, 2, 3, 4, 5, 6, 7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30];
+var util_labels = [];
+// for(let i = 0; i <= 24; i++){
+//     for(let j = 0; j <= 60; j++){
+//         util_labels.push(`${i}:${j}`);
+//     }
+// }
 var util_raw_data = [8, 59, 80, 81, 56, 55, 40, 65, 40, 35, 20, 8, 55, 40,20, 35, 70, 65, 62, 40, 55, 10, 12, 25, 35, 45, 68, 0];
 
-function updateTBSGraph(){
+function updateGraph(){
+    // if(timeline_self != undefined & timeline_self != []){
+
+    //     const time = timeline_self[i]["datetime"];
+    //     const status = timeline_self[i]["status"];
+    //     const timeIndex = new Date(time);
+    //     if(timeStart.getTime() < timeIndex.getTime()){
+
+    //     }
+    // }
+
+    // var sec_start = (+timeList_start[0]) * 60 * 60 + (+timeList_start[1]) * 60; 
+    // var sec_end = (+timeList_end[0]) * 60 * 60 + (+timeList_end[1]) * 60; 
+    // console.log(timeStart.getTime());
 
 }
-
+var x = 0;
+function sPlus(){
+    x = x + 1;
+    // utilChart.data.datasets[0].data[1] = x;
+    util_labels.push("99");
+    utilChart.data.labels = util_labels;
+    utilChart.data.datasets[0].data = [0, 0, 0, 0, 56, 55, 40, 65, 40, 35, 20, 8, 55, 40,20, 35, 70, 65, 62, 40, 55, 10, 12, 25, 0, 0, 0, 0];
+    utilChart.update();
+}
         // Error Counting *************************************************
         var labels = ["20", "1", "150", "60", "12"];
 
@@ -697,15 +789,7 @@ function updateTBSGraph(){
             }
         });
         // TBS  *************************************************
-        
-        var x = 0;
-            function tbsPlus(){
-                x = x + 1;
-                tbsChart.data.datasets[0].data[1] = x;
-                console.log(x);
-                tbsChart.update();
-            }
-            
+
         var tbs_ctx = document.getElementById('tbs-chart');
         const tbs_data = {
             labels: tbs_labels,
@@ -743,35 +827,90 @@ function updateTBSGraph(){
             }
         }
     }
-        const tbsChart = new Chart(tbs_ctx, tbs_config);
-        
-        // Utilization  *************************************************
-        var x = 0;
-            function sPlus(){
-                x = x + 1;
-                utilChart.data.datasets[0].data[1] = x;
-                console.log(x);
-                utilChart.update();
-            }
+    const tbsChart = new Chart(tbs_ctx, tbs_config);
 
-        var util_ctx = document.getElementById('utilize-chart');
+
+
+//   var weeklyHistoryChartEl = document
+//     .getElementById("utilize-chart1")
+//     .getContext("2d");
+//   var weeklyHistoryChart = new Chart(weeklyHistoryChartEl, {
+//     type: "line",
+//     options: {
+//       spanGaps: true,
+//       scales: {
+//         x: {
+//           type: "time",
+//           parsing: false,
+//           time: {
+//                 unit: 'hour',
+//                 stepSize: 1,
+//                 displayFormats: {
+//                     hour: 'HH:mm'
+//                 }
+//             }
+//         }
+//       }
+//     }
+//   });
+//   weeklyHistoryChart.data = JSON.parse(
+//     '{"datasets":[{"data":[{"x":1623024000,"y":9.98},{"x":1623628800,"y":15.97},{"x":1624233600,"y":29.07},{"x":1624838400,"y":57.26},{"x":1625443200,"y":15.87},{"x":1627257600,"y":40.73},{"x":1627862400,"y":29.87},{"x":1628467200,"y":58.87},{"x":1629072000,"y":7.62},{"x":1629676800,"y":21.52},{"x":1630281600,"y":6.03}],"label":"Ride","hidden":true},{"data":[{"x":1623628800,"y":92.45},{"x":1624233600,"y":31.24},{"x":1624838400,"y":23.81},{"x":1625443200,"y":9.39},{"x":1626048000,"y":40.94},{"x":1626652800,"y":12.84},{"x":1627257600,"y":33.59},{"x":1627862400,"y":30.97},{"x":1628467200,"y":31.88},{"x":1629072000,"y":27.88},{"x":1629676800,"y":47.23},{"x":1630281600,"y":48.1}],"label":"Run","hidden":false},{"data":[{"x":1627862400,"y":30.2},{"x":1628467200,"y":36.24},{"x":1629676800,"y":85.58},{"x":1630281600,"y":52.81}],"label":"VirtualRide","hidden":true},{"data":[{"x":1623024000,"y":6.78},{"x":1626048000,"y":5.92}],"label":"Walk","hidden":true},{"data":[{"x":1623628800,"y":0},{"x":1628467200,"y":0}],"label":"Yoga","hidden":true}]}'
+//   );
+//   weeklyHistoryChart.update();
+
+//   {"data":,"label":"Run","hidden":false}
+        // Utilization  *************************************************
+        var util_ctx = document.getElementById("utilize-chart");
         const util_data = {
-            labels: util_labels,
+            // labels: util_labels,
             datasets : [{
                 label: 'data',
-                data: util_raw_data,
-                fill: false,
+                data: [
+                    {x: '2023-4-5T12:00:00Z', y: 10}, 
+                    {x: '2023-4-6T13:00:00Z', y: 20}, 
+                    {x: '2023-4-7T14:00:00Z', y: 10}, 
+                    {x: '2023-4-8T15:00:00Z', y: 67}, 
+                    {x: '2023-4-10T16:00:00Z', y: 40},
+                    {x: '2023-4-5T16:30:00Z', y: 10}, 
+                    {x: '2023-4-6T16:40:00Z', y: 20}, 
+                    {x: '2023-4-7T17:00:00Z', y: 10}, 
+                    {x: '2023-4-8T18:40:00Z', y: 67}, 
+                    {x: '2023-4-10T18:45:00Z', y: 40}
+                ],
+                // fill: false,
                 borderColor: barColors[0],
                 tension: 0.1
             }]
         }
         const util_config = {
-            type: "line",
+            type: 'line',
             data: util_data,
             options:{
                 scales:{
+                    // xAxes: [{
+                    //     type: 'time',
+                    //     time:{
+                    //         unit: 'hour',
+                    //         displayFormats: {
+                    //             hour: 'dd:MM'
+                    //         }
+                    //     }
+                    // }],
+                    x: {
+                        type: 'time',
+                        parsing: false,
+                        time: {
+                            unit: 'day',
+                            // stepSize: 1,
+                            // displayFormats: {
+                            //     hour: 'HH:mm'
+                            // }
+                        }
+                    },
                     y:{
-                        beginAtZero: true
+                        beginAtZero: true,
+                        min: 0,
+                        max: 100
                     }
                 },
                 plugins: {
@@ -785,18 +924,19 @@ function updateTBSGraph(){
                                 value: 60,
                                 borderColor: 'rgba(255, 99, 132)',
                                 backgroundColor: 'rgba(255, 99, 132)'
+                            }
                         }
-                    }
-                }   
-            }
+                    }   
+                }
         }
     }
-        const utilChart = new Chart(util_ctx, util_config);
+    const utilChart = new Chart(util_ctx, util_config);
 
-    function timelineMore(){
+function timelineMore(){
         document.getElementById('timeline-container').classList.toggle('show');
         var btn_showmore = document.getElementById('btn-showmore');
         var timelineForm = document.querySelector('.timeline-detail-more');
+        timelineForm.classList.toggle('slide');
         if(timelineForm.style.display == "block"){
             timelineForm.style.display = "none";
             btn_showmore.innerHTML = "More";
@@ -854,7 +994,6 @@ function UtilizationCalBar(){
                 }
                 else if(i == data.length - 1){
                     time_Green += sec_end - data[i]['time_sec'];
-
                 }
                 else{
                     time_Green += data[i+1]['time_sec'] - data[i]['time_sec'];

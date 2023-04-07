@@ -24,6 +24,8 @@ from mimetypes import guess_type
 from websockify import WebSocketProxy
 from datetime import datetime, timedelta
 import pytz
+from django.contrib.auth.decorators import login_required
+
 
 # Create your views here.
 def remote_view(request):
@@ -38,6 +40,7 @@ def home_view(request):
     # Return a response to the client
     return render(request, 'home_view.html', context)
 
+@login_required
 def line_view(request, pt, ln):
     plant_members = PlantInfo.objects.all()
     line_row = LineRow.objects.filter(plant_name__exact = pt, line_name__exact = ln).order_by('number')
@@ -48,6 +51,7 @@ def line_view(request, pt, ln):
     }
     return render(request, 'line_view.html', context)
 
+@login_required
 def machine_view(request, pt, ln, mc):
     
     notification_error = ErrorNotification.objects.filter(tag_member__line_name = ln, tag_member__machine_name = mc)

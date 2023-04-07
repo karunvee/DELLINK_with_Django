@@ -80,9 +80,10 @@
   border: 0;
 }
 .btn:hover{
-  background-color: rgb(118, 185, 229);
+  opacity: 0.8;
   cursor: pointer;
 }
+
 .btn-add {
     right: 60px;
     position: absolute;
@@ -369,12 +370,33 @@ h5{
   
 }
 .timeline-container.show{
-  height: 400px;
+  /* height: 400px; */
+  animation: SlideDIV 1s linear forwards;
 }
 .timeline-detail-more{
   display: none;
   margin-top: 10px;
   font-size: 14px;
+  opacity: 0;
+}
+.timeline-detail-more.slide{
+  animation: DivFadeIn 1s linear forwards;
+}
+@keyframes DivFadeIn {
+  50%{
+    opacity: 0.1;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+@keyframes SlideDIV {
+  50%{
+    height: 390px;
+  }
+  100% {
+    height: 400px;
+  }
 }
 .time-picker{
   padding: 5px;
@@ -964,14 +986,25 @@ text-align: center;
   font-size: 14px;
   width: auto;
 }
-.btn-trans{
+.btn-more{
   color: #0086DB;
   border: solid 1px #0086DB;
   background-color: transparent;
-  border-radius: 3px;
+  border-radius: 10px;
 }
-.btn-trans:hover{
+.btn-trans{
+  padding: 5px 12px;
+  color: #0086DB;
+  border: solid 1px rgb(32, 133, 199);
+  background-color: transparent;
+  border-radius: 10px;
+}
+.btn-trans:hover, .btn-more:hover{
   cursor: pointer;
   color: #fff;
-  background-color: #0086DB;
+  background-color: rgb(32, 133, 199);
+}
+.btn-trans.selected{
+  color: white;
+  background-color: rgb(32, 133, 199);
 }
