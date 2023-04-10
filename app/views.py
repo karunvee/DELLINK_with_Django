@@ -286,3 +286,12 @@ def DeleteTimeline(request):
     TimeLineStatus.objects.all().delete()
 
     return HttpResponse("Delete all data success!")
+
+
+def updatetimestart(request):
+    now = datetime.now(pytz.timezone('Asia/Bangkok'))
+    new_start = now.replace(hour=0, minute=0, second=0).astimezone(pytz.timezone('Asia/Bangkok')) #It's mean 7.30 am
+    new_end = new_start + timedelta(days = 1)  #Plus a day
+    TimeLineStartEnd.objects.filter(pk = 2).update(start = new_start, end = new_end)
+
+    return HttpResponse("Datetime updated!")

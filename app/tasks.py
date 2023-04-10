@@ -113,14 +113,35 @@ def MachineDashboard(machine_type, plant_name, line_name, machine_name, objStatu
             line_name__exact = line_name, 
             machine_name__exact = machine_name
         )
-        now = datetime.now(pytz.timezone('UTC'))
+        # now = datetime.now(pytz.timezone('UTC'))
+        now = datetime.now(pytz.timezone('Asia/Bangkok'))
+        utilizationRateDay = UtilizationRatePerDay.objects.all()      
         #update datetime start - end
         datetimeStartEnd = TimeLineStartEnd.objects.all().order_by('-id')[0]
         if(datetimeStartEnd.end < now):
-            new_start = now.replace(hour=0, minute=30) #It's mean 7.30 am
+            # new_start = now.replace(hour=0, minute=30) #It's mean 7.30 am
+            new_start = now.replace(hour=0, minute=0, second=0).astimezone(pytz.timezone('Asia/Bangkok'))
             new_end = new_start + timedelta(days = 1)  #Plus a day
             TimeLineStartEnd.objects.filter(pk = 2).update(start = new_start, end = new_end)
             print(" \n############## Update datetime start - end ##############\n{} {}".format(new_start, new_end))
+            avg_utilization = 0
+            if not utilizationRateDay.filter(exact__datetime = datetimeStartEnd.end).exists():
+                timelineGreen = TimeLineStatus.objects.filter(
+                    plant_name__exact = plant_name,
+                    line_name__exact = line_name, 
+                    machine_name__exact = machine_name,
+                    status__exact = "Normal"
+                )
+                for item in timelineGreen:
+                    item.datetime.timestamp() 
+                # UtilizationRatePerDay(
+                #     plant_name = plant_name, 
+                #     line_name = line_name, 
+                #     machine_name = machine_name, 
+                #     datetime =  datetimeStartEnd.end, 
+                #     rate = 90
+                #     ).save()
+                print(" \n<<<<<<<<<<<<<<< Add new Utilization Rate >>>>>>>>>>>>>>\n{}".format(datetimeStartEnd.end))
                         
         if(objStatus.status == "0"):
             current_status = "Normal"
@@ -146,15 +167,14 @@ def MachineDashboard(machine_type, plant_name, line_name, machine_name, objStatu
             print("Add first status data to database")
 
         if(updateTimeline):
-            timeline = TimeLineStatus(
+            TimeLineStatus(
                 plant_name = plant_name, 
                 line_name = line_name, 
                 machine_name = machine_name,
                 datetime = now, 
                 status = current_status, 
                 error_code = e_code
-                )
-            timeline.save()
+                ).save()
 
 @shared_task
 def data_api():
@@ -315,17 +335,10 @@ def graph_api():
         
         dictType["error-history"].append(dictError)
 
+    dictType["utilization-rate"] = []
+    
 
     data.append(dictType)
-    # add day to datetime
-    # oneDay = datetime.timedelta(days=1)
-
-    # d1 = datetime.datetime(2020, 5, 13, 22, 50, 55) 
-    # d2 = datetime.datetime(2020, 5, 13, 22, 50, 55)
-    # d3 = datetime.datetime(2020, 6, 13, 7, 30, 0)
-
-    # print(d1 > d2)
-    # print(d2 > d3)
     
     data_json = json.dumps(data)
     # print(data_json)
@@ -349,88 +362,3 @@ def graph_api():
     # publish_message_to_group({ "type": "chat_message", "text": msg }, "app")
     # # async_to_sync(channel_layer.group_send)("app", {"type": "chat_message","text": msg,},)
     # print('<==================> message :' + msg)
-
-def MachineDashboard1(machine_type, dictPlant, dictLine, dictMachine, dictIndicator, errorKey):
-    #Line notice error
-                    print(dictIndicator)
-                    if(dictIndicator["indicator_name"] == "statusCode" and dictIndicator["value"] != "" and dictIndicator["value"] != "None" ):
-                        if(dictIndicator["value"] != "0" and errorKey not in dicError):
-
-                            e_msg = ErrorMessage.objects.filter(
-                                machine_type__machine_type__exact = machine_type,
-                                error_code__exact = dictIndicator["value"]
-                            )
-                            if(e_msg.exists()):
-                                msg_error = e_msg.get()
-                            else:
-                                msg_error = "Error unknown, this error is not defined!"
-
-                            dicError[errorKey] = dictIndicator["value"]
-                            print("\n!!!!!!!! error >{} {}".format(errorKey, msg_error))
-
-                            msg_alert = 'Error Alert\nmachine name:{}\nError code: ({}){}'.format(dictMachine["machine_name"], dictIndicator["value"], msg_error)
-                            
-                            # line_bot_api.broadcast(TextSendMessage(text=msg_alert))
-                            # line_bot_api.broadcast(FlexSendMessage(alt_text="Card", contents=card))
-
-                            #------------------------------------------------------------------------------------------------------------------------
-                            # Add to Error history
-                            now = datetime.now()
-                            errorAddCount = ErrorHistory(plant_name = dictPlant["plant_name"], line_name = dictLine["line_name"], machine_name = dictMachine["machine_name"]
-                                                            , datetime = now, error_code = dictIndicator["value"], error_message = msg_error)
-                            errorAddCount.save()
-                            #------------------------------------------------------------------------------------------------------------------------
-                        elif(dictIndicator["value"] == "0" and errorKey in dicError):
-                            del dicError[errorKey]
-                    
-                    # Timeline update
-                    if(dictIndicator["indicator_name"] == "status" and dictIndicator["value"] != "" and dictIndicator["value"] != "None" ):
-                        
-                        updateTimeline = False
-                        now = datetime.now(pytz.timezone('UTC'))
-                        #update datetime start - end
-                        datetimeStartEnd = TimeLineStartEnd.objects.all().order_by('-id')[0]
-                        if(datetimeStartEnd.end < now):
-                            new_start = now.replace(hour=0, minute=30) #It's mean 7.30 am
-                            new_end = new_start + timedelta(days = 1)  #Plus a day
-                            TimeLineStartEnd.objects.filter(pk = 2).update(start = new_start, end = new_end)
-                            print(" \n############## Update datetime start - end ##############\n{} {}".format(new_start, new_end))
-                        
-                        timelineObj = TimeLineStatus.objects.filter(
-                            plant_name__exact = dictPlant["plant_name"],
-                            line_name__exact = dictLine["line_name"], 
-                            machine_name__exact = dictMachine["machine_name"]
-                        )
-                        
-                        if(dictIndicator["value"]  == "0"):
-                            e_code = "0"
-                            current_status = "Normal"
-
-                        elif(dictIndicator["value"]  == "1"):
-                            current_status = "Error"
-                            if(errorKey in dicError):
-                                e_code = dicError[errorKey]
-                            else:
-                                print(e_code)
-                                print(dicError)
-                                e_code = "status 1 but errorCode 0"
-                            
-                        else:
-                            current_status = "Pause"
-
-                        if(timelineObj.exists()):
-                            old_value = timelineObj.order_by('-id')[0]
-                            if(str(current_status) != str(old_value)):
-                                updateTimeline = True
-                                print("\n{} {} \nstatus has change from <{}> to <{}> <<errorCode: {}>>".format(dictLine["line_name"], dictMachine["machine_name"], old_value, current_status, e_code))
-                            elif(old_value.datetime < datetimeStartEnd.start):
-                                print("Last status under datetime-start >> updated!\n{} {}".format(old_value.datetime, datetimeStartEnd.start))
-                                updateTimeline = True
-                        else:
-                            updateTimeline = True
-                            print("Add first status data to database")
-
-                        if(updateTimeline):
-                                timeline = TimeLineStatus(plant_name = dictPlant["plant_name"], line_name = dictLine["line_name"], machine_name = dictMachine["machine_name"]
-                                                        ,datetime = now, status = current_status, error_code = e_code)
-                                timeline.save()

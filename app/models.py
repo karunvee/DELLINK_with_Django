@@ -114,3 +114,14 @@ class TimeLineStartEnd(models.Model):
 
     def __int__(self):
         return self.pk
+    
+class UtilizationRatePerDay(models.Model):
+    plant_name = models.CharField(max_length = 255)
+    line_name = models.CharField(max_length = 255)
+    machine_name = models.CharField(max_length = 255)
+
+    datetime = models.CharField(max_length = 255)
+    rate = models.IntegerField()
+
+    def __init__(self):
+        return self.rate

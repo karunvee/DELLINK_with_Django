@@ -441,7 +441,6 @@
     <script src="{% static 'js/machine_view.js' %}"></script>
     
     <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
-
     <script>
 
 // Initialized parameter
@@ -458,10 +457,10 @@
 
     var date = new Date();
     let timeReset = new Date();
-    timeReset.setHours(7, 30, 0, 0);
+    timeReset.setHours(0, 0, 0, 0);
     timeReset.setDate(timeReset.getDate() + 1);
     let timeStart = new Date();
-    timeStart.setHours(7, 30, 0, 0);
+    timeStart.setHours(0, 0, 0, 0);
 
 
     var currentDate = ((date.getDate() < 10)?"0":"") + date.getDate() +'/' + (((date.getMonth()+1) < 10)?"0":"") + (date.getMonth()+1) +'/' + date.getFullYear();
@@ -656,6 +655,14 @@ function createCustomTooltip(start_time, end_time, status,errorCode) {
 // var tbs_config_month = document.getElementById('tbs-config-month');
 // var tbs_config_quarter = document.getElementById('tbs-config-quarter');
 
+//     document.getElementById('dayBtn').addEventListener('click', function() {
+//   myChart.options.scales.xAxes[0].time.unit = 'day';
+//   myChart.options.scales.xAxes[0].time.displayFormats = {
+//     day: 'MMM D, YYYY'
+//   };
+//   myChart.update();
+// });
+// utilChart tbsChart
 var UtilizedFilter = "day";
 function UtilizedSelectData(filter){
     var btn_was_released = document.getElementById('util-config-' + UtilizedFilter)
@@ -665,23 +672,68 @@ function UtilizedSelectData(filter){
     btn_was_clicked.classList.toggle('selected');
     UtilizedFilter = filter;
 
-    switch(UtilizedFilter){
+    if(utilChart != undefined){
+        switch(UtilizedFilter){
         case "day" :
+            utilChart.options.scales.x.time.unit = 'hour';
+            utilChart.options.scales.x.time.displayFormats = { hour : 'HH:mm'};
+            utilChart.data.datasets[0].data = [ 
+                    {x: '2023-04-10 07:40:28', y: 45}, 
+                    {x: '2023-04-10 07:45:28', y: 30}, 
+                    {x: '2023-04-10 07:50:28', y: 20}, 
+                    {x: '2023-04-10 08:05:28', y: 10}, 
+                    {x: '2023-04-10 08:20:28', y: 67}, 
+                    {x: '2023-04-10 08:30:28', y: 53},
+                    {x: '2023-04-10 17:10:28', y: 71}
+                ];
             console.log("utilization >>> day ");
             break;
         case "week":
+            utilChart.options.scales.x.time.unit = 'day';
+            utilChart.options.scales.x.time.displayFormats = { day : 'dd/MM/yyyy'};
+            utilChart.data.datasets[0].data = [ 
+                    {x: '2023-04-04 07:39:00', y: 45}, 
+                    {x: '2023-04-05 07:39:00', y: 30}, 
+                    {x: '2023-04-06 07:39:00', y: 20}, 
+                    {x: '2023-04-07 07:39:00', y: 10}, 
+                    {x: '2023-04-08 07:39:00', y: 67}, 
+                    {x: '2023-04-09 07:39:00', y: 53},
+                    {x: '2023-04-10 07:39:00', y: 71}
+                ];
             console.log("utilization >>> week ");
             break;
         case "month":
+            utilChart.options.scales.x.time.unit = 'week';
+            utilChart.options.scales.x.time.displayFormats = { week : 'dd/MM'};
+            utilChart.data.datasets[0].data = [ 
+                    {x: '2023-03-01 07:39:00', y: 45}, 
+                    {x: '2023-03-07 07:39:00', y: 30}, 
+                    {x: '2023-03-14 07:39:00', y: 20}, 
+                    {x: '2023-03-21 07:39:00', y: 10}, 
+                    {x: '2023-03-28 07:39:00', y: 67}
+                ];
             console.log("utilization >>> month ");
             break;
         case "quarter":
+            utilChart.options.scales.x.time.unit = 'month';
+            utilChart.options.scales.x.time.displayFormats = { month : 'MM/yyyy'};
+            utilChart.data.datasets[0].data = [ 
+                    {x: '2023-01-25 07:39:00', y: 65.5}, 
+                    {x: '2023-02-25 07:39:00', y: 58.7}, 
+                    {x: '2023-03-25 07:39:00', y: 55.9}, 
+                    {x: '2023-04-25 07:39:00', y: 63.1}
+                ];
             console.log("utilization >>> quarter ");
             break;
         default:
             break;
     }
+    utilChart.update();
+    }
+    
 }
+
+
 var TBSFilter = "day";
 function TBSSelectData(filter){
     var btn_was_released = document.getElementById('tbs-config-' + TBSFilter)
@@ -712,16 +764,11 @@ function TBSSelectData(filter){
 var tbs_labels = [1, 2, 3, 4, 5, 6, 7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31];
 var tbs_raw_data = [8, 59, 80, 81, 56, 55, 40, 65, 40, 35, 20, 8, 55, 40,20, 35, 70, 65, 62, 40, 55, 10, 12, 25, 35, 45, 68, 0];
 var util_labels = [];
-// for(let i = 0; i <= 24; i++){
-//     for(let j = 0; j <= 60; j++){
-//         util_labels.push(`${i}:${j}`);
-//     }
-// }
+
 var util_raw_data = [8, 59, 80, 81, 56, 55, 40, 65, 40, 35, 20, 8, 55, 40,20, 35, 70, 65, 62, 40, 55, 10, 12, 25, 35, 45, 68, 0];
 
 function updateGraph(){
     // if(timeline_self != undefined & timeline_self != []){
-
     //     const time = timeline_self[i]["datetime"];
     //     const status = timeline_self[i]["status"];
     //     const timeIndex = new Date(time);
@@ -733,7 +780,6 @@ function updateGraph(){
     // var sec_start = (+timeList_start[0]) * 60 * 60 + (+timeList_start[1]) * 60; 
     // var sec_end = (+timeList_end[0]) * 60 * 60 + (+timeList_end[1]) * 60; 
     // console.log(timeStart.getTime());
-
 }
 var x = 0;
 function sPlus(){
@@ -821,64 +867,36 @@ function sPlus(){
                                 value: 240,
                                 borderColor: 'rgba(255, 99, 132)',
                                 backgroundColor: 'rgba(255, 99, 132)'
+                            }
                         }
-                    }
-                }   
-            }
+                    },
+                    legend: {
+                        display: false,
+                    }   
+                }
         }
     }
     const tbsChart = new Chart(tbs_ctx, tbs_config);
 
-
-
-//   var weeklyHistoryChartEl = document
-//     .getElementById("utilize-chart1")
-//     .getContext("2d");
-//   var weeklyHistoryChart = new Chart(weeklyHistoryChartEl, {
-//     type: "line",
-//     options: {
-//       spanGaps: true,
-//       scales: {
-//         x: {
-//           type: "time",
-//           parsing: false,
-//           time: {
-//                 unit: 'hour',
-//                 stepSize: 1,
-//                 displayFormats: {
-//                     hour: 'HH:mm'
-//                 }
-//             }
-//         }
-//       }
-//     }
-//   });
-//   weeklyHistoryChart.data = JSON.parse(
-//     '{"datasets":[{"data":[{"x":1623024000,"y":9.98},{"x":1623628800,"y":15.97},{"x":1624233600,"y":29.07},{"x":1624838400,"y":57.26},{"x":1625443200,"y":15.87},{"x":1627257600,"y":40.73},{"x":1627862400,"y":29.87},{"x":1628467200,"y":58.87},{"x":1629072000,"y":7.62},{"x":1629676800,"y":21.52},{"x":1630281600,"y":6.03}],"label":"Ride","hidden":true},{"data":[{"x":1623628800,"y":92.45},{"x":1624233600,"y":31.24},{"x":1624838400,"y":23.81},{"x":1625443200,"y":9.39},{"x":1626048000,"y":40.94},{"x":1626652800,"y":12.84},{"x":1627257600,"y":33.59},{"x":1627862400,"y":30.97},{"x":1628467200,"y":31.88},{"x":1629072000,"y":27.88},{"x":1629676800,"y":47.23},{"x":1630281600,"y":48.1}],"label":"Run","hidden":false},{"data":[{"x":1627862400,"y":30.2},{"x":1628467200,"y":36.24},{"x":1629676800,"y":85.58},{"x":1630281600,"y":52.81}],"label":"VirtualRide","hidden":true},{"data":[{"x":1623024000,"y":6.78},{"x":1626048000,"y":5.92}],"label":"Walk","hidden":true},{"data":[{"x":1623628800,"y":0},{"x":1628467200,"y":0}],"label":"Yoga","hidden":true}]}'
-//   );
-//   weeklyHistoryChart.update();
-
-//   {"data":,"label":"Run","hidden":false}
+    
         // Utilization  *************************************************
         var util_ctx = document.getElementById("utilize-chart");
         const util_data = {
             // labels: util_labels,
             datasets : [{
                 label: 'data',
-                data: [
-                    {x: '2023-4-5T12:00:00Z', y: 10}, 
-                    {x: '2023-4-6T13:00:00Z', y: 20}, 
-                    {x: '2023-4-7T14:00:00Z', y: 10}, 
-                    {x: '2023-4-8T15:00:00Z', y: 67}, 
-                    {x: '2023-4-10T16:00:00Z', y: 40},
-                    {x: '2023-4-5T16:30:00Z', y: 10}, 
-                    {x: '2023-4-6T16:40:00Z', y: 20}, 
-                    {x: '2023-4-7T17:00:00Z', y: 10}, 
-                    {x: '2023-4-8T18:40:00Z', y: 67}, 
-                    {x: '2023-4-10T18:45:00Z', y: 40}
+                data: [ 
+                    {x: '2023-03-27 12:00:28', y: 45}, 
+                    {x: '2023-03-30 12:00:28', y: 30}, 
+                    {x: '2023-04-06 12:02:28', y: 20}, 
+                    {x: '2023-04-07 12:05:28', y: 10}, 
+                    {x: '2023-04-08 12:08:28', y: 67}, 
+                    {x: '2023-04-09 12:10:28', y: 53},
+                    {x: '2023-04-10 12:10:28', y: 71}
                 ],
-                // fill: false,
+                fill: false,
                 borderColor: barColors[0],
+                backgroundColor: barColors[0],
                 tension: 0.1
             }]
         }
@@ -887,30 +905,22 @@ function sPlus(){
             data: util_data,
             options:{
                 scales:{
-                    // xAxes: [{
-                    //     type: 'time',
-                    //     time:{
-                    //         unit: 'hour',
-                    //         displayFormats: {
-                    //             hour: 'dd:MM'
-                    //         }
-                    //     }
-                    // }],
                     x: {
                         type: 'time',
-                        parsing: false,
+                        // parsing: false,
                         time: {
-                            unit: 'day',
-                            // stepSize: 1,
-                            // displayFormats: {
-                            //     hour: 'HH:mm'
-                            // }
+                            unit: 'hour',
+                            
+                            displayFormats: {
+                                day: 'dd/MM/yyyy HH:mm'
+                            }
                         }
                     },
                     y:{
                         beginAtZero: true,
                         min: 0,
                         max: 100
+                        
                     }
                 },
                 plugins: {
@@ -926,11 +936,16 @@ function sPlus(){
                                 backgroundColor: 'rgba(255, 99, 132)'
                             }
                         }
+                    },
+                    legend: {
+                        display: false,
                     }   
                 }
         }
     }
     const utilChart = new Chart(util_ctx, util_config);
+
+
 
 function timelineMore(){
         document.getElementById('timeline-container').classList.toggle('show');
@@ -1025,6 +1040,42 @@ function AnimationUtilBar(elementID, percent){
       }
     }
 }
+
+
+
+//   var weeklyHistoryChartEl = document
+//     .getElementById("utilize-chart")
+//     .getContext("2d");
+//   var weeklyHistoryChart = new Chart(weeklyHistoryChartEl, {
+//     type: "line",
+//     options: {
+//       spanGaps: true,
+//       scales: {
+//         x: {
+//           type: "time",
+//           parsing: false,
+//           time: {
+//                 unit: 'hour',
+//                 stepSize: 1,
+//                 displayFormats: {
+//                     hour: 'HH:mm'
+//                 }
+//             }
+//         }
+//       }
+//     }
+//   });
+//   weeklyHistoryChart.data = JSON.parse(
+//     '{"datasets":[{"data":[{"x":1623024000,"y":9.98},{"x":1623628800,"y":15.97},{"x":1624233600,"y":29.07},{"x":1624838400,"y":57.26},{"x":1625443200,"y":15.87},{"x":1627257600,"y":40.73},{"x":1627862400,"y":29.87},{"x":1628467200,"y":58.87},{"x":1629072000,"y":7.62},{"x":1629676800,"y":21.52},{"x":1630281600,"y":6.03}],"label":"Ride","hidden":false}]}'
+//   );
+//   weeklyHistoryChart.update();
+
+
     </script>
 </body>
 </html>
+
+
+
+
+

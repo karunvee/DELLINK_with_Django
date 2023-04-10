@@ -19,6 +19,7 @@ urlpatterns = [
     path('delete_timeline/', views.DeleteTimeline, name='delete_timeline'),
     path('vnc_view/', views.vnc_viewer, name='vnc_viewer'),
     path('update_config/pt<str:pt>ln<str:ln>mc<str:mc>/', views.updateConfig, name='update_config'),
+    path('updatetimestart/', views.updatetimestart, name='updatetimestart'),
 ]
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
