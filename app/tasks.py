@@ -122,9 +122,9 @@ def MachineDashboard(machine_type, plant_name, line_name, machine_name, objStatu
             # new_start = now.replace(hour=0, minute=30) #It's mean 7.30 am
             new_start = now.replace(hour=0, minute=0, second=0).astimezone(pytz.timezone('Asia/Bangkok'))
             new_end = new_start + timedelta(days = 1)  #Plus a day
-            TimeLineStartEnd.objects.filter(pk = 2).update(start = new_start, end = new_end)
-            print(" \n############## Update datetime start - end ##############\n{} {}".format(new_start, new_end))
+            timeYesterday = new_start - timedelta(days = 1)
             avg_utilization = 0
+
             if not utilizationRateDay.filter(exact__datetime = datetimeStartEnd.end).exists():
                 timelineGreen = TimeLineStatus.objects.filter(
                     plant_name__exact = plant_name,
@@ -132,6 +132,7 @@ def MachineDashboard(machine_type, plant_name, line_name, machine_name, objStatu
                     machine_name__exact = machine_name,
                     status__exact = "Normal"
                 )
+
                 for item in timelineGreen:
                     item.datetime.timestamp() 
                 # UtilizationRatePerDay(
@@ -142,7 +143,11 @@ def MachineDashboard(machine_type, plant_name, line_name, machine_name, objStatu
                 #     rate = 90
                 #     ).save()
                 print(" \n<<<<<<<<<<<<<<< Add new Utilization Rate >>>>>>>>>>>>>>\n{}".format(datetimeStartEnd.end))
-                        
+
+            TimeLineStartEnd.objects.filter(pk = 2).update(start = new_start, end = new_end)
+            print(" \n############## Update datetime start - end ##############\n{} {}".format(new_start, new_end))        
+        
+        
         if(objStatus.status == "0"):
             current_status = "Normal"
         elif(objStatus.status == "1"):           

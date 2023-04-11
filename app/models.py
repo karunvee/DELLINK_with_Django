@@ -123,5 +123,5 @@ class UtilizationRatePerDay(models.Model):
     datetime = models.CharField(max_length = 255)
     rate = models.IntegerField()
 
-    def __init__(self):
+    def __str__(self):
         return self.rate

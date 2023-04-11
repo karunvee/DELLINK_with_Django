@@ -85,3 +85,12 @@ class ErrorNotificationAdmin(admin.ModelAdmin):
                     'error_msg',
     )
 admin.site.register(ErrorNotification, ErrorNotificationAdmin)
+
+class UtilizationRatePerDayAdmin(admin.ModelAdmin):
+    list_display = ('plant_name',
+                    'line_name',
+                    'machine_name',
+                    'datetime',
+                    'rate'
+    )
+admin.site.register(UtilizationRatePerDay, UtilizationRatePerDayAdmin)
