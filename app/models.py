@@ -120,7 +120,7 @@ class UtilizationRatePerDay(models.Model):
     line_name = models.CharField(max_length = 255)
     machine_name = models.CharField(max_length = 255)
 
-    datetime = models.CharField(max_length = 255)
+    datetime = models.DateField()
     rate = models.IntegerField()
 
     def __str__(self):

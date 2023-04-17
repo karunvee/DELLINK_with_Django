@@ -7,7 +7,7 @@ from celery import Celery
 from typing import Any, Dict
 import msgpack
 import json
-
+from datetime import date 
 from .models import *
 from datetime import datetime, timedelta
 import pytz
@@ -118,31 +118,42 @@ def MachineDashboard(machine_type, plant_name, line_name, machine_name, objStatu
         utilizationRateDay = UtilizationRatePerDay.objects.all()      
         #update datetime start - end
         datetimeStartEnd = TimeLineStartEnd.objects.all().order_by('-id')[0]
+
         if(datetimeStartEnd.end < now):
             # new_start = now.replace(hour=0, minute=30) #It's mean 7.30 am
             new_start = now.replace(hour=0, minute=0, second=0).astimezone(pytz.timezone('Asia/Bangkok'))
             new_end = new_start + timedelta(days = 1)  #Plus a day
             timeYesterday = new_start - timedelta(days = 1)
-            avg_utilization = 0
-
-            if not utilizationRateDay.filter(exact__datetime = datetimeStartEnd.end).exists():
-                timelineGreen = TimeLineStatus.objects.filter(
+            sum_greenTime = 0
+            DaySecond = 86400
+            if not utilizationRateDay.filter(datetime__exact = timeYesterday.date()).exists():
+                timelineData = TimeLineStatus.objects.filter(
                     plant_name__exact = plant_name,
                     line_name__exact = line_name, 
                     machine_name__exact = machine_name,
-                    status__exact = "Normal"
+                    datetime__date = timeYesterday
                 )
 
-                for item in timelineGreen:
-                    item.datetime.timestamp() 
-                # UtilizationRatePerDay(
-                #     plant_name = plant_name, 
-                #     line_name = line_name, 
-                #     machine_name = machine_name, 
-                #     datetime =  datetimeStartEnd.end, 
-                #     rate = 90
-                #     ).save()
-                print(" \n<<<<<<<<<<<<<<< Add new Utilization Rate >>>>>>>>>>>>>>\n{}".format(datetimeStartEnd.end))
+                if timelineData.exists():
+                    for i in range(0, len(timelineData), 1):
+                        if timelineData[i].status == "Normal":
+                            if i == 0:
+                                sum_greenTime = timelineData[i+1].datetime.timestamp() - timeYesterday.timestamp() + sum_greenTime
+                            elif i == (len(timelineData) -1):
+                                sum_greenTime = new_start.timestamp() - timelineData[i].datetime.timestamp() + sum_greenTime
+                            else:
+                                sum_greenTime = timelineData[i+1].datetime.timestamp() - timelineData[i].datetime.timestamp() + sum_greenTime
+
+                utilizationRate = (sum_greenTime*100) / DaySecond
+                print("{} - {} - Utilization Rate : {}%".format(line_name, machine_name, utilizationRate))
+                UtilizationRatePerDay(
+                    plant_name = plant_name, 
+                    line_name = line_name, 
+                    machine_name = machine_name, 
+                    datetime =  timeYesterday, 
+                    rate = utilizationRate
+                    ).save()
+
 
             TimeLineStartEnd.objects.filter(pk = 2).update(start = new_start, end = new_end)
             print(" \n############## Update datetime start - end ##############\n{} {}".format(new_start, new_end))        
