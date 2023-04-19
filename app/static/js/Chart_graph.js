@@ -46,7 +46,7 @@ function startTime() {
     return i;
   }
 function refreshTimeline(){
-    widthTimeline = 1500;
+    widthTimeline = 4000;
     timelineContainer.scrollTo(timelineContainer.scrollWidth, 0);
 }
 function zoominTimeline(){

@@ -1,6 +1,6 @@
 import os
 from celery import Celery
-
+from celery.schedules import crontab
 # Set the default Django settings module for the 'celery' program.
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'DELLINK.settings')
 
@@ -27,7 +27,21 @@ app.conf.beat_schedule ={
         'options': {
             'expires': 15.0,
         },
-    }
+    },
+    'delete_expired_data_4hrs': {
+        'task' : 'app.tasks.delete_expired_data',
+        'schedule' : 14400,
+        'options': {
+            'expires': 15.0,
+        },
+    },
+    # 'update_utilization_start_hour': {
+    #     'task' : 'app.tasks.update_utilization_per_hour',
+    #     'schedule' : crontab(minute=0),
+    #     'options': {
+    #         'expires': 15.0,
+    #     },
+    # }
 }
 
 # Load task modules from all registered Django apps.

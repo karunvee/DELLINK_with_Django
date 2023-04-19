@@ -5,5 +5,5 @@ const http = require('http')
             server.listen(port)
             websockify(server, 
             [
-                
+                {target: '10.199.999.99:9000', path: '/S022033601'},
                 ])

@@ -42,7 +42,7 @@ def home_view(request):
 
 @login_required
 def line_view(request, pt, ln):
-    plant_members = PlantInfo.objects.all()
+    # PLANTs = PlantInfo.objects.get(name = pt)
     line_row = LineRow.objects.filter(plant_name__exact = pt, line_name__exact = ln).order_by('number')
     context = {
         'plant_name': pt,
@@ -54,7 +54,6 @@ def line_view(request, pt, ln):
 @login_required
 def machine_view(request, pt, ln, mc):
     
-    notification_error = ErrorNotification.objects.filter(tag_member__line_name = ln, tag_member__machine_name = mc)
     indicator_members = Indicator.objects.filter(plant_name__exact = pt, line_name__exact = ln, machine_name__exact = mc)
     plantInfo = PlantInfo.objects.filter(name__exact = pt).get()
 
@@ -84,7 +83,6 @@ def machine_view(request, pt, ln, mc):
         'machineName': mc,
         'dia_url' : str_url,
         'ip_port' : ip_port,
-        'notification_error' : notification_error,
         'errData_count' : [30, 49, 44, 24, 15],
     }
     return render(request, 'machine_view.html', context)
@@ -108,7 +106,7 @@ def SetLine(request, pt, ln):
     if request.method == 'POST':
         
         data_dictionary = json.loads(request.body.decode('utf-8'))
-
+        plant = PlantInfo.objects.get(name = pt)
         print(data_dictionary)
         LineRow.objects.filter(plant_name__exact = pt, line_name__exact = ln).delete()
         for i in range(1, len(data_dictionary) + 1, 1):
@@ -126,7 +124,13 @@ def SetLine(request, pt, ln):
                 url = data_dictionary[str(i)][7],
                 )
             print("number:{} plant:{} line:{} deviceId:{} name:{}".format(i, pt, ln, data_dictionary[str(i)][0], data_dictionary[str(i)][1]))
-        
+            
+            
+            MachineMembers(
+                plantInfo = plant,
+                line_name = ln,
+                machine_name = data_dictionary[str(i)][1]
+            ).save()
             low_row.save()
         return JsonResponse({'status': 'success'})
 
@@ -136,7 +140,8 @@ def DeleteIndicator(request, pt, ln, mc, tid):
     return redirect('../../machine_view/pt{}ln{}mc{}/'.format(pt, ln, mc))
 
 def DeleteData(request, pt, ln):
-
+    plant = PlantInfo.objects.get(name = pt)
+    MachineMembers.objects.filter(plantInfo = plant,line_name = ln).delete()
     LineRow.objects.filter(plant_name__exact = pt, line_name__exact = ln).delete()
 
     return redirect('../../line_view/pt{}ln{}/'.format(pt, ln))
@@ -280,13 +285,17 @@ def vnc_viewer(request):
     
     return render(request, 'vnc_view.html', {})
 
+def DeleteErrorHistory(request):
+    ErrorHistory.objects.all().delete()
+    return HttpResponse("Delete all error history success!")
 
 def DeleteTimeline(request):
-
     TimeLineStatus.objects.all().delete()
+    return HttpResponse("Delete all timeline success!")
 
-    return HttpResponse("Delete all data success!")
-
+def DeleteUtilizationDays(request):
+    UtilizationRatePerDay.objects.all().delete()
+    return HttpResponse("Delete all Utilization Days success!")
 
 def updatetimestart(request):
     now = datetime.now(pytz.timezone('Asia/Bangkok'))

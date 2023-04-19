@@ -1,6 +1,9 @@
 from django.db import models
 from django.contrib.postgres.fields import ArrayField
 from django.conf import settings
+from datetime import datetime, timedelta
+import pytz
+from django.core.validators import DecimalValidator
 
 def default_image_path():
     return f'{settings.STATIC_URL}/img/default.png'
@@ -22,12 +25,19 @@ class PlantInfo(models.Model):
 
     def __str__(self):
         return self.name
-
+class MachineMembers(models.Model):
+    plantInfo = models.ForeignKey(PlantInfo, on_delete=models.CASCADE, null=True)
+    line_name = models.CharField(max_length = 255)
+    machine_name = models.CharField(max_length = 255)
+    
+    def __str__(self):
+        return "[%s] %s" % (self.line_name, self.machine_name)
+        
 class LineRow(models.Model):
     plant_name = models.CharField(max_length = 255)
     line_name = models.CharField(max_length = 255)
-    deviceId = models.CharField(max_length = 255)
     name = models.CharField(max_length = 255)
+    deviceId = models.CharField(max_length = 255)
     deviceName = models.CharField(max_length = 255)
     number = models.IntegerField()
     status = models.CharField(max_length = 255)
@@ -71,43 +81,33 @@ class ErrorType(models.Model):
         return "%s - %s" % (self.machine_type, self.comment)
 
 class ErrorMessage(models.Model):
-    machine_type = models.ForeignKey(ErrorType, on_delete=models.CASCADE, null=True)
+    error_type = models.ForeignKey(ErrorType, on_delete=models.CASCADE, null=True)
     error_code = models.CharField(max_length= 255)
     error_message = models.CharField(max_length= 255)
 
     def __str__(self):
-        return self.error_code
-    
-class ErrorNotification(models.Model):
-    tag_member = models.ForeignKey(Indicator, on_delete=models.CASCADE, null=True)
-    error_msg = models.ForeignKey(ErrorMessage, on_delete=models.CASCADE, null=True, related_name='error_msg')
-    
-    def __str__(self):
-        return self.error_msg.error_message
+        return self.error_message
     
 class ErrorHistory(models.Model):
-    plant_name = models.CharField(max_length = 255)
-    line_name = models.CharField(max_length = 255)
-    machine_name = models.CharField(max_length = 255)
+    machineInfo = models.ForeignKey(MachineMembers, on_delete=models.CASCADE, null=True)
 
     datetime = models.DateTimeField()
     error_code = models.CharField(max_length = 255)
-    error_message = models.CharField(max_length = 255)
+    error_message = models.ForeignKey(ErrorMessage, on_delete=models.CASCADE, null=True, related_name='error_msg')
 
     def __str__(self):
-        return self.error_message
-    
+        return self.error_message.error_message
+        
 class TimeLineStatus(models.Model):
-    plant_name = models.CharField(max_length = 255)
-    line_name = models.CharField(max_length = 255)
-    machine_name = models.CharField(max_length = 255)
+    machineInfo = models.ForeignKey(MachineMembers, on_delete=models.CASCADE, null=True)
+
     datetime = models.DateTimeField()
     status = models.CharField(max_length = 255)
     error_code = models.CharField(max_length = 255)
 
     def __str__(self):
         return self.status
-    
+
 class TimeLineStartEnd(models.Model):
     start = models.DateTimeField()
     end = models.DateTimeField()
@@ -116,12 +116,19 @@ class TimeLineStartEnd(models.Model):
         return self.pk
     
 class UtilizationRatePerDay(models.Model):
-    plant_name = models.CharField(max_length = 255)
-    line_name = models.CharField(max_length = 255)
-    machine_name = models.CharField(max_length = 255)
+    machineInfo = models.ForeignKey(MachineMembers, on_delete=models.CASCADE, null=True)
 
     datetime = models.DateField()
-    rate = models.IntegerField()
+    rate = models.DecimalField(max_digits=5, decimal_places=2)
 
-    def __str__(self):
+    def __int__(self):
+        return self.rate
+    
+class UtilizationRatePerHour(models.Model):
+    machineInfo = models.ForeignKey(MachineMembers, on_delete=models.CASCADE, null=True)
+
+    datetime = models.DateTimeField()
+    rate = models.DecimalField(max_digits=5, decimal_places=2)
+
+    def __int__(self):
         return self.rate

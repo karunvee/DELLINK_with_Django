@@ -40,9 +40,7 @@ class IndicatorAdmin(admin.ModelAdmin):
 admin.site.register(Indicator, IndicatorAdmin)
 
 class ErrorHistoryAdmin(admin.ModelAdmin):
-    list_display = ('plant_name',
-                    'line_name',
-                    'machine_name',
+    list_display = ('machineInfo',
                     'datetime',
                     'error_code',
                     'error_message'
@@ -50,9 +48,7 @@ class ErrorHistoryAdmin(admin.ModelAdmin):
 admin.site.register(ErrorHistory, ErrorHistoryAdmin)
 
 class TimeLineStatusAdmin(admin.ModelAdmin):
-    list_display = ('plant_name',
-                    'line_name',
-                    'machine_name',
+    list_display = ('machineInfo',
                     'datetime',
                     'status',
                     'error_code'
@@ -74,23 +70,29 @@ class ErrorTypeAdmin(admin.ModelAdmin):
 admin.site.register(ErrorType, ErrorTypeAdmin)
 
 class ErrorMessageAdmin(admin.ModelAdmin):
-    list_display = ('machine_type',
+    list_display = ('error_type',
                     'error_code',
                     'error_message'
     )
 admin.site.register(ErrorMessage, ErrorMessageAdmin)
 
-class ErrorNotificationAdmin(admin.ModelAdmin):
-    list_display = ('tag_member',
-                    'error_msg',
+class MachineMembersAdmin(admin.ModelAdmin):
+    list_display = ('plantInfo',
+                    'line_name',
+                    'machine_name'
     )
-admin.site.register(ErrorNotification, ErrorNotificationAdmin)
+admin.site.register(MachineMembers, MachineMembersAdmin)
 
 class UtilizationRatePerDayAdmin(admin.ModelAdmin):
-    list_display = ('plant_name',
-                    'line_name',
-                    'machine_name',
+    list_display = ('machineInfo',
                     'datetime',
                     'rate'
     )
 admin.site.register(UtilizationRatePerDay, UtilizationRatePerDayAdmin)
+
+class UtilizationRatePerHourAdmin(admin.ModelAdmin):
+    list_display = ('machineInfo',
+                    'datetime',
+                    'rate'
+    )
+admin.site.register(UtilizationRatePerHour, UtilizationRatePerHourAdmin)

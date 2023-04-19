@@ -66,99 +66,117 @@ class machineStatus:
           self.status = status
           self.statusCode = statusCode
 
+
+def UtilizationRateDay(machine_type, plant_name, line_name, machine_name):
+    PLANTs = PlantInfo.objects.get(name = "CNBU")
+    MACHINEDs = MachineMembers.objects.get(plantInfo = PLANTs, line_name = "CN08", machine_name = "Auto Apply Glue")
+    utilizationRate = 0
+    now = datetime.now(pytz.timezone('Asia/Bangkok'))
+    UtlPerHour = UtilizationRatePerHour.objects.filter(machineInfo = MACHINEDs, datetime__date = now)
+    sum_greenTime = 0
+    totalSecond = 0
+    if UtlPerHour.exists():
+        timeStart = now.replace(hour=len(UtlPerHour), minute=0, second=0).astimezone(pytz.timezone('Asia/Bangkok'))
+    else:
+        # first data
+        timeStart = now.replace(hour=0, minute=0, second=0).astimezone(pytz.timezone('Asia/Bangkok'))
+
+    if (now.timestamp() - timeStart.timestamp()) >= 3600 :
+
+        nextHour = timeStart.replace(minute=0, second=0).astimezone(pytz.timezone('Asia/Bangkok')) + timedelta(hours=1)
+        startHour = now.replace(hour=0, minute=0, second=0).astimezone(pytz.timezone('Asia/Bangkok'))
+
+        timelineData = TimeLineStatus.objects.filter(
+                machineInfo = MACHINEDs,
+                datetime__date = now
+        )
+        if timelineData.exists():
+            print(timeStart)
+            for i in range(0, len(timelineData), 1):
+                try:
+                        timeline_hourTime = timelineData[i].datetime.astimezone(pytz.timezone('Asia/Bangkok'))
+                        
+                        if timelineData[i].status == "Normal" and  startHour < timeline_hourTime < nextHour:
+                            print("timeline_hourTime {}".format(timeline_hourTime))
+                            if i == 0:
+                                if timelineData[i+1].datetime.timestamp() > nextHour.timestamp():
+                                    sum_greenTime = nextHour.timestamp() - startHour.timestamp() 
+                                else:
+                                    sum_greenTime = timelineData[i+1].datetime.timestamp() - startHour.timestamp() + sum_greenTime
+                            elif i == (len(timelineData) -1):
+                                sum_greenTime = nextHour.timestamp() - timelineData[i].datetime.timestamp() + sum_greenTime
+                            else:
+                                sum_greenTime = timelineData[i+1].datetime.timestamp() - timelineData[i].datetime.timestamp() + sum_greenTime
+ 
+                except:
+                    break  
+        totalSecond = nextHour.timestamp() - startHour.timestamp()          
+        utilizationRate = (sum_greenTime*100) / totalSecond
+        print("start :{} - now :{}  >>> {:.2f}% <s {}| t {}>".format(startHour, nextHour, utilizationRate, sum_greenTime, totalSecond))
+        UtilizationRatePerHour(
+            machineInfo = MACHINEDs, 
+            datetime = nextHour,
+            rate = abs(utilizationRate)
+        ).save()
+
+
+
 def MachineDashboard(machine_type, plant_name, line_name, machine_name, objStatus, errorKey):
+
+    PLANTs = PlantInfo.objects.get(name = plant_name)
+    MACHINEDs = MachineMembers.objects.get(plantInfo = PLANTs, line_name = line_name, machine_name = machine_name)
     #Line notice error
     e_code = "0"
+    # print("{} ******** {} <{}>".format(MACHINEDs, objStatus.status, objStatus.statusCode))
     if(objStatus.status != "" and objStatus.status != "None" and objStatus.statusCode != "" and objStatus.statusCode != "None"):
          
         if(objStatus.status == "1" and errorKey not in dicError):
+            
             if(objStatus.statusCode != "0"):
-                e_msg = ErrorMessage.objects.filter(
-                    machine_type__machine_type__exact = machine_type,
-                    error_code__exact = objStatus.statusCode
-                )
-                if(e_msg.exists()):
-                    msg_error = e_msg.get()
-                else:
-                    msg_error = "Error unknown, this error is not defined!"
+                try:
+                    ERROR_TYPEs = ErrorType.objects.filter(machine_type = machine_type)
+                    if ERROR_TYPEs.exists():
+                        error_type = ERROR_TYPEs.get()
+                        MSG_ERRORs = ErrorMessage.objects.get(error_type = error_type, error_code__exact = objStatus.statusCode)
+                    else:
+                        UNDEFINED_TYPEs = ErrorType.objects.get(machine_type = "Undefined")
+                        MSG_ERRORs = ErrorMessage.objects.get( error_type = UNDEFINED_TYPEs, error_code__exact = "NAN")
+                except Exception as e:
+                    print("Error at msg_error : {}".format(e))
 
                 dicError[errorKey] = objStatus.statusCode
-                print("\n!!!!!!!! error >{} {}".format(errorKey, msg_error))
+
+
+                print("\n!!!!!!!! error >{} {}".format(errorKey, MSG_ERRORs.error_message))
                 
-                msg_alert = 'Error Alert\nmachine name:{}\nError code: ({}){}'.format(machine_name, objStatus.statusCode, msg_error)
+                # msg_alert = 'Error Alert\nmachine name:{}\nError code: ({}){}'.format(machine_name, objStatus.statusCode, MSG_ERRORs.error_message)
                 
                 # line_bot_api.broadcast(TextSendMessage(text=msg_alert))
                 # line_bot_api.broadcast(FlexSendMessage(alt_text="Card", contents=card))
 
                 #------------------------------------------------------------------------------------------------------------------------
                 # Add to Error history
-                now = datetime.now()
+                now = datetime.now(pytz.timezone('Asia/Bangkok'))
                 errorAddCount = ErrorHistory(
-                    plant_name = plant_name, 
-                    line_name = line_name, 
-                    machine_name = machine_name, 
+                    machineInfo = MACHINEDs,
                     datetime = now, 
                     error_code = objStatus.statusCode, 
-                    error_message = msg_error)
+                    error_message = MSG_ERRORs)
                 errorAddCount.save()
                 #------------------------------------------------------------------------------------------------------------------------
         
         if(objStatus.status == "0" and objStatus.statusCode == "0" and errorKey in dicError):
             del dicError[errorKey]
     
-        # Timeline update
+    if(objStatus.status != "" and objStatus.status != "None"):
+        # Timeline update  #------------------------------------------------------------------------------------------------------------------------
         updateTimeline = False
         timelineObj = TimeLineStatus.objects.filter(
-            plant_name__exact = plant_name,
-            line_name__exact = line_name, 
-            machine_name__exact = machine_name
+            machineInfo = MACHINEDs
         )
-        # now = datetime.now(pytz.timezone('UTC'))
-        now = datetime.now(pytz.timezone('Asia/Bangkok'))
-        utilizationRateDay = UtilizationRatePerDay.objects.all()      
-        #update datetime start - end
         datetimeStartEnd = TimeLineStartEnd.objects.all().order_by('-id')[0]
 
-        if(datetimeStartEnd.end < now):
-            # new_start = now.replace(hour=0, minute=30) #It's mean 7.30 am
-            new_start = now.replace(hour=0, minute=0, second=0).astimezone(pytz.timezone('Asia/Bangkok'))
-            new_end = new_start + timedelta(days = 1)  #Plus a day
-            timeYesterday = new_start - timedelta(days = 1)
-            sum_greenTime = 0
-            DaySecond = 86400
-            if not utilizationRateDay.filter(datetime__exact = timeYesterday.date()).exists():
-                timelineData = TimeLineStatus.objects.filter(
-                    plant_name__exact = plant_name,
-                    line_name__exact = line_name, 
-                    machine_name__exact = machine_name,
-                    datetime__date = timeYesterday
-                )
 
-                if timelineData.exists():
-                    for i in range(0, len(timelineData), 1):
-                        if timelineData[i].status == "Normal":
-                            if i == 0:
-                                sum_greenTime = timelineData[i+1].datetime.timestamp() - timeYesterday.timestamp() + sum_greenTime
-                            elif i == (len(timelineData) -1):
-                                sum_greenTime = new_start.timestamp() - timelineData[i].datetime.timestamp() + sum_greenTime
-                            else:
-                                sum_greenTime = timelineData[i+1].datetime.timestamp() - timelineData[i].datetime.timestamp() + sum_greenTime
-
-                utilizationRate = (sum_greenTime*100) / DaySecond
-                print("{} - {} - Utilization Rate : {}%".format(line_name, machine_name, utilizationRate))
-                UtilizationRatePerDay(
-                    plant_name = plant_name, 
-                    line_name = line_name, 
-                    machine_name = machine_name, 
-                    datetime =  timeYesterday, 
-                    rate = utilizationRate
-                    ).save()
-
-
-            TimeLineStartEnd.objects.filter(pk = 2).update(start = new_start, end = new_end)
-            print(" \n############## Update datetime start - end ##############\n{} {}".format(new_start, new_end))        
-        
-        
         if(objStatus.status == "0"):
             current_status = "Normal"
         elif(objStatus.status == "1"):           
@@ -180,17 +198,55 @@ def MachineDashboard(machine_type, plant_name, line_name, machine_name, objStatu
                 updateTimeline = True
         else:
             updateTimeline = True
-            print("Add first status data to database")
+            # print("Add first status data to database")
 
         if(updateTimeline):
+            now = datetime.now(pytz.timezone('Asia/Bangkok'))
             TimeLineStatus(
-                plant_name = plant_name, 
-                line_name = line_name, 
-                machine_name = machine_name,
+                machineInfo = MACHINEDs, 
                 datetime = now, 
                 status = current_status, 
                 error_code = e_code
                 ).save()
+            
+    #---- Utilization Rate----------------------------------------------------------------------------------------------------        
+    now = datetime.now(pytz.timezone('Asia/Bangkok'))
+    utilizationRateDay = UtilizationRatePerDay.objects.all()      
+        #update datetime start - end
+    datetimeStartEnd = TimeLineStartEnd.objects.all().order_by('-id')[0]
+        
+    if(datetimeStartEnd.end < now):
+        new_start = now.replace(hour=0, minute=0, second=0).astimezone(pytz.timezone('Asia/Bangkok'))
+        new_end = new_start + timedelta(days = 1)  #Plus a day
+        timeYesterday = new_start - timedelta(days = 1)
+        sum_greenTime = 0
+        DaySecond = 86400
+        if not utilizationRateDay.filter(machineInfo = MACHINEDs, datetime__exact = timeYesterday.date()).exists():
+            timelineData = TimeLineStatus.objects.filter(
+                machineInfo = MACHINEDs,
+                datetime__date = timeYesterday
+            )
+            if timelineData.exists():
+                for i in range(0, len(timelineData), 1):
+                    try:
+                        if timelineData[i].status == "Normal":
+                            if i == 0:
+                                sum_greenTime = timelineData[i+1].datetime.timestamp() - timeYesterday.timestamp() + sum_greenTime
+                            elif i == (len(timelineData) -1):
+                                    sum_greenTime = new_start.timestamp() - timelineData[i].datetime.timestamp() + sum_greenTime
+                            else:
+                                sum_greenTime = timelineData[i+1].datetime.timestamp() - timelineData[i].datetime.timestamp() + sum_greenTime
+                    except:
+                        break                    
+
+            utilizationRate = (sum_greenTime*100) / DaySecond
+            print("{} - Utilization Rate : {}%".format(MACHINEDs, utilizationRate))
+            UtilizationRatePerDay(
+                machineInfo = MACHINEDs, 
+                datetime =  timeYesterday, 
+                rate = utilizationRate
+                ).save()     
+            
 
 @shared_task
 def data_api():
@@ -251,7 +307,8 @@ def data_api():
                         machine_list[line_word].append([url, machine_word, deviceNo, status, deviceName, guid, type, model])
                     else:
                         machine_list[line_word] = [[url, machine_word, deviceNo, status, deviceName, guid, type, model]]
-                
+        
+        # print(machine_list)        
         for key in machine_list.keys() :
             dictLine = {}
             dictLine["line_name"] = key
@@ -259,7 +316,7 @@ def data_api():
             dictLine["machine"] = []
 
             for mIndex in machine_list[key]:
-
+                
                 status_dh = ""
                 statusCode_dh = ""
 
@@ -274,9 +331,10 @@ def data_api():
                 dictMachine["model"] = mIndex[7]
                 dictMachine["url"] = mIndex[0]
                 dictMachine["indicator"] = []
-
+                
                 indicator_members = requests.get(mIndex[0] + "/" + str(mIndex[2]) + "/tags").json()
                 for indicator in indicator_members:
+
                     dictIndicator = {}
                     dictIndicator["indicator_name"] = indicator['name']
                     dictIndicator["tid"] = indicator['tid']
@@ -285,10 +343,9 @@ def data_api():
                     dictIndicator["value"] = str(indicator['value'])
                     
                     if(dictIndicator["indicator_name"] == "status"):
-                        status_dh = dictIndicator["value"]
+                        status_dh = str(indicator['value'])
                     elif(dictIndicator["indicator_name"] == "statusCode"):
-                        statusCode_dh = dictIndicator["value"]
-
+                        statusCode_dh = str(indicator['value'])
                     dictMachine["indicator"].append(dictIndicator)
 
                 errorKey = "{}-{}".format(dictLine["line_name"], dictMachine["machine_name"])
@@ -300,8 +357,13 @@ def data_api():
                      dictMachine["machine_name"], 
                      machineStatus(status_dh, statusCode_dh), 
                      errorKey
-                     )
-                
+                )
+                UtilizationRateDay(
+                    machine_type, 
+                    dictPlant["plant_name"], 
+                    dictLine["line_name"], 
+                    dictMachine["machine_name"]
+                )
 
                 dictLine["machine"].append(dictMachine)
 
@@ -310,8 +372,16 @@ def data_api():
 
         data.append(dictPlant)
 
+
+    now = datetime.now(pytz.timezone('Asia/Bangkok'))    
+    datetimeStartEnd = TimeLineStartEnd.objects.all().order_by('-id')[0]
+    if(datetimeStartEnd.end < now):
+        new_start = now.replace(hour=0, minute=0, second=0).astimezone(pytz.timezone('Asia/Bangkok'))
+        new_end = new_start + timedelta(days = 1)  #Plus a day
+        TimeLineStartEnd.objects.filter(pk = 2).update(start = new_start, end = new_end)
+        print(" \n############## Update datetime start - end ##############\n{} {}".format(new_start, new_end))        
+
     data_json = json.dumps(data)
-    # print("API fetching worker is listening..")
     publish_message_to_group({ "type": "chat_message", "text": data_json }, "app")
 
 @shared_task
@@ -326,12 +396,10 @@ def graph_api():
     dictType["timeline"] = []
     for index in timeline:
         dictTimeline = {}
-        dictTimeline["plant_name"] = index.plant_name
-        dictTimeline["line_name"] = index.line_name
-        dictTimeline["machine_name"] = index.machine_name
+        dictTimeline["plant_name"] = index.machineInfo.plantInfo.name
+        dictTimeline["line_name"] = index.machineInfo.line_name
+        dictTimeline["machine_name"] = index.machineInfo.machine_name
         dictTimeline["datetime"] = "{}".format(index.datetime)
-        # dictTimeline["data_date"] = "{}".format(index.data_date)
-        # dictTimeline["data_time"] = "{}".format(index.data_time)
         dictTimeline["status"] = index.status
         dictTimeline["error_code"] = index.error_code
 
@@ -342,39 +410,48 @@ def graph_api():
     dictType["error-history"] = []
     for index in errorHistory:
         dictError = {}
-        dictError["plant_name"] = index.plant_name
-        dictError["line_name"] = index.line_name
-        dictError["machine_name"] = index.machine_name
+        dictError["plant_name"] = index.machineInfo.plantInfo.name
+        dictError["line_name"] = index.machineInfo.line_name
+        dictError["machine_name"] = index.machineInfo.machine_name
         dictError["datetime"] = "{}".format(index.datetime)
         dictError["error_code"] = index.error_code
-        dictError["error_message"] = index.error_message
+        dictError["error_message"] = index.error_message.error_message
         
         dictType["error-history"].append(dictError)
 
+    UtilizationRate = UtilizationRatePerDay.objects.all()
     dictType["utilization-rate"] = []
-    
+    for index in UtilizationRate:
+        dictUtilize = {}
+        dictUtilize["plant_name"] = index.machineInfo.plantInfo.name
+        dictUtilize["line_name"] = index.machineInfo.line_name
+        dictUtilize["machine_name"] = index.machineInfo.machine_name
+        dictUtilize["datetime"] = "{}".format(index.datetime)
+        dictUtilize["rate"] = "{}".format(index.rate)
+
+        dictType["utilization-rate"].append(dictUtilize)
 
     data.append(dictType)
     
     data_json = json.dumps(data)
-    # print(data_json)
-    # print("Graph API fetching worker is listening..")
     publish_message_to_group({ "type": "chat_message", "text": data_json }, "graph")
 
+@shared_task
+def delete_expired_data():
+    now = datetime.now(pytz.timezone('Asia/Bangkok'))
+    ThreeDays_expired_date = now - timedelta(days = 3)
+    threeMonths_expired_date = now - timedelta(days = 90)
+    TwoYears_expired_date = now - timedelta(days = 730)
 
+    # Expiration data is 3 Days 
+    utilizationHour_expired = UtilizationRatePerHour.objects.filter(datetime__lte = TwoYears_expired_date)
+    utilizationHour_expired.delete()
+    timeline_expired = TimeLineStatus.objects.filter(datetime__lte = ThreeDays_expired_date)
+    timeline_expired.delete()
+    # Expiration data is 3 Months 
 
-
-
-
-
-
-
-
-
-    # publish_message_to_group({ "type": "chat_message", "text": response }, "app")
-    # response = requests.get(url).json()
-    # msg = response['comment']
-
-    # publish_message_to_group({ "type": "chat_message", "text": msg }, "app")
-    # # async_to_sync(channel_layer.group_send)("app", {"type": "chat_message","text": msg,},)
-    # print('<==================> message :' + msg)
+    # Expiration data is 2 Years 
+    error_expired = ErrorHistory.objects.filter(datetime__lte = TwoYears_expired_date)
+    error_expired.delete()
+    utilizationDay_expired = UtilizationRatePerDay.objects.filter(datetime__lte = TwoYears_expired_date)
+    utilizationDay_expired.delete()

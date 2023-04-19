@@ -100,34 +100,34 @@ var socket = new WebSocket('ws://localhost:8000/ws/app/');
                                         //
 
                                         // Update error to notification
-                                        var errorCode = document.getElementById("errorCode" + String(tid));
-                                        if(errorCode != null){
-                                                document.getElementById("errorCode"+String(tid)).value = val;
-                                                if(val != 0){
-                                                    // document.getElementById('alert-message').style.display = "block";
-                                                    var errorMsg = document.getElementById("errorMsg" + String(val));
-                                                    if(errorMsg != null){
-                                                        var eMsg = document.getElementById("errorMsg" + String(val)).value;
-                                                        document.querySelector('#alert-container').innerHTML = `
-                                                                    <div class="alert">
-                                                                        <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span> 
-                                                                        <strong>Error!</strong> ${eMsg}.
-                                                                    </div>`;
-                                                    }
-                                                    else{
-                                                        document.querySelector('#alert-container').innerHTML = `
-                                                                    <div class="alert">
-                                                                        <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span> 
-                                                                        <strong>Error!</strong> Unknown error message.
-                                                                    </div>`;
-                                                    }
+                                        // var errorCode = document.getElementById("errorCode" + String(tid));
+                                        // if(errorCode != null){
+                                        //         document.getElementById("errorCode"+String(tid)).value = val;
+                                        //         if(val != 0){
+                                        //             // document.getElementById('alert-message').style.display = "block";
+                                        //             var errorMsg = document.getElementById("errorMsg" + String(val));
+                                        //             if(errorMsg != null){
+                                        //                 var eMsg = document.getElementById("errorMsg" + String(val)).value;
+                                        //                 document.querySelector('#alert-container').innerHTML = `
+                                        //                             <div class="alert">
+                                        //                                 <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span> 
+                                        //                                 <strong>Error!</strong> ${eMsg}.
+                                        //                             </div>`;
+                                        //             }
+                                        //             else{
+                                        //                 document.querySelector('#alert-container').innerHTML = `
+                                        //                             <div class="alert">
+                                        //                                 <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span> 
+                                        //                                 <strong>Error!</strong> Unknown error message.
+                                        //                             </div>`;
+                                        //             }
                                                     
-                                                }
-                                                else{
-                                                    // document.getElementById('alert-message').style.display = "none";
-                                                    document.querySelector('#alert-container').innerHTML = "";
-                                                }
-                                        }
+                                        //         }
+                                        //         else{
+                                        //             // document.getElementById('alert-message').style.display = "none";
+                                        //             document.querySelector('#alert-container').innerHTML = "";
+                                        //         }
+                                        // }
                                         //
                                     }
                                 }   
