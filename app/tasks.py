@@ -67,7 +67,7 @@ class machineStatus:
           self.statusCode = statusCode
 
 
-def UtilizationRateDay(machine_type, plant_name, line_name, machine_name):
+def UtilizationRateHour(machine_type, plant_name, line_name, machine_name):
     PLANTs = PlantInfo.objects.get(name = "CNBU")
     MACHINEDs = MachineMembers.objects.get(plantInfo = PLANTs, line_name = "CN08", machine_name = "Auto Apply Glue")
     utilizationRate = 0
@@ -96,13 +96,14 @@ def UtilizationRateDay(machine_type, plant_name, line_name, machine_name):
                 try:
                         timeline_hourTime = timelineData[i].datetime.astimezone(pytz.timezone('Asia/Bangkok'))
                         
+                        
                         if timelineData[i].status == "Normal" and  startHour < timeline_hourTime < nextHour:
                             print("timeline_hourTime {}".format(timeline_hourTime))
                             if i == 0:
                                 if timelineData[i+1].datetime.timestamp() > nextHour.timestamp():
-                                    sum_greenTime = nextHour.timestamp() - startHour.timestamp() 
+                                    sum_greenTime = nextHour.timestamp() - timelineData[i].datetime.timestamp()
                                 else:
-                                    sum_greenTime = timelineData[i+1].datetime.timestamp() - startHour.timestamp() + sum_greenTime
+                                    sum_greenTime = timelineData[i+1].datetime.timestamp() - timelineData[i].datetime.timestamp()
                             elif i == (len(timelineData) -1):
                                 sum_greenTime = nextHour.timestamp() - timelineData[i].datetime.timestamp() + sum_greenTime
                             else:
@@ -210,8 +211,7 @@ def MachineDashboard(machine_type, plant_name, line_name, machine_name, objStatu
                 ).save()
             
     #---- Utilization Rate----------------------------------------------------------------------------------------------------        
-    now = datetime.now(pytz.timezone('Asia/Bangkok'))
-    utilizationRateDay = UtilizationRatePerDay.objects.all()      
+    now = datetime.now(pytz.timezone('Asia/Bangkok'))     
         #update datetime start - end
     datetimeStartEnd = TimeLineStartEnd.objects.all().order_by('-id')[0]
         
@@ -221,7 +221,7 @@ def MachineDashboard(machine_type, plant_name, line_name, machine_name, objStatu
         timeYesterday = new_start - timedelta(days = 1)
         sum_greenTime = 0
         DaySecond = 86400
-        if not utilizationRateDay.filter(machineInfo = MACHINEDs, datetime__exact = timeYesterday.date()).exists():
+        if not UtilizationRatePerDay.objects.filter(machineInfo = MACHINEDs, datetime__exact = timeYesterday.date()).exists():
             timelineData = TimeLineStatus.objects.filter(
                 machineInfo = MACHINEDs,
                 datetime__date = timeYesterday
@@ -358,7 +358,7 @@ def data_api():
                      machineStatus(status_dh, statusCode_dh), 
                      errorKey
                 )
-                UtilizationRateDay(
+                UtilizationRateHour(
                     machine_type, 
                     dictPlant["plant_name"], 
                     dictLine["line_name"], 
@@ -427,12 +427,21 @@ def graph_api():
         dictUtilize["line_name"] = index.machineInfo.line_name
         dictUtilize["machine_name"] = index.machineInfo.machine_name
         dictUtilize["datetime"] = "{}".format(index.datetime)
-        dictUtilize["rate"] = "{}".format(index.rate)
+        dictUtilize["rate-day"] = "{}".format(index.rate)
+        dictUtilize["rate-hour"] = []
+        PLANTs = PlantInfo.objects.get(name = index.machineInfo.plantInfo.name)
+        MACHINEDs = MachineMembers.objects.get(plantInfo = PLANTs, line_name = index.machineInfo.line_name, machine_name = index.machineInfo.machine_name)
+        for idx in UtilizationRatePerHour.objects.filter(machineInfo = MACHINEDs):
+            dicUtlData = {}
+            dicUtlData["x"] = "{}".format(idx.datetime)
+            dicUtlData["y"] = "{}".format(idx.rate)
+            dictUtilize["rate-hour"].append(dicUtlData)
 
         dictType["utilization-rate"].append(dictUtilize)
 
     data.append(dictType)
     
+
     data_json = json.dumps(data)
     publish_message_to_group({ "type": "chat_message", "text": data_json }, "graph")
 

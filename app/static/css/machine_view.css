@@ -484,14 +484,14 @@ h5{
   display: block;
   top: 0;
   width:45%;
-  max-width:600px;
+  /* max-width:600px; */
   max-height: 350px;
 }
 #utilize-chart{
   display: block;
   top: 0;
   width:45%;
-  max-width:600px;
+  /* max-width:1000px; */
   max-height: 350px;
 }
 /* --------------------- */

@@ -297,6 +297,10 @@ def DeleteUtilizationDays(request):
     UtilizationRatePerDay.objects.all().delete()
     return HttpResponse("Delete all Utilization Days success!")
 
+def DeleteUtilizationHours(request):
+    UtilizationRatePerHour.objects.all().delete()
+    return HttpResponse("Delete all Utilization Hours success!")
+
 def updatetimestart(request):
     now = datetime.now(pytz.timezone('Asia/Bangkok'))
     new_start = now.replace(hour=0, minute=0, second=0).astimezone(pytz.timezone('Asia/Bangkok')) #It's mean 7.30 am

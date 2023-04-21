@@ -23,6 +23,9 @@ CN05
 10.195.220.21
 5000
 
+http://10.195.220.8:5000/
+http://10.195.220.10:5000/
+
 CNBU : Control networking business unit
 DCBU : Direct current business unit.
 
@@ -41,3 +44,9 @@ IP : 10.204.209.1
 Domain : mesth.deltames.corp
 User : mesth\SRV-THD7WARROOM
 Pass : W@rServ1ce
+
+
+
+chart.js library
+
+npm install chartjs-plugin-datalabels 

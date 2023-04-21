@@ -19,6 +19,7 @@ urlpatterns = [
     path('delete_timeline/', views.DeleteTimeline, name='delete_timeline'),
     path('delete_errorhistory/', views.DeleteErrorHistory, name='delete_errorhistory'),
     path('delete_utilizationdays/', views.DeleteUtilizationDays, name='delete_utilizationdays'),
+    path('delete_utilizationhours/', views.DeleteUtilizationHours, name='delete_utilizationhours'),
     path('vnc_view/', views.vnc_viewer, name='vnc_viewer'),
     path('update_config/pt<str:pt>ln<str:ln>mc<str:mc>/', views.updateConfig, name='update_config'),
     path('updatetimestart/', views.updatetimestart, name='updatetimestart'),
