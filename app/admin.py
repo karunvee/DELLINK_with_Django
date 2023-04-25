@@ -96,3 +96,12 @@ class UtilizationRatePerHourAdmin(admin.ModelAdmin):
                     'rate'
     )
 admin.site.register(UtilizationRatePerHour, UtilizationRatePerHourAdmin)
+
+class TBSAdmin(admin.ModelAdmin):
+    list_display = ('machineInfo',
+                    'datetimeStart',
+                    'datetimeEnd',
+                    'duration',
+                    'rate'
+    )
+admin.site.register(TBS, TBSAdmin)

@@ -25,6 +25,7 @@ from linebot.models import (
 )
 line_bot_api = LineBotApi('AGCpW+ldLVHm5eZKQ7Fm+Ph3mZZbjG9oAZU//pz7vzqH3UYSLQI8LRqPeLwuean6e39MpiC3RT/swpDUGHvDINfpH/ChLhWd0u/sEq+xwi0WC21a5xydQzMkplKB7Ata6D/VPiuLORmj4w4mN3KeYwdB04t89/1O/w1cDnyilFU=')
 
+
 dicError = {}
 channel_layer = get_channel_layer()
 
@@ -67,9 +68,9 @@ class machineStatus:
           self.statusCode = statusCode
 
 
-def UtilizationRateHour(machine_type, plant_name, line_name, machine_name):
-    PLANTs = PlantInfo.objects.get(name = "CNBU")
-    MACHINEDs = MachineMembers.objects.get(plantInfo = PLANTs, line_name = "CN08", machine_name = "Auto Apply Glue")
+def UtilizationRateHour(MACHINEDs):
+    # PLANTs = PlantInfo.objects.get(name = "CNBU")
+    # MACHINEDs = MachineMembers.objects.get(plantInfo = PLANTs, line_name = "CN05", machine_name = "Auto load in router")
     utilizationRate = 0
     now = datetime.now(pytz.timezone('Asia/Bangkok'))
     UtlPerHour = UtilizationRatePerHour.objects.filter(machineInfo = MACHINEDs, datetime__date = now)
@@ -120,10 +121,15 @@ def UtilizationRateHour(machine_type, plant_name, line_name, machine_name):
             rate = abs(utilizationRate)
         ).save()
 
-
-
+onCount = False
+datetimeStart = datetime.now(pytz.timezone('Asia/Bangkok'))
+datetimeEnd = datetime.now(pytz.timezone('Asia/Bangkok'))
+datetimeTBS = datetime.now(pytz.timezone('Asia/Bangkok'))
+tbs_rate = 0
 def MachineDashboard(machine_type, plant_name, line_name, machine_name, objStatus, errorKey):
-
+    global onCount
+    global tbs_rate
+    global datetimeStart, datetimeEnd, datetimeTBS
     PLANTs = PlantInfo.objects.get(name = plant_name)
     MACHINEDs = MachineMembers.objects.get(plantInfo = PLANTs, line_name = line_name, machine_name = machine_name)
     #Line notice error
@@ -180,12 +186,42 @@ def MachineDashboard(machine_type, plant_name, line_name, machine_name, objStatu
 
         if(objStatus.status == "0"):
             current_status = "Normal"
+            if not onCount and MACHINEDs.machine_name == "Auto load in router":
+                onCount = True
+                print("start TBS counting")
+
+                tbs = TBS.objects.filter(machineInfo = MACHINEDs)
+                if tbs.exists():
+                    tbsObj = tbs.order_by('-id')[0]
+                    datetimeTBS = tbsObj.datetimeEnd
+                else:
+                    datetimeTBS = datetime.now(pytz.timezone('Asia/Bangkok'))
+                if tbs_rate != 0 :
+                    datetimeEnd = datetime.now(pytz.timezone('Asia/Bangkok'))
+                    duration = datetimeEnd.timestamp() - datetimeStart.timestamp()
+                    print("\n\nTBS****[{}] {}\nstart {}\nend {}\nduration {}\nrate {}\n\n".format(
+                        MACHINEDs.line_name, MACHINEDs.machine_name, 
+                        datetimeStart, 
+                        datetimeEnd, 
+                        duration, tbs_rate))
+                    TBS(machineInfo = MACHINEDs, 
+                        datetimeStart = datetimeStart, 
+                        datetimeEnd = datetimeEnd, 
+                        duration = duration,
+                        rate = tbs_rate).save()
+                tbs_rate = 0
+                
         elif(objStatus.status == "1"):           
             current_status = "Error"
             if(errorKey in dicError):
                 e_code = dicError[errorKey]
             else:
                 e_code = "Is0"
+            
+            if onCount and MACHINEDs.machine_name == "Auto load in router":
+                onCount = False
+                datetimeStart = datetime.now(pytz.timezone('Asia/Bangkok'))
+                tbs_rate =  datetimeStart.timestamp() - datetimeTBS.timestamp()
         else:
             current_status = "Pause"
                    
@@ -358,12 +394,12 @@ def data_api():
                      machineStatus(status_dh, statusCode_dh), 
                      errorKey
                 )
-                UtilizationRateHour(
-                    machine_type, 
-                    dictPlant["plant_name"], 
-                    dictLine["line_name"], 
-                    dictMachine["machine_name"]
-                )
+                # UtilizationRateHour(
+                #     machine_type, 
+                #     dictPlant["plant_name"], 
+                #     dictLine["line_name"], 
+                #     dictMachine["machine_name"]
+                # )
 
                 dictLine["machine"].append(dictMachine)
 
@@ -383,6 +419,11 @@ def data_api():
 
     data_json = json.dumps(data)
     publish_message_to_group({ "type": "chat_message", "text": data_json }, "app")
+    # function_fetching.apply_async(args=["Hi Data is here!"])
+
+@shared_task
+def function_fetching(data):
+    print("function_fetching {}".format(data))
 
 @shared_task
 def graph_api():
@@ -390,9 +431,9 @@ def graph_api():
     dictType = {}
     dictTimeline = {}
     dictError = {}
+    now = datetime.now(pytz.timezone('Asia/Bangkok'))
 
-
-    timeline  = TimeLineStatus.objects.all()
+    timeline  = TimeLineStatus.objects.filter(datetime__date = now)
     dictType["timeline"] = []
     for index in timeline:
         dictTimeline = {}
@@ -420,7 +461,7 @@ def graph_api():
         dictType["error-history"].append(dictError)
 
     UtilizationRate = UtilizationRatePerDay.objects.all()
-    dictType["utilization-rate"] = []
+    dictType["utilization-rate-day"] = []
     for index in UtilizationRate:
         dictUtilize = {}
         dictUtilize["plant_name"] = index.machineInfo.plantInfo.name
@@ -428,17 +469,26 @@ def graph_api():
         dictUtilize["machine_name"] = index.machineInfo.machine_name
         dictUtilize["datetime"] = "{}".format(index.datetime)
         dictUtilize["rate-day"] = "{}".format(index.rate)
-        dictUtilize["rate-hour"] = []
-        PLANTs = PlantInfo.objects.get(name = index.machineInfo.plantInfo.name)
-        MACHINEDs = MachineMembers.objects.get(plantInfo = PLANTs, line_name = index.machineInfo.line_name, machine_name = index.machineInfo.machine_name)
-        for idx in UtilizationRatePerHour.objects.filter(machineInfo = MACHINEDs):
+        dictType["utilization-rate-day"].append(dictUtilize)
+
+    dictType["utilization-rate-hour"] = []
+    
+    MACHINEDs = MachineMembers.objects.all()
+    for mIndex in MACHINEDs:
+        UtilizationRateHour(mIndex)
+        utl_hour = UtilizationRatePerHour.objects.filter(machineInfo = mIndex, datetime__date = now)
+        dictUtlHour = {}
+        dictUtlHour["plant_name"] = mIndex.plantInfo.name
+        dictUtlHour["line_name"] = mIndex.line_name
+        dictUtlHour["machine_name"] = mIndex.machine_name
+        dictUtlHour["rate-hour"] = []
+        for index in utl_hour:
             dicUtlData = {}
-            dicUtlData["x"] = "{}".format(idx.datetime)
-            dicUtlData["y"] = "{}".format(idx.rate)
-            dictUtilize["rate-hour"].append(dicUtlData)
+            dicUtlData["x"] = "{}".format(index.datetime)
+            dicUtlData["y"] = "{}".format(index.rate)
+            dictUtlHour["rate-hour"].append(dicUtlData)
 
-        dictType["utilization-rate"].append(dictUtilize)
-
+        dictType["utilization-rate-hour"].append(dictUtlHour)
     data.append(dictType)
     
 

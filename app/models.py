@@ -132,3 +132,15 @@ class UtilizationRatePerHour(models.Model):
 
     def __int__(self):
         return self.rate
+    
+class TBS(models.Model):
+    machineInfo = models.ForeignKey(MachineMembers, on_delete=models.CASCADE, null=True)
+
+    datetimeStart = models.DateTimeField()
+    datetimeEnd = models.DateTimeField()
+    duration = models.DecimalField(max_digits=10, decimal_places=2)
+    rate = models.DecimalField(max_digits=10, decimal_places=2)
+    
+
+    def __int__(self):
+        return self.rate 

@@ -132,7 +132,7 @@
                             <button onclick="zoomoutTimeline()"><i class='bx bx-zoom-out bx-xs' ></i></button>
                             <button onclick="refreshTimeline()"><i class='bx bx-refresh bx-xs'></i></button>
                             <button onclick="tonowTimeline()"><i class='bx bxs-arrow-to-right bx-xs'></i></button>
-                            <button onclick="autofollowTimeline()" class="on" id="autofollow_btn"><i class='bx bx-play-circle'></i></button>
+                            <button onclick="autofollowTimeline()" class="on" id="autofollow_btn"><i class='bx bx-play-circle bx-xs'></i></button>
                         </div>
                         <div class="labels-des">
                             <span class="box-color normal"></span><span>Normal</span><br>
@@ -185,7 +185,7 @@
                                 <button class="btn-trans" id="error-config-day" onclick="">24Hrs</button>
                                 <button class="btn-trans" id="error-config-week" onclick="">Week</button>
                                 <button class="btn-trans" id="error-config-month" onclick="">Month</button>
-                                <button class="btn-trans" id="error-config-quarter" onclick="">Quarter</button>
+                                <button class="btn-trans" id="error-config-year" onclick="">Year</button>
                             </div>
                         </div>
                         <table class="table-error" id="table-error">
@@ -216,23 +216,50 @@
 
                 <div class="graph-content-container">
                     <div class="pnl tbs-content">
-                        <h2>TBS</h2>
-                        <canvas id="tbs-chart" style="height: 300px;"></canvas>
+                        <div class="topic-graph">
+                            <h2>TBS</h2>
+                            <div class="tooltip-container">
+                                <span class="tooltip1">Click to upload</span>
+                                <button class="btn-track on" id="autofollow_tbs_btn" onclick="autofollowTBS()"><i class='bx bx-play-circle bx-xs'></i></button>
+                            </div>
+                        </div>
+                        <div class="chart-container">
+                            <div class="graph-header">
+                                <canvas id="tbs-chart-header" style="max-height: 340px;"></canvas>
+                            </div>
+                            <div class="graph-tbs-container">
+                                <div class="graph" id="graph-tbs">
+                                    <canvas id="tbs-chart" style="max-height: 340px;"></canvas>
+                                </div>
+                            </div>
+                        </div>
                         <div class="filter-config">
                             <button class="btn-trans selected" id="tbs-config-day" onclick="TBSSelectData('day')">24Hrs</button>
                             <button class="btn-trans" id="tbs-config-week" onclick="TBSSelectData('week')">Week</button>
                             <button class="btn-trans" id="tbs-config-month" onclick="TBSSelectData('month')">Month</button>
-                            <button class="btn-trans" id="tbs-config-quarter" onclick="TBSSelectData('quarter')">Quarter</button>
+                            <button class="btn-trans" id="tbs-config-year" onclick="TBSSelectData('year')">Year</button>
                         </div>
                     </div>
                     <div class="pnl utilize-content">
+                        <div class="topic-graph">
                         <h2>Utilization Rate</h2>
-                        <canvas id="utilize-chart" style="height: 300px;"></canvas>
+                        <button class="btn-track on" id="autofollow_utl_btn" onclick="autofollowUTL()"><i class='bx bx-play-circle bx-xs'></i></button>
+                        </div>
+                        <div class="chart-container">
+                            <div class="graph-header">
+                                <canvas id="utilize-chart-header" style="height: 340px;"></canvas>
+                            </div>
+                            <div class="graph-utl-container">
+                                <div class="graph" id="graph-utl">
+                                    <canvas id="utilize-chart" style="height: 340px;"></canvas>
+                                </div>
+                            </div>
+                        </div>
                         <div class="filter-config">
                             <button class="btn-trans selected" id="util-config-day" onclick="UtilizedSelectData('day')">24Hrs</button>
                             <button class="btn-trans" id="util-config-week" onclick="UtilizedSelectData('week')">Week</button>
                             <button class="btn-trans" id="util-config-month" onclick="UtilizedSelectData('month')">Month</button>
-                            <button class="btn-trans" id="util-config-quarter" onclick="UtilizedSelectData('quarter')">Quarter</button>
+                            <button class="btn-trans" id="util-config-year" onclick="UtilizedSelectData('year')">Year</button>
                         </div>
                     </div> 
                     
@@ -447,7 +474,6 @@
     date.setDate(date.getDate() + days);
     return date;
     }
-    // console.log(date.addDays(16));
 
     var date = new Date();
     let timeReset = new Date();
@@ -657,9 +683,16 @@ function createCustomTooltip(start_time, end_time, status,errorCode) {
 //   myChart.update();
 // });
 // utilChart tbsChart
+var maxTime = new Date();
+maxTime.setHours(maxTime.getHours() + 1);
+var minTime = new Date();;
+minTime.setHours(minTime.getHours() - 5);
+
 var UtilizedFilter = "day";
 
 function UtilizedSelectData(filter){
+    const graph_tbs = document.getElementById('graph-tbs');
+    const graph_utl = document.getElementById('graph-utl');
     var btn_was_released = document.getElementById('util-config-' + UtilizedFilter)
     var btn_was_clicked = document.getElementById('util-config-' + filter);
     
@@ -670,28 +703,34 @@ function UtilizedSelectData(filter){
     if(utilChart != undefined){
         switch(UtilizedFilter){
         case "day" : // 24 hrs
+            graph_utl.style.width = '1200px';
+            utilChart.options.scales.x.max = maxTime_24hrs;
             utilChart.options.scales.x.time.unit = 'hour';
             utilChart.options.scales.x.time.displayFormats = { hour : 'HH:mm'};
             utilChart.data.datasets[0].data = UtlDataDay;
-            console.log(UtlData);
-                // [ 
-                //     {x: '2023-04-20 18:00:00.158747+00:00', y: '71'}
-                // ];
+            console.log(UtlDataDay);
+                // [ {x: '2023-04-20 18:00:00.158747+00:00', y: '71'}];
             break;
         case "week": // 7  Days 
+            graph_utl.style.width = '570px';
+            utilChart.options.scales.x.max = maxTime_week;
             utilChart.options.scales.x.time.unit = 'day';
             utilChart.options.scales.x.time.displayFormats = { day : 'dd/MM/yyyy'};
             utilChart.data.datasets[0].data = UtlDataWeek;
+            utilChart.data.datasets[0].data[UtlDataWeek.length] = utlRealtime;
             break;
         case "month": // 30 Days
+            graph_utl.style.width = '1200px';
             utilChart.options.scales.x.time.unit = 'week';
-            utilChart.options.scales.x.time.displayFormats = { week : 'dd/MM'};
+            utilChart.options.scales.x.time.displayFormats = { week : 'dd/MM/yyyy'};
             utilChart.data.datasets[0].data = UtlDataMonth;
+            utilChart.data.datasets[0].data[UtlDataMonth.length] = utlRealtime;
             break;
-        case "quarter": // 4  month
+        case "year": // 4  month
+            graph_utl.style.width = '1200px';
             utilChart.options.scales.x.time.unit = 'month';
             utilChart.options.scales.x.time.displayFormats = { month : 'MM/yyyy'};
-            utilChart.data.datasets[0].data = UtlDataQuarter;
+            utilChart.data.datasets[0].data = UtlDataYear;
             break;
         default:
             break;
@@ -721,8 +760,8 @@ function TBSSelectData(filter){
         case "month":
             console.log("TBS >>> month ");
             break;
-        case "quarter":
-            console.log("TBS >>> quarter ");
+        case "year":
+            console.log("TBS >>> year ");
             break;
         default:
             break;
@@ -730,46 +769,98 @@ function TBSSelectData(filter){
 }
 // Initialized Data
 var tbs_labels = [1, 2, 3, 4, 5, 6, 7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31];
-var tbs_raw_data = [8, 59, 80, 81, 56, 55, 40, 65, 40, 35, 20, 8, 55, 40,20, 35, 70, 65, 62, 40, 55, 10, 12, 25, 35, 45, 68, 0];
+var tbs_raw_data = [8, 59, 80, 81, 250, 55, 40, 650, 400, 35, 200, 8, 55, 40,20, 35, 70, 65, 62, 40, 55, 10, 12, 25, 35, 45, 68, 0];
 
 var UtlData = [];
 var UtlDataDay = [];
 var UtlDataWeek = [];
 var UtlDataMonth = [];
-var UtlDataQuarter = [];
+var UtlDataYear = [];
+var utlRealtime = 0;
+var maxTime_24hrs;
+var maxTime_week;
 function UtilizationDataUpdate(rw){
-    var raw = rw[0]["utilization-rate"];
-    UtlDataRaw = []
+    console.log(rw);
+
+    var rawHour = rw[0]["utilization-rate-hour"];
+    var rawDay = rw[0]["utilization-rate-day"];
+    UtlRawHour = [];
+    UtlRawDay = [];
     UtlData = [];
-    for(let i = 0; i < raw.length ; i++){
-        if(plantName == raw[i]["plant_name"] && lineName == raw[i]["line_name"] && machineName == raw[i]["machine_name"]){
-            UtlDataRaw.push(raw[i]["rate-hour"]);
-            UtlDataDay = UtlDataRaw.flat();
-            UtlDataWeek = UtlDataRaw.flat();
+    // 24 Hrs
+    for(let i = 0; i < rawHour.length ; i++){
+        if(plantName == rawHour[i]["plant_name"] && lineName == rawHour[i]["line_name"] && machineName == rawHour[i]["machine_name"]){
+            UtlRawHour.push(rawHour[i]["rate-hour"]);
+            UtlDataDay = UtlRawHour.flat(); //Flat for delete [] form data - ex. [ data=[] ]
         }
     }
+    //Week 
+    for(let i = 0; i < rawDay.length ; i++){
+        if(plantName == rawDay[i]["plant_name"] && lineName == rawDay[i]["line_name"] && machineName == rawDay[i]["machine_name"]){
+            to_dict = {'x' : rawDay[i]["datetime"], 'y' : rawDay[i]["rate-day"]};
+            UtlRawDay.push(to_dict);
+        }
+    }
+    week = [];
+    for(let i = 0; i < UtlRawDay.length ; i++){
+        if(UtlRawDay.length > 6){
+            if(i >= UtlRawDay.length - 6){
+                week.push(UtlRawDay[i]);
+            }
+        }
+        else{
+            week.push(UtlRawDay[i]);
+        }
+    }
+    UtlDataWeek = week;
+    month = [];
+    for(let i = 0; i < UtlRawDay.length ; i++){
+        if(UtlRawDay.length > 29){
+            if(i >= UtlRawDay.length - 29){
+                month.push(UtlRawDay[i]);
+            }
+        }
+        else{
+            month.push(UtlRawDay[i]);
+        }
+    }
+    UtlDataMonth = month;
+
+    utlRealtime = {'x': UtlDataDay[UtlDataDay.length - 1]['x'].split(" ")[0], 'y' : UtlDataDay[UtlDataDay.length - 1]['y']};
+
+    maxTime_24hrs = new Date();
+    maxTime_24hrs.setHours(maxTime_24hrs.getHours() + 1);
+    maxTime_week = new Date();
     
     switch(UtilizedFilter){
         case "day" :
+            utilChart.options.scales.x.max = maxTime_24hrs;
             utilChart.data.datasets[0].data = UtlDataDay;
             console.log("UTL >>> day ");
+            console.log(UtlDataDay);
             break;
         case "week":
+            utilChart.options.scales.x.max = maxTime_week;
             utilChart.data.datasets[0].data = UtlDataWeek;
+            utilChart.data.datasets[0].data[UtlDataWeek.length] = utlRealtime;
             console.log("UTL >>> week ");
+            console.log(UtlDataWeek);
             break;
         case "month":
             utilChart.data.datasets[0].data = UtlDataMonth;
+            utilChart.data.datasets[0].data[UtlDataMonth.length] = utlRealtime;
             console.log("UTL >>> month ");
+            console.log(UtlDataMonth);
             break;
-        case "quarter":
-            utilChart.data.datasets[0].data = UtlDataQuarter;
-            console.log("UTL >>> quarter ");
+        case "year":
+            utilChart.data.datasets[0].data = UtlDataYear;
+            console.log("UTL >>> year ");
             break;
         default:
             utilChart.data.datasets[0].data = UtlDataDay;
             break;
     }
+    utilChartHeader.update();
     utilChart.update();
 }
 var x = 0;
@@ -777,8 +868,7 @@ function sPlus(){
     x = x + 1;
     // utilChart.data.datasets[0].data[1] = x;
     util_labels.push("99");
-    utilChart.data.labels = util_labels;
-    utilChart.data.datasets[0].data = [0, 0, 0, 0, 56, 55, 40, 65, 40, 35, 20, 8, 55, 40,20, 35, 70, 65, 62, 40, 55, 10, 12, 25, 0, 0, 0, 0];
+    utilChart.data.datasets[0].data = [0, 0, 0, 0, 120, 55, 40, 65, 40, 250, 20, 8, 55, 40,20, 35, 70, 65, 62, 40, 55, 10, 12, 25, 0, 0, 0, 0];
     utilChart.update();
 }
         // Error Counting *************************************************
@@ -825,167 +915,8 @@ function sPlus(){
                 }
             }
         });
-        // TBS  *************************************************
-
-        var tbs_ctx = document.getElementById('tbs-chart');
-        const tbs_data = {
-            labels: tbs_labels,
-            datasets : [{
-                label: 'data',
-                data: tbs_raw_data,
-                fill: false,
-                borderColor: barColors[0],
-                tension: 0.1
-            }]
-        }
-        const tbs_config = {
-            type: "line",
-            data: tbs_data,
-            options:{
-                scales:{
-                    y:{
-                        beginAtZero: true
-                    }
-                },
-                plugins: {
-                    annotation: {
-                        annotations: {
-                            line1: {
-                                adjustScaleRange: true,
-                                drawTime: 'afterDatasetsDraw',
-                                type: 'line',
-                                scaleID: 'y',
-                                value: 240,
-                                borderColor: 'rgba(255, 99, 132)',
-                                backgroundColor: 'rgba(255, 99, 132)'
-                            }
-                        }
-                    },
-                    legend: {
-                        display: false,
-                    }   
-                }
-        }
-    }
-    const tbsChart = new Chart(tbs_ctx, tbs_config);
-
     
-        // Utilization  *************************************************
-        var util_ctx = document.getElementById("utilize-chart");
-        const util_data = {
-            datasets : [{
-                label: 'data',
-                data: UtlDataDay,
-                fill: false,
-                borderColor: barColors[0],
-                backgroundColor: barColors[0],
-                tension: 0.1
-            }]
-        }
-        const util_config = {
-            type: 'line',
-            data: util_data,
-            options:{
-                scales:{
-                    x: {
-                        type: 'time',
-                        // parsing: false,
-                        time: {
-                            unit: 'hour',
-                            
-                            displayFormats: {
-                                day: 'dd/MM/yyyy HH:mm'
-                            }
-                        }
-                    },
-                    y:{
-                        beginAtZero: true,
-                        min: 0,
-                        max: 100
-                        
-                    }
-                },
-                plugins: {
-                    tooltip: {
-                        backgroundColor: 'rgba(0,0,0,0.8)',
-                        titleColor: '#fff',
-                        bodyColor: '#fff',
-                        titleFont: {
-                        size: 14,
-                        weight: 'bold'
-                        },
-                        bodyFont: {
-                        size: 12,
-                        weight: 'normal'
-                        },
-                        callbacks: {
-                            // title: function (tooltipItems, data) {
-                            //     const label = data.labels[tooltipItems[0].dataIndex];
-                            //     return label;
-                            //     },
-                            title: function(context) {
-                                return context.label ;
-                            },
-                            label: function(context) {
-                                var label = context.dataset.label || '';
-                                if (label) {
-                                label += ': ';
-                                }
-                                label += context.formattedValue + '%';
-                                return label;
-                            }
-                        }
-                    },
-                    datalabels: {
-                        color: '#fff',
-                        font: {
-                        weight: 'bold',
-                        size: 10
-                        },
-                        backgroundColor: function(context) {
-                        return context.dataset.backgroundColor;
-                        },
-                        borderRadius: 4,
-                        formatter: function(value, context) {
-                        return value['y'] + '%';
-                        },
-                        align: 'end',
-                        anchor: 'end',
-                        padding: 6
-                    },
-                    annotation: {
-                        annotations: {
-                            line1: {
-                                adjustScaleRange: true,
-                                drawTime: 'afterDatasetsDraw',
-                                type: 'line',
-                                scaleID: 'y',
-                                value: 60,
-                                borderColor: 'rgba(255, 99, 132)',
-                                backgroundColor: 'rgba(255, 99, 132)'
-                            }
-                        }
-                    },
-                    legend: {
-                        display: false,
-                    },
-                    layout: {
-                        padding: {
-                            top: 0,
-                            right: 0,
-                            bottom: 0,
-                            left: 0,
-                        },
-                    },
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    overflow: 'visible',
-                }          
-        },
-        plugins: [ChartDataLabels]
-    }
-
-const utilChart = new Chart(util_ctx, util_config);
+    
 
 function timelineMore(){
         document.getElementById('timeline-container').classList.toggle('show');
@@ -1112,6 +1043,286 @@ function AnimationUtilBar(elementID, percent){
 //   );
 //   weeklyHistoryChart.update();
 
+// TBS  *************************************************
+const tbs_data = {
+            labels: tbs_labels,
+            datasets : [{
+                label: 'data',
+                data: tbs_raw_data,
+                fill: false,
+                borderColor: barColors[0],
+                tension: 0.1
+            }]
+        }
+        const tbs_header_config = {
+            type: "bar",
+            data: tbs_data,
+            options:{
+                maintainAspectRatio: false,
+                layout:{
+                    padding:{
+                        bottom: 28.5
+                    }
+                },
+                scales:{
+                    x:{
+                        ticks:{
+                            display: false
+                        },
+                        grid:{
+                            drawTicks: false
+                        }
+                    },
+                    y:{
+                        beginAtZero: true,
+                        afterFit: (ctx) => {
+                            ctx.width = 35;
+                        }
+                    }
+                },
+                plugins: {
+                    annotation: {
+                        annotations: {
+                            line1: {
+                                adjustScaleRange: true,
+                                drawTime: 'afterDatasetsDraw',
+                                type: 'line',
+                                scaleID: 'y',
+                                value: 240,
+                                borderColor: 'rgba(255, 99, 132)',
+                                backgroundColor: 'rgba(255, 99, 132)'
+                            }
+                        }
+                    },
+                    legend: {
+                        display: false,
+                    }   
+                }
+        }
+    }
+        const tbs_config = {
+            type: "line",
+            data: tbs_data,
+            options:{
+                maintainAspectRatio: false,
+                layout:{
+                    padding:{
+                        top:10
+                    }
+                },
+                scales:{
+                    y:{
+                        beginAtZero: true,
+                        ticks:{
+                            display: false
+                        },
+                        grid:{
+                            drawTicks: false
+                        }
+                    }
+                },
+                plugins: {
+                    annotation: {
+                        annotations: {
+                            line1: {
+                                adjustScaleRange: true,
+                                drawTime: 'afterDatasetsDraw',
+                                type: 'line',
+                                scaleID: 'y',
+                                value: 240,
+                                borderColor: 'rgba(255, 99, 132)',
+                                backgroundColor: 'rgba(255, 99, 132)'
+                            }
+                        }
+                    },
+                    legend: {
+                        display: false,
+                    }   
+                }
+        }
+    }
+    
+var tbs_header_ctx = document.getElementById("tbs-chart-header");
+const tbsCharttHeader = new Chart(tbs_header_ctx, tbs_header_config);
+var tbs_ctx = document.getElementById('tbs-chart');
+const tbsChart = new Chart(tbs_ctx, tbs_config);
+
+// Utilization  *************************************************
+        const util_data = {
+            datasets : [{
+                label: 'data',
+                data: UtlDataDay,
+                fill: false,
+                borderColor: barColors[0],
+                backgroundColor: barColors[0],
+                tension: 0.1
+            }]
+        }
+        const util_header_config = {
+            type: 'bar',
+            data: util_data,
+            options:{
+                maintainAspectRatio: false,
+                layout:{
+                    padding:{
+                        bottom: 38.25
+                    }
+                },
+                scales:{
+                    x:{
+                        max : maxTime,
+                        type: 'time',
+                        time: {
+                            unit: 'hour',
+                            
+                            displayFormats: {
+                                hour: 'HH:mm'
+                            }
+                        },
+                        ticks:{
+                            display: false
+                        },
+                        grid:{
+                            drawTicks: false
+                        }
+                    },
+                    y:{
+                        beginAtZero: true,
+                        min: 0,
+                        max: 100,
+                        afterFit: (ctx) => {
+                            ctx.width = 35;
+                        }
+                    }
+                },
+                plugins: {
+                    annotation: {
+                        annotations: {
+                            line1: {
+                                adjustScaleRange: true,
+                                drawTime: 'afterDatasetsDraw',
+                                type: 'line',
+                                scaleID: 'y',
+                                value: 60,
+                                borderColor: 'rgba(255, 99, 132)',
+                                backgroundColor: 'rgba(255, 99, 132)'
+                            }
+                        }
+                    },
+                    legend: {
+                        display: false,
+                    },
+                }          
+        }
+    }
+        const util_config = {
+            type: 'line',
+            data: util_data,
+            options:{
+                maintainAspectRatio: false,
+                layout:{
+                    padding:{
+                        top:10
+                    }
+                },
+                scales:{
+                    x: {
+                        // min : minTime,
+                        max : maxTime,
+                        type: 'time',
+                        time: {
+                            unit: 'hour',
+                            
+                            displayFormats: {
+                                hour: 'HH:mm'
+                            }
+                        }
+                    },
+                    y:{
+                        beginAtZero: true,
+                        min: 0,
+                        max: 100,
+                        ticks:{
+                            display: false
+                        },
+                        grid:{
+                            drawTicks: false
+                        }
+                    }
+                },
+                plugins: {
+                    tooltip: {
+                        backgroundColor: 'rgba(0,0,0,0.8)',
+                        titleColor: '#fff',
+                        bodyColor: '#fff',
+                        titleFont: {
+                        size: 14,
+                        weight: 'bold'
+                        },
+                        bodyFont: {
+                        size: 12,
+                        weight: 'normal'
+                        },
+                        callbacks: {
+                            // title: function (tooltipItems, data) {
+                            //     const label = data.labels[tooltipItems[0].dataIndex];
+                            //     return label;
+                            //     },
+                            // title: function(context) {
+                            //     return context.dataIndex ;
+                            // },
+                            label: function(context) {
+                                // var label = context.dataset.label || '';
+                                // if (label) {
+                                // label += ': ';
+                                // }
+                                // label += context.formattedValue + '%';
+                                label = 'rate : ' + context.formattedValue + '%';
+                                return label;
+                            }
+                        }
+                    },
+                    datalabels: {
+                        color: '#fff',
+                        font: {
+                        weight: 'bold',
+                        size: 10
+                        },
+                        backgroundColor: function(context) {
+                        return context.dataset.backgroundColor;
+                        },
+                        borderRadius: 4,
+                        formatter: function(value, context) {
+                        return value['y'] + '%';
+                        },
+                        align: 'end',
+                        anchor: 'end',
+                        padding: 6
+                    },
+                    annotation: {
+                        annotations: {
+                            line1: {
+                                adjustScaleRange: true,
+                                drawTime: 'afterDatasetsDraw',
+                                type: 'line',
+                                scaleID: 'y',
+                                value: 60,
+                                borderColor: 'rgba(255, 99, 132)',
+                                backgroundColor: 'rgba(255, 99, 132)'
+                            }
+                        }
+                    },
+                    legend: {
+                        display: false,
+                    },
+                }          
+        },
+        plugins: [ChartDataLabels]
+    }
+var util_header_ctx = document.getElementById("utilize-chart-header");
+const utilChartHeader = new Chart(util_header_ctx, util_header_config);  
+var util_ctx = document.getElementById("utilize-chart"); 
+const utilChart = new Chart(util_ctx, util_config);
 
     </script>
 </body>

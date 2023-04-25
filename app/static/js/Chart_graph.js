@@ -1,5 +1,9 @@
 const timelineContainer = document.querySelector('.timeline');
+const tbsContainer = document.querySelector('.graph-tbs-container');
+const utlContainer = document.querySelector('.graph-utl-container');
 var toggleAutoFollowTimeline = true;
+var toggleAutoFollowTBS = true;
+var toggleAutoFollowUTL = true;
 function initialPage(){
     startTime();
     timelineContainer.scrollTo(timelineContainer.scrollWidth, 0);
@@ -40,6 +44,12 @@ function startTime() {
     if(toggleAutoFollowTimeline){
         timelineContainer.scrollTo(timelineContainer.scrollWidth, 0);
     }
+    if(toggleAutoFollowTBS){
+        tbsContainer.scrollTo(tbsContainer.scrollWidth, 0);
+    }
+    if(toggleAutoFollowUTL){
+        utlContainer.scrollTo(utlContainer.scrollWidth, 0);
+    }
   }
   function checkTime(i) {
     if (i < 10) {i = "0" + i};  // add zero in front of numbers < 10
@@ -63,5 +73,13 @@ function autofollowTimeline(){
     autofollow_btn.classList.toggle("on");
     toggleAutoFollowTimeline = !toggleAutoFollowTimeline;
 }
-
-
+function autofollowTBS(){
+    const autofollow_tbs_btn = document.getElementById('autofollow_tbs_btn');
+    autofollow_tbs_btn.classList.toggle("on");
+    toggleAutoFollowTBS = !toggleAutoFollowTBS;
+}
+function autofollowUTL(){
+    const autofollow_utl_btn = document.getElementById('autofollow_utl_btn');
+    autofollow_utl_btn.classList.toggle("on");
+    toggleAutoFollowUTL = !toggleAutoFollowUTL;
+}

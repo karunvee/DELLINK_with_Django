@@ -1,4 +1,5 @@
 import os
+from celery import chain
 from celery import Celery
 from celery.schedules import crontab
 # Set the default Django settings module for the 'celery' program.
@@ -16,14 +17,14 @@ app.config_from_object('django.conf:settings', namespace='CELERY')
 app.conf.beat_schedule ={
     'data_api_3s': {
         'task' : 'app.tasks.data_api',
-        'schedule' : 3.0,
+        'schedule' : 3,
         'options': {
             'expires': 15.0,
         },
     },
-    'graph_api_5s': {
+    'graph_api_6s': {
         'task' : 'app.tasks.graph_api',
-        'schedule' : 5.0,
+        'schedule' : 6.0,
         'options': {
             'expires': 15.0,
         },
