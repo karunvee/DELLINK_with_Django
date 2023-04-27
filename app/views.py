@@ -5,7 +5,7 @@ from django.template import loader
 import requests
 from .forms import *
 from .models import *
-from .tasks import urlDIA
+from .tasks import urlDIA, add
 import json
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
@@ -33,8 +33,10 @@ def remote_view(request):
 
 def home_view(request):
     plant_members = PlantInfo.objects.all()
-
+    val = add.delay(2,2)
+    print(val['result'])
     context = {
+        'add' : val,
         'plant_members': plant_members,
     }
     # Return a response to the client

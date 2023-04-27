@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'channels',
     'app',
     'members',
+    'django_celery_results',
 ]
 
 MIDDLEWARE = [
@@ -75,6 +76,8 @@ ASGI_APPLICATION = 'DELLINK.asgi.application'
 
 # CELERY_BROKER_URL = 'redis://localhost:6379'
 CELERY_BROKER_URL = 'amqp://guest:guest@localhost:5672//'
+# CELERY_RESULT_BACKEND = 'rpc://localhost'
+# CELERY_APP = 'DELLINK.celery:app'
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 

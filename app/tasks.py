@@ -2,6 +2,7 @@ import requests
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
 from celery import shared_task
+from celery import Task, group
 import urllib.request
 from celery import Celery
 from typing import Any, Dict
@@ -92,14 +93,12 @@ def UtilizationRateHour(MACHINEDs):
                 datetime__date = now
         )
         if timelineData.exists():
-            print(timeStart)
             for i in range(0, len(timelineData), 1):
                 try:
                         timeline_hourTime = timelineData[i].datetime.astimezone(pytz.timezone('Asia/Bangkok'))
                         
                         
                         if timelineData[i].status == "Normal" and  startHour < timeline_hourTime < nextHour:
-                            print("timeline_hourTime {}".format(timeline_hourTime))
                             if i == 0:
                                 if timelineData[i+1].datetime.timestamp() > nextHour.timestamp():
                                     sum_greenTime = nextHour.timestamp() - timelineData[i].datetime.timestamp()
@@ -126,10 +125,17 @@ datetimeStart = datetime.now(pytz.timezone('Asia/Bangkok'))
 datetimeEnd = datetime.now(pytz.timezone('Asia/Bangkok'))
 datetimeTBS = datetime.now(pytz.timezone('Asia/Bangkok'))
 tbs_rate = 0
-def MachineDashboard(machine_type, plant_name, line_name, machine_name, objStatus, errorKey):
+
+@shared_task
+def MachineDashboard(machine_type, plant_name, line_name, machine_name,  status_dh, statusCode_dh, errorKey):
+    
     global onCount
     global tbs_rate
     global datetimeStart, datetimeEnd, datetimeTBS
+    
+    now = datetime.now(pytz.timezone('Asia/Bangkok'))
+    objStatus = machineStatus(status_dh, statusCode_dh)
+
     PLANTs = PlantInfo.objects.get(name = plant_name)
     MACHINEDs = MachineMembers.objects.get(plantInfo = PLANTs, line_name = line_name, machine_name = machine_name)
     #Line notice error
@@ -163,7 +169,7 @@ def MachineDashboard(machine_type, plant_name, line_name, machine_name, objStatu
 
                 #------------------------------------------------------------------------------------------------------------------------
                 # Add to Error history
-                now = datetime.now(pytz.timezone('Asia/Bangkok'))
+                # now = datetime.now(pytz.timezone('Asia/Bangkok'))
                 errorAddCount = ErrorHistory(
                     machineInfo = MACHINEDs,
                     datetime = now, 
@@ -183,7 +189,6 @@ def MachineDashboard(machine_type, plant_name, line_name, machine_name, objStatu
         )
         datetimeStartEnd = TimeLineStartEnd.objects.all().order_by('-id')[0]
 
-
         if(objStatus.status == "0"):
             current_status = "Normal"
             if not onCount and MACHINEDs.machine_name == "Auto load in router":
@@ -193,6 +198,7 @@ def MachineDashboard(machine_type, plant_name, line_name, machine_name, objStatu
                 tbs = TBS.objects.filter(machineInfo = MACHINEDs)
                 if tbs.exists():
                     tbsObj = tbs.order_by('-id')[0]
+                    print("datetimeTBS : {}".format(tbsObj.datetimeEnd))
                     datetimeTBS = tbsObj.datetimeEnd
                 else:
                     datetimeTBS = datetime.now(pytz.timezone('Asia/Bangkok'))
@@ -238,7 +244,7 @@ def MachineDashboard(machine_type, plant_name, line_name, machine_name, objStatu
             # print("Add first status data to database")
 
         if(updateTimeline):
-            now = datetime.now(pytz.timezone('Asia/Bangkok'))
+            # now = datetime.now(pytz.timezone('Asia/Bangkok'))
             TimeLineStatus(
                 machineInfo = MACHINEDs, 
                 datetime = now, 
@@ -247,7 +253,7 @@ def MachineDashboard(machine_type, plant_name, line_name, machine_name, objStatu
                 ).save()
             
     #---- Utilization Rate----------------------------------------------------------------------------------------------------        
-    now = datetime.now(pytz.timezone('Asia/Bangkok'))     
+    # now = datetime.now(pytz.timezone('Asia/Bangkok'))     
         #update datetime start - end
     datetimeStartEnd = TimeLineStartEnd.objects.all().order_by('-id')[0]
         
@@ -313,7 +319,8 @@ def data_api():
         plant_name = plant.name
         dictPlant["line"] = []
         machine_list = {}
-
+        dataA = fetch_data_from_multiple_apis(urlLine)
+        print(dataA)
         for url in urlLine:
             if(internet_on(url)):
                 line_members = requests.get(url).json()
@@ -343,8 +350,7 @@ def data_api():
                         machine_list[line_word].append([url, machine_word, deviceNo, status, deviceName, guid, type, model])
                     else:
                         machine_list[line_word] = [[url, machine_word, deviceNo, status, deviceName, guid, type, model]]
-        
-        # print(machine_list)        
+              
         for key in machine_list.keys() :
             dictLine = {}
             dictLine["line_name"] = key
@@ -386,14 +392,22 @@ def data_api():
 
                 errorKey = "{}-{}".format(dictLine["line_name"], dictMachine["machine_name"])
                 #Dashboard function here
-                MachineDashboard(
-                     machine_type, 
-                     dictPlant["plant_name"], 
-                     dictLine["line_name"], 
-                     dictMachine["machine_name"], 
-                     machineStatus(status_dh, statusCode_dh), 
-                     errorKey
-                )
+                MachineDashboard.apply_async(
+                    args=[
+                        machine_type, 
+                        dictPlant["plant_name"], 
+                        dictLine["line_name"],
+                        dictMachine["machine_name"], 
+                        status_dh, statusCode_dh, 
+                        errorKey])
+                # MachineDashboard(
+                #      machine_type, 
+                #      dictPlant["plant_name"], 
+                #      dictLine["line_name"], 
+                #      dictMachine["machine_name"], 
+                #      machineStatus(status_dh, statusCode_dh), 
+                #      errorKey
+                # )
                 # UtilizationRateHour(
                 #     machine_type, 
                 #     dictPlant["plant_name"], 
@@ -417,13 +431,52 @@ def data_api():
         TimeLineStartEnd.objects.filter(pk = 2).update(start = new_start, end = new_end)
         print(" \n############## Update datetime start - end ##############\n{} {}".format(new_start, new_end))        
 
+    # print("data api")
     data_json = json.dumps(data)
     publish_message_to_group({ "type": "chat_message", "text": data_json }, "app")
-    # function_fetching.apply_async(args=["Hi Data is here!"])
+    
+# @app.task
+# def fetch_data_from_api(api_url):
+#     data = requests.get(api_url).json()
+#     return data
 
-@shared_task
-def function_fetching(data):
-    print("function_fetching {}".format(data))
+@app.task
+def add(x, y):
+    return {'result': x + y}
+
+# def fetch_data_from_multiple_apis(api_urls):
+#     # Use Celery group to execute tasks in parallel
+#     # group_result = group(fetch_data_from_api.s(api_url) for api_url in api_urls)()
+#     group_result = group(add.s(i, i) for i in range(2))()
+#     # Get results from the group and return as a list of data
+#     fetched_data = group_result.get(timeout=10)
+#     return fetched_data
+
+# @shared_task
+# def function_fetching(machine_type, plant_name, line_name, machine_name, objectStatus, errorKey):
+    # MachineDashboard(
+    #                  machine_type, 
+    #                  plant_name, 
+    #                  line_name, 
+    #                  machine_name, 
+    #                  objectStatus, 
+    #                  errorKey
+    #             )
+
+    # for plant in data:
+    #     for line in plant['line']:
+    #         line['line_name']
+    #         if line['line_name'] == "D09A" :
+    #             for machine in line['machine']:
+    #                 status_dh = ""
+    #                 statusCode_dh = ""
+    #                 for indicator in machine['indicator']:
+    #                     if indicator['indicator_name'] == 'status':
+    #                         status_dh = str(indicator['value'])
+    #                     elif indicator['indicator_name'] == 'statusCode':
+    #                         statusCode_dh = str(indicator['value'])
+
+    #                 print("function_fetching {}".format(machine['machine_name']))
 
 @shared_task
 def graph_api():
